@@ -1,0 +1,128 @@
+@media (forced-colors: active)
+{
+	html .geMenubarContainer {
+		background: transparent !important;
+	}
+}
+html body .geMenubarContainer .geBigButton {
+	margin-top: 4px;
+}
+html body .geBigStandardButton:active, .geSidebarContainer .geTitle:active {
+	background-color: light-dark(#DEEBFF, var(--dark-border-color));
+}
+body .geToolbarContainer .geButton:active, body .geToolbarContainer .geLabel:active {
+	background-color: light-dark(#DEEBFF, var(--dark-border-color));
+}
+body > .geToolbarContainer > .geToolbar .geSeparator:not(.geDarkMode *) {
+	background:#cccccc !important;
+}
+html body .geStatus .geStatusAlert:not(.geDarkMode *) {
+	color:#ffffff !important;
+	font-size:12px;
+	border:none;
+	border-radius:6px;
+	text-shadow: rgb(41, 89, 137) 0px 1px 0px;
+	background-color:#428bca;
+	background-image:linear-gradient(rgb(70, 135, 206) 0px, rgb(48, 104, 162) 100%);
+	-webkit-box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+	-moz-box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+	box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+}
+html body .geStatus .geStatusAlert:hover:not(.geDarkMode *) {
+    background-color: #2d6ca2;
+    background-image: linear-gradient(rgb(90, 148, 211) 0px, rgb(54, 115, 181) 100%);
+}
+html body .geStatus .geStatusMessage:not(.geDarkMode *) {
+	color:#ffffff !important;
+	font-size:12px;
+	border:none;
+	border-radius:6px;
+	text-shadow: rgb(41, 89, 137) 0px 1px 0px;
+	background-color:#428bca;
+	background-image:linear-gradient(rgb(70, 135, 206) 0px, rgb(48, 104, 162) 100%);
+	-webkit-box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+	-moz-box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+	box-shadow: rgba(255, 255, 255, 0.0980392) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 1px 1px 0px;
+}
+html body .geStatus .geStatusMessage:hover:not(.geDarkMode *) {
+    background-color: #2d6ca2;
+    background-image: linear-gradient(rgb(90, 148, 211) 0px, rgb(54, 115, 181) 100%);
+}
+html body .geSidebarTooltip, .geSidebarTooltipImage {
+	z-index:2;
+}
+.geTitle, .geItem, .geLabel {
+	color: light-dark(var(--text-color), var(--dark-text-color));
+}
+#mxHeaderDocumentName {
+	color: light-dark(#DEEBFF, var(--dark-text-color));
+}
+
+html body .geMenubarContainer *:not(.geDarkMode *) {
+	color: #DEEBFF;
+}
+html body .geMenubarContainer .geStatus:not(.geDarkMode *) {
+	color: rgb(179, 179, 179);
+}
+.geMenubarContainer .geItem:hover:not(.geStatus) {
+	background-color: rgba(9, 30, 66, 0.48) !important;
+}
+html body .geMenubarContainer:not(.geDarkMode *) {
+	background-color: #0049B0;
+	color: #ffffff;
+	font-size: 14px;
+}
+html body .geMenubar > .geItem {
+	padding-left:14px;
+	padding-right:15px;
+}
+html body .geSidebarContainer .geToolbarContainer {
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	border:none;
+}
+html body .geSidebarContainer .geToolbarContainer .geButton {
+	margin:2px !important;
+	height:20px !important;
+}
+html body .geSidebarContainer .geToolbarContainer .geLabel {
+	margin:2px !important;
+	padding:4px !important;
+}
+html body .geMenubarContainer .mxDisabled {
+	opacity: 1;
+	color: rgb(179, 179, 179);
+}
+html .geButtonContainer {
+	padding-right:10px;
+}
+.geDialogTitle:not(.geDarkMode *) {
+	box-sizing:border-box;
+	white-space:nowrap;
+	background:rgb(32, 80, 129);
+	border-bottom:1px solid rgb(192, 192, 192);
+	font-size:15px;
+	font-weight:bold;
+	text-align:center;
+	color:white;
+}
+.geDialogFooter:not(.geDarkMode *) {
+	background:whiteSmoke;
+	white-space:nowrap;
+	text-align:right;
+	box-sizing:border-box;
+	border-top:1px solid #e5e5e5;
+	color:darkGray;
+}
+html .geNotification-bell {
+  opacity: 1;
+}
+html .geNotification-bell *:not(.geDarkMode *) {
+  background-color: #DEEBFF;
+  box-shadow: 0px 0px 10px #DEEBFF;
+}
+
+body.geSimple.geDarkMode .geMenuItem {
+	filter: none !important;
+}
