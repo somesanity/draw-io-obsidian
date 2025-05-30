@@ -20,7 +20,7 @@ because it uses separate localhost-server, and I don't use embed mode in Ddraw.i
 3. `cd drawIo-plugin`.
 4. `npm i`.
 5. `npm run dev` (only if `main.js` not exist).
-6. move the `webapp folder` and `main.js` to your Obsidian vault:
+6. move the `webapp folder`, `manifest.json` and `main.js` to your Obsidian vault:
 	`.obsidian` > `plugins` > (create new directory for draw io plugin).
 7. Open your vault and enable the plugin.
 
@@ -31,4 +31,5 @@ because it uses separate localhost-server, and I don't use embed mode in Ddraw.i
 >	└── plugin
 >		├── webapp     <-- It's important!!
 >		└── main.js
+>		└── manifest.json
 >	```
