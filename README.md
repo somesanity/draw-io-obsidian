@@ -4,7 +4,7 @@ it plugin is an alternative [this plugin](https://github.com/jensmtg/obsidian-di
 
 ## ❓ How does the plugin work?
 
-Essentially it runs a separate localhost-server, when the plugin active or Obsidian opened, thank to the [serve package](https://www.npmjs.com/package/serve), the server is started and is being deployed draw io's web app.
+Essentially it runs a separate localhost-server, when the plugin active or Obsidian opened, thank to the [serve package](https://www.npmjs.com/package/serve), the server is started and is being deployed [draw io's web app](https://github.com/jgraph/drawio).
 
 ### ⚠️ not perfectly
 
@@ -26,8 +26,9 @@ because it uses separate localhost-server, and I don't use embed mode in Ddraw.i
 
 
 > main.js and webapp folder should be placed together.
->```lua
->└── plugin
->	├── webapp     <-- It's important!!
->	└── main.js
->```
+>
+>	```lua
+>	└── plugin
+>		├── webapp     <-- It's important!!
+>		└── main.js
+>	```
