@@ -1,8 +1,19 @@
-/*
+/* styles.css */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.drawio-plugin-body .drawio-webview.is-focused .view-content {
+    border: 2px solid transparent; /* Обычное состояние, чтобы не было мерцания */
+    transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
 
-If your plugin does not need CSS, delete this file.
+.drawio-plugin-body .drawio-webview.is-focused .view-content.drawio-drag-over {
+    border: 2px dashed var(--interactive-accent); /* Акцентный цвет Obsidian для рамки */
+    background-color: var(--background-modifier-hover); /* Легкий фон при перетаскивании */
+}
 
-*/
+/* Если вы хотите, чтобы эффект drag-over был виден, даже когда вид не в фокусе,
+   уберите .is-focused из селектора выше и оставьте только .drawio-webview .view-content.drawio-drag-over
+   либо добавьте отдельное правило: */
+.drawio-webview .view-content.drawio-drag-over {
+    border: 2px dashed var(--interactive-accent);
+    background-color: var(--background-modifier-hover);
+}
