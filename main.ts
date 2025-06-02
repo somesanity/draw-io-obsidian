@@ -9,6 +9,9 @@ import {
     Menu,
     MarkdownView,
     TFile,
+    PluginSettingTab, // Импорт PluginSettingTab
+    Setting, // Импорт Setting
+    TextComponent
 } from "obsidian";
 import * as path from "path";
 import * as fs from "fs";
@@ -17,7 +20,6 @@ import express from "express";
 import { Buffer } from 'buffer';
 
 const DRAWIO_VIEW = "drawio-webview";
-const DRAWIO_PORT = 8080;
 
 declare module 'obsidian' {
     interface MarkdownView {
@@ -25,10 +27,22 @@ declare module 'obsidian' {
     }
 }
 
+interface DrawioPluginSettings {
+    port: number;
+}
+
+
+const DEFAULT_SETTINGS: DrawioPluginSettings = {
+    port: 8080, 
+}
+
 export default class DrawIOPlugin extends Plugin {
     private expressServer: Server | null = null;
+    settings: DrawioPluginSettings;
 
     async onload() {
+        await this.loadSettings();
+
         this.registerView(DRAWIO_VIEW, (leaf) => new DrawIOView(leaf, this));
 
         this.addRibbonIcon("shapes", "Open Draw.io", async () => {
@@ -39,53 +53,37 @@ export default class DrawIOPlugin extends Plugin {
                 active: true,
             });
         });
+        
+        // --- КОМАНДА ДЛЯ ГОРЯЧЕЙ КЛАВИШИ (СОЗДАТЬ ИЛИ РЕДАКТИРОВАТЬ) ---
+        this.addCommand({
+            id: 'drawio-create-or-edit',
+            name: 'Create or edit Draw.io diagram',
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const fileToEdit = this.findDiagramFileUnderCursor(editor, view);
+                await this.launchDrawioServer();
 
+                if (fileToEdit) {
+                    new DrawioEmbedModal(this.app, editor, this, fileToEdit).open();
+                } else {
+                    new DrawioEmbedModal(this.app, editor, this).open();
+                }
+            }
+        });
+
+        // --- КОНТЕКСТНОЕ МЕНЮ ---
         this.registerEvent(
-            this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: ItemView) => {
-
-                let filePathToEdit: string | null = null;
-                const selection = editor.getSelection();
-                const cursor = editor.getCursor();
-
-                if (selection) {
-                    const match = selection.match(/^!\[\[([^\]]+\.(?:drawio\.svg|drawio))\]\]$/);
-                    if (match && match[1]) {
-                        filePathToEdit = match[1];
-                    }
-                }
-
-                if (!filePathToEdit) {
-                    const line = editor.getLine(cursor.line);
-                    const linkRegex = /!\[\[([^\]]+\.(?:drawio\.svg|drawio))\]\]/g;
-                    let execMatch;
-                    while ((execMatch = linkRegex.exec(line)) !== null) {
-                        const fullMatchText = execMatch[0];
-                        const potentialPath = execMatch[1];
-                        const startIndex = execMatch.index;
-                        const endIndex = startIndex + fullMatchText.length;
-
-                        if (cursor.ch >= startIndex && cursor.ch <= endIndex) {
-                            filePathToEdit = potentialPath;
-                            break;
-                        }
-                    }
-                }
-
-                if (filePathToEdit) {
-                    const finalPath = filePathToEdit;
+            this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
+                const fileToEdit = this.findDiagramFileUnderCursor(editor, view);
+                
+                if (fileToEdit) {
                     menu.addItem((item) => {
                         item
-                            .setTitle(`Edit ${path.basename(finalPath)}`)
+                            .setTitle(`Edit ${fileToEdit.basename}`)
                             .setIcon("pencil")
                             .setSection("drawio-actions")
                             .onClick(async () => {
-                                const abstractFile = this.app.vault.getAbstractFileByPath(finalPath);
-                                if (abstractFile instanceof TFile) {
-                                    await this.launchDrawioServer();
-                                    new DrawioEmbedModal(this.app, editor, this, abstractFile).open();
-                                } else {
-                                    new Notice(`❌ Draw.io file not found: ${finalPath}`);
-                                }
+                                await this.launchDrawioServer();
+                                new DrawioEmbedModal(this.app, editor, this, fileToEdit).open();
                             });
                     });
                 } else {
@@ -104,9 +102,22 @@ export default class DrawIOPlugin extends Plugin {
         );
 
         this.registerDomEvent(document, "click", this.handleDiagramClick.bind(this));
- 
+    
         document.body.addClass("drawio-plugin-body");
         new Notice("✅ Draw.io plugin loaded");
+
+        // Добавляем вкладку настроек
+        this.addSettingTab(new DrawioSettingTab(this.app, this));
+    }
+
+    // Загрузка настроек плагина
+    async loadSettings() {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    // Сохранение настроек плагина
+    async saveSettings() {
+        await this.saveData(this.settings);
     }
 
     onunload() {
@@ -119,6 +130,29 @@ export default class DrawIOPlugin extends Plugin {
 
         this.app.workspace.detachLeavesOfType(DRAWIO_VIEW);
         document.body.removeClass("drawio-plugin-body");
+    }
+    
+    // Вспомогательная функция для поиска файла диаграммы под курсором
+    private findDiagramFileUnderCursor(editor: Editor, view: MarkdownView): TFile | null {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+        const linkRegex = /!\[\[([^\]]+\.(?:drawio\.svg|drawio))\]\]/g;
+        let execMatch;
+
+        while ((execMatch = linkRegex.exec(line)) !== null) {
+            const fullMatchText = execMatch[0];
+            const linkText = execMatch[1];
+            const startIndex = execMatch.index;
+            const endIndex = startIndex + fullMatchText.length;
+
+            if (cursor.ch >= startIndex && cursor.ch <= endIndex) {
+                const linkedFile = this.app.metadataCache.getFirstLinkpathDest(linkText, view.file?.path ?? "");
+                if (linkedFile instanceof TFile) {
+                    return linkedFile;
+                }
+            }
+        }
+        return null;
     }
 
     public async launchDrawioServer() {
@@ -136,13 +170,14 @@ export default class DrawIOPlugin extends Plugin {
         const app = express();
         app.use(express.static(webAppPath));
 
-        this.expressServer = app.listen(DRAWIO_PORT, () => {
-            console.log(`Draw.io server running at http://localhost:${DRAWIO_PORT}`);
-            new Notice(`🚀 Draw.io server started on port ${DRAWIO_PORT}`);
+        // Используем порт из настроек
+        this.expressServer = app.listen(this.settings.port, () => {
+            console.log(`Draw.io server running at http://localhost:${this.settings.port}`);
+            new Notice(`🚀 Draw.io server started on port ${this.settings.port}`);
         }).on('error', (err: any) => {
             if (err.code === 'EADDRINUSE') {
-                new Notice(`❌ Port ${DRAWIO_PORT} is already in use. Draw.io server could not start.`);
-                console.error(`Port ${DRAWIO_PORT} is already in use.`);
+                new Notice(`❌ Port ${this.settings.port} is already in use. Draw.io server could not start.`);
+                console.error(`Port ${this.settings.port} is already in use.`);
             } else {
                 new Notice(`❌ Failed to start Draw.io server: ${err.message}`);
                 console.error(`Failed to start Draw.io server:`, err);
@@ -191,7 +226,6 @@ export default class DrawIOPlugin extends Plugin {
             }
         }
     }
-
 }
 
 class DrawIOView extends ItemView {
@@ -213,9 +247,10 @@ class DrawIOView extends ItemView {
         container.empty();
         this.currentFile = null;
 
+        // Используем порт из настроек плагина
         this.iframe = container.createEl("iframe", {
             attr: {
-                src: `http://localhost:${DRAWIO_PORT}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
+                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
                 style: "width: 100%; height: 100%; border: none;",
             },
         });
@@ -226,7 +261,8 @@ class DrawIOView extends ItemView {
         this.iframe.addEventListener("dragenter", this.handleDragEnter.bind(this));
 
         const messageHandler = async (event: MessageEvent) => {
-            if (event.origin !== `http://localhost:${DRAWIO_PORT}`) return;
+            // Используем порт из настроек плагина
+            if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
             let msg;
             try {
                 msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
@@ -290,13 +326,12 @@ class DrawIOView extends ItemView {
 
     private sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
-            this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${DRAWIO_PORT}`);
+            // Используем порт из настроек плагина
+            this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
     }
 }
 
-
-// --- Модальное окно --- 
 class DrawioEmbedModal extends Modal {
     private editor: Editor;
     private currentFile: TFile | null = null;
@@ -335,15 +370,17 @@ class DrawioEmbedModal extends Modal {
             this.isEmptyDiagram = false;
         }
 
+        // Используем порт из настроек плагина
         this.iframe = contentEl.createEl("iframe", {
             attr: {
-                src: `http://localhost:${DRAWIO_PORT}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
+                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
                 style: "width: 100%; height: 100%; border: none;",
             },
         });
 
         this.messageHandler = async (event: MessageEvent) => {
-            if (event.origin !== `http://localhost:${DRAWIO_PORT}`) return;
+            // Используем порт из настроек плагина
+            if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
             let msg;
             try {
                 msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
@@ -355,7 +392,6 @@ class DrawioEmbedModal extends Modal {
                         const fileContent = await this.app.vault.read(this.currentFile);
                         this.sendMessageToDrawio({ action: "load", xml: fileContent, autosave: 1 });
                     } else {
-
                         const emptyXml = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
                         this.sendMessageToDrawio({ action: "load", xml: emptyXml, autosave: 1 });
                     }
@@ -368,9 +404,7 @@ class DrawioEmbedModal extends Modal {
                     break;
                 case "change":
                     const baseEmptyXml = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
-
                     this.isEmptyDiagram = (!msg.xml || msg.xml === baseEmptyXml);
-
                     break;
                 case "exit":
                     console.log("👋 User exited Draw.io in modal via Draw.io button");
@@ -398,7 +432,8 @@ class DrawioEmbedModal extends Modal {
 
     private sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
-            this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${DRAWIO_PORT}`);
+            // Используем порт из настроек плагина
+            this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
     }
 
@@ -471,12 +506,12 @@ class DrawioEmbedModal extends Modal {
             const emptyDrawioXmlInSvgContent = `content="&lt;mxGraphModel&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;"`;
             const emptySvgStructureIndicator = `<g/>`;
             const isActuallyEmpty = contentToSave.includes(emptyDrawioXmlInSvgContent) &&
-                                    contentToSave.includes(emptySvgStructureIndicator) &&
-                                    (contentToSave.match(/<g\b[^>]*>/g) || []).length === 1 &&
-                                    !contentToSave.includes('<path') &&
-                                    !contentToSave.includes('<rect') &&
-                                    !contentToSave.includes('<ellipse') &&
-                                    !contentToSave.includes('<text');
+                                            contentToSave.includes(emptySvgStructureIndicator) &&
+                                            (contentToSave.match(/<g\b[^>]*>/g) || []).length === 1 &&
+                                            !contentToSave.includes('<path') &&
+                                            !contentToSave.includes('<rect') &&
+                                            !contentToSave.includes('<ellipse') &&
+                                            !contentToSave.includes('<text');
             this.isEmptyDiagram = isActuallyEmpty;
 
         } catch (e) {
@@ -500,13 +535,13 @@ class DrawioEmbedModal extends Modal {
             const emptySvgStructureIndicator = `<g/>`;
             
             const isActuallyEmpty = currentFileContent.includes(emptyDrawioXmlInSvgContent) &&
-                                    currentFileContent.includes(emptySvgStructureIndicator) &&
-                                    (currentFileContent.match(/<g\b[^>]*>/g) || []).length === 1 &&
-                                    !currentFileContent.includes('<path') &&
-                                    !currentFileContent.includes('<rect') &&
-                                    !currentFileContent.includes('<ellipse') &&
-                                    !currentFileContent.includes('<image') &&
-                                    !currentFileContent.includes('<text');
+                                            currentFileContent.includes(emptySvgStructureIndicator) &&
+                                            (currentFileContent.match(/<g\b[^>]*>/g) || []).length === 1 &&
+                                            !currentFileContent.includes('<path') &&
+                                            !currentFileContent.includes('<rect') &&
+                                            !currentFileContent.includes('<ellipse') &&
+                                            !currentFileContent.includes('<image') &&
+                                            !currentFileContent.includes('<text');
 
             if (this.isEmptyDiagram || isActuallyEmpty) {
                 try {
@@ -523,14 +558,14 @@ class DrawioEmbedModal extends Modal {
                         this.editor.setValue(editorContent.replace(linkToDelete, ''));
                         new Notice("🔗 Removed empty diagram link from editor.");
                     } else if (editorContent.includes(linkToDeleteEncoded)) {
-                         this.editor.setValue(editorContent.replace(linkToDeleteEncoded, ''));
-                        new Notice("🔗 Removed empty diagram link (encoded) from editor.");
+                           this.editor.setValue(editorContent.replace(linkToDeleteEncoded, ''));
+                           new Notice("🔗 Removed empty diagram link (encoded) from editor.");
                     }
 
                 } catch (e) {
                     if (!(e instanceof Error && e.message.toLowerCase().includes("file already deleted"))) {
-                         new Notice(`❌ Failed to delete empty diagram file: ${this.currentFile.path}`);
-                         console.error("Error deleting empty diagram file:", e);
+                           new Notice(`❌ Failed to delete empty diagram file: ${this.currentFile.path}`);
+                           console.error("Error deleting empty diagram file:", e);
                     }
                 }
             }
@@ -557,7 +592,6 @@ class DrawioEmbedModal extends Modal {
                     if (typeof (leaf as any).rebuildView === 'function') {
                         await (leaf as any).rebuildView();
                     } else {
-
                         const viewState = leaf.getViewState();
                         await leaf.setViewState({ type: 'empty' });
                         await leaf.setViewState(viewState);
@@ -600,19 +634,18 @@ async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgDataUri: st
     const emptyDrawioXmlInSvgContent = `content="&lt;mxGraphModel&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;"`;
     const emptySvgStructureIndicator = `<g/>`;
     const isActuallyEmpty = contentToSave.includes(emptyDrawioXmlInSvgContent) &&
-                            contentToSave.includes(emptySvgStructureIndicator) &&
-                            (contentToSave.match(/<g\b[^>]*>/g) || []).length === 1 &&
-                            !contentToSave.includes('<path') &&
-                            !contentToSave.includes('<rect') &&
-                            !contentToSave.includes('<ellipse') &&
-                            !contentToSave.includes('<image') &&
-                            !contentToSave.includes('<text');
+                                    contentToSave.includes(emptySvgStructureIndicator) &&
+                                    (contentToSave.match(/<g\b[^>]*>/g) || []).length === 1 &&
+                                    !contentToSave.includes('<path') &&
+                                    !contentToSave.includes('<rect') &&
+                                    !contentToSave.includes('<ellipse') &&
+                                    !contentToSave.includes('<image') &&
+                                    !contentToSave.includes('<text');
 
     if (isActuallyEmpty && !view.currentFile) {
         new Notice("🚫 Diagram appears empty, not saving new file.");
         return;
     }
-
 
     let savedFile: TFile | null = null;
 
@@ -659,20 +692,20 @@ async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgDataUri: st
         
         let needsRebuild = mdView.file.path === savedFile.path;
         
-		if(!needsRebuild) {
+        if(!needsRebuild) {
             try {
                 const fileContent = await app.vault.cachedRead(mdView.file);
                  if (fileContent.includes(savedFile.name) || fileContent.includes(encodeURI(savedFile.name))) {
                     needsRebuild = true;
                 }
             } catch(err) {
-				console.log(err)
-			}
+                console.log(err)
+            }
         };
 
         if (needsRebuild) {
              try {
-                if (typeof (leaf as any).rebuildView === 'function') {
+                 if (typeof (leaf as any).rebuildView === 'function') {
                     await (leaf as any).rebuildView();
                 } else {
                     const currentViewState = leaf.getViewState();
@@ -686,19 +719,27 @@ async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgDataUri: st
     }
 }
 
-
 async function handleDrawioMessage(msg: any, sourceWindow: Window, app: App, view: DrawIOView) {
+    // Получаем экземпляр плагина для доступа к его настройкам
+    // !!! ВАЖНО: Замените 'your-plugin-id' на реальный ID вашего плагина из файла manifest.json
+    const plugin = (app as any).plugins.getPlugin('your-plugin-id'); 
+    if (!plugin) {
+        console.error("Draw.io plugin not found. Cannot access settings.");
+        return;
+    }
+    const port = plugin.settings.port;
+
     switch (msg.event) {
         case "init":
             if (view.currentFile) {
                 const fileContent = await app.vault.read(view.currentFile);
-                sourceWindow.postMessage(JSON.stringify({ action: "load", xml: fileContent, autosave: 1 }), `http://localhost:${DRAWIO_PORT}`);
+                sourceWindow.postMessage(JSON.stringify({ action: "load", xml: fileContent, autosave: 1 }), `http://localhost:${port}`);
             } else {
-                sourceWindow.postMessage(JSON.stringify({ action: "load", xml: "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>", autosave: 1 }), `http://localhost:${DRAWIO_PORT}`);
+                sourceWindow.postMessage(JSON.stringify({ action: "load", xml: "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>", autosave: 1 }), `http://localhost:${port}`);
             }
             break;
         case "save":
-            sourceWindow.postMessage(JSON.stringify({ action: "export", format: "xmlsvg", xml: 1, empty: 1 }), `http://localhost:${DRAWIO_PORT}`);
+            sourceWindow.postMessage(JSON.stringify({ action: "export", format: "xmlsvg", xml: 1, empty: 1 }), `http://localhost:${port}`);
             break;
         case "export":
             await saveOrUpdateDrawioFile(app, view, msg.data);
@@ -708,5 +749,109 @@ async function handleDrawioMessage(msg: any, sourceWindow: Window, app: App, vie
         case "exit":
             console.log("👋 User exited Draw.io from main view");
             break;
+    }
+}
+
+class DrawioSettingTab extends PluginSettingTab {
+    plugin: DrawIOPlugin; // Тип должен соответствовать вашему классу DrawIOPlugin
+    private portTextComponent: TextComponent;
+
+    constructor(app: App, plugin: DrawIOPlugin) { // Тип plugin должен быть DrawIOPlugin
+        super(app, plugin);
+        this.plugin = plugin;
+        console.log("DrawioSettingTab: Constructor called.");
+    }
+
+    display(): void {
+        console.log("DrawioSettingTab: display() called.");
+        console.log("DrawioSettingTab: 'this' is:", this);
+
+        if (!this) {
+            console.error("DrawioSettingTab: CRITICAL - 'this' is undefined or null in display()!");
+            new Notice("Критическая ошибка: 'this' не определен в display() Draw-io.");
+            return;
+        }
+
+        console.log("DrawioSettingTab: 'this.containerEl' is:", this.containerEl);
+
+        let containerElLocal: HTMLElement;
+        try {
+            // Это стандартный способ получения containerEl.
+            // Если здесь ошибка, this или this.containerEl некорректны.
+            const { containerEl } = this; 
+            containerElLocal = containerEl;
+        } catch (e) {
+            console.error("DrawioSettingTab: Error during destructuring 'containerEl' from 'this':", e);
+            console.error("DrawioSettingTab: 'this' context at error:", this);
+            new Notice("Ошибка при инициализации containerEl в Draw-io.");
+            return;
+        }
+        
+        if (!containerElLocal) {
+            console.error("DrawioSettingTab: 'containerElLocal' is undefined after destructuring!");
+            console.error("DrawioSettingTab: 'this.containerEl' was:", this.containerEl);
+            new Notice("Ошибка: containerEl не определен после деструктуризации в Draw-io.");
+            return; 
+        }
+
+        try {
+            containerElLocal.empty(); // Если containerElLocal был undefined, здесь будет TypeError
+            containerElLocal.createEl('h2', { text: 'Настройки плагина Draw.io' });
+
+            const defaultPort = 8080;
+
+            new Setting(containerElLocal)
+                .setName('Порт сервера Draw.io')
+                .setDesc('Порт (1-65535). Изменения сохраняются и проверяются при закрытии окна настроек.')
+                .addText(text => {
+                    this.portTextComponent = text;
+                    text.setPlaceholder(`например, ${defaultPort}`)
+                        .setValue(this.plugin.settings.port.toString())
+                        .onChange(value => {
+                            // Логика onChange... (пока можно оставить пустой для теста)
+                        });
+                });
+        } catch (error) {
+            console.error("DrawioSettingTab: Error using 'containerElLocal':", error);
+            // Если ошибка была "ReferenceError: containerEl is not defined" и указывала сюда,
+            // значит переменная containerElLocal (или containerEl до переименования) не была объявлена выше.
+            // Если ошибка TypeError, значит containerElLocal был undefined.
+            new Notice("Произошла ошибка при отображении настроек Draw-io.");
+        }
+    }
+
+    async hide() {
+        if (!this.portTextComponent) {
+            console.warn("DrawioSettingTab: hide() called but portTextComponent is not initialized.");
+            return; 
+        }
+        
+        const defaultPort = 8080;
+        const currentValueInField = this.portTextComponent.getValue(); 
+        const parsedPortFromField = parseInt(currentValueInField, 10);
+
+        let targetPort = this.plugin.settings.port; 
+        let messageForNotice: string | null = null;
+        
+        const originalPortBeforeThisHide = this.plugin.settings.port;
+
+        if (isNaN(parsedPortFromField) || parsedPortFromField <= 0 || parsedPortFromField > 65535) {
+            targetPort = defaultPort;
+            if (originalPortBeforeThisHide !== defaultPort || currentValueInField !== defaultPort.toString()) {
+                messageForNotice = `🚫 Введенный порт "${currentValueInField}" некорректен. Установлен порт по умолчанию: ${targetPort}.`;
+            }
+        } else {
+            targetPort = parsedPortFromField;
+            if (originalPortBeforeThisHide !== targetPort) {
+                messageForNotice = `⚙️ Порт плагина Draw.io изменен на ${targetPort}.`;
+            }
+        }
+        
+        this.plugin.settings.port = targetPort;
+        await this.plugin.saveSettings();
+
+        if (messageForNotice) {
+            new Notice(messageForNotice + " Перезапустите Obsidian или плагин для применения.");
+        }
     }
 }

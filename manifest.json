@@ -1,7 +1,7 @@
 {
 	"id": "Draw-io",
 	"name": "Draw.io",
-	"version": "1.0.0",
+	"version": "2.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "It's a plugin for localy integration draw.io web interface in obdidian.",
 	"author": "SomeSanity",
