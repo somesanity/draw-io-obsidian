@@ -9,8 +9,8 @@ import {
     Menu,
     MarkdownView,
     TFile,
-    PluginSettingTab, // Импорт PluginSettingTab
-    Setting, // Импорт Setting
+    PluginSettingTab,
+    Setting,
     TextComponent
 } from "obsidian";
 import * as path from "path";
@@ -54,7 +54,6 @@ export default class DrawIOPlugin extends Plugin {
             });
         });
         
-        // --- КОМАНДА ДЛЯ ГОРЯЧЕЙ КЛАВИШИ (СОЗДАТЬ ИЛИ РЕДАКТИРОВАТЬ) ---
         this.addCommand({
             id: 'drawio-create-or-edit',
             name: 'Create or edit Draw.io diagram',
@@ -70,7 +69,6 @@ export default class DrawIOPlugin extends Plugin {
             }
         });
 
-        // --- КОНТЕКСТНОЕ МЕНЮ ---
         this.registerEvent(
             this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.findDiagramFileUnderCursor(editor, view);
@@ -106,16 +104,13 @@ export default class DrawIOPlugin extends Plugin {
         document.body.addClass("drawio-plugin-body");
         new Notice("✅ Draw.io plugin loaded");
 
-        // Добавляем вкладку настроек
         this.addSettingTab(new DrawioSettingTab(this.app, this));
     }
 
-    // Загрузка настроек плагина
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
 
-    // Сохранение настроек плагина
     async saveSettings() {
         await this.saveData(this.settings);
     }
@@ -132,11 +127,10 @@ export default class DrawIOPlugin extends Plugin {
         document.body.removeClass("drawio-plugin-body");
     }
     
-    // Вспомогательная функция для поиска файла диаграммы под курсором
     private findDiagramFileUnderCursor(editor: Editor, view: MarkdownView): TFile | null {
         const cursor = editor.getCursor();
         const line = editor.getLine(cursor.line);
-        const linkRegex = /!\[\[([^\]]+\.(?:drawio\.svg|drawio))\]\]/g;
+        const linkRegex = /!\[\[([^|\]]+\.(?:drawio\.svg|drawio))[^\]]*\]\]/g;
         let execMatch;
 
         while ((execMatch = linkRegex.exec(line)) !== null) {
@@ -170,7 +164,6 @@ export default class DrawIOPlugin extends Plugin {
         const app = express();
         app.use(express.static(webAppPath));
 
-        // Используем порт из настроек
         this.expressServer = app.listen(this.settings.port, () => {
             console.log(`Draw.io server running at http://localhost:${this.settings.port}`);
             new Notice(`🚀 Draw.io server started on port ${this.settings.port}`);
@@ -247,7 +240,6 @@ class DrawIOView extends ItemView {
         container.empty();
         this.currentFile = null;
 
-        // Используем порт из настроек плагина
         this.iframe = container.createEl("iframe", {
             attr: {
                 src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
@@ -261,7 +253,7 @@ class DrawIOView extends ItemView {
         this.iframe.addEventListener("dragenter", this.handleDragEnter.bind(this));
 
         const messageHandler = async (event: MessageEvent) => {
-            // Используем порт из настроек плагина
+
             if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
             let msg;
             try {
@@ -326,7 +318,6 @@ class DrawIOView extends ItemView {
 
     private sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
-            // Используем порт из настроек плагина
             this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
     }
@@ -370,7 +361,6 @@ class DrawioEmbedModal extends Modal {
             this.isEmptyDiagram = false;
         }
 
-        // Используем порт из настроек плагина
         this.iframe = contentEl.createEl("iframe", {
             attr: {
                 src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
@@ -379,7 +369,6 @@ class DrawioEmbedModal extends Modal {
         });
 
         this.messageHandler = async (event: MessageEvent) => {
-            // Используем порт из настроек плагина
             if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
             let msg;
             try {
@@ -432,7 +421,6 @@ class DrawioEmbedModal extends Modal {
 
     private sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
-            // Используем порт из настроек плагина
             this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
     }
@@ -720,8 +708,6 @@ async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgDataUri: st
 }
 
 async function handleDrawioMessage(msg: any, sourceWindow: Window, app: App, view: DrawIOView) {
-    // Получаем экземпляр плагина для доступа к его настройкам
-    // !!! ВАЖНО: Замените 'your-plugin-id' на реальный ID вашего плагина из файла manifest.json
     const plugin = (app as any).plugins.getPlugin('your-plugin-id'); 
     if (!plugin) {
         console.error("Draw.io plugin not found. Cannot access settings.");
@@ -753,10 +739,10 @@ async function handleDrawioMessage(msg: any, sourceWindow: Window, app: App, vie
 }
 
 class DrawioSettingTab extends PluginSettingTab {
-    plugin: DrawIOPlugin; // Тип должен соответствовать вашему классу DrawIOPlugin
+    plugin: DrawIOPlugin;
     private portTextComponent: TextComponent;
 
-    constructor(app: App, plugin: DrawIOPlugin) { // Тип plugin должен быть DrawIOPlugin
+    constructor(app: App, plugin: DrawIOPlugin) {
         super(app, plugin);
         this.plugin = plugin;
         console.log("DrawioSettingTab: Constructor called.");
@@ -776,8 +762,6 @@ class DrawioSettingTab extends PluginSettingTab {
 
         let containerElLocal: HTMLElement;
         try {
-            // Это стандартный способ получения containerEl.
-            // Если здесь ошибка, this или this.containerEl некорректны.
             const { containerEl } = this; 
             containerElLocal = containerEl;
         } catch (e) {
@@ -795,7 +779,7 @@ class DrawioSettingTab extends PluginSettingTab {
         }
 
         try {
-            containerElLocal.empty(); // Если containerElLocal был undefined, здесь будет TypeError
+            containerElLocal.empty();
             containerElLocal.createEl('h2', { text: 'Настройки плагина Draw.io' });
 
             const defaultPort = 8080;
@@ -808,14 +792,10 @@ class DrawioSettingTab extends PluginSettingTab {
                     text.setPlaceholder(`например, ${defaultPort}`)
                         .setValue(this.plugin.settings.port.toString())
                         .onChange(value => {
-                            // Логика onChange... (пока можно оставить пустой для теста)
                         });
                 });
         } catch (error) {
             console.error("DrawioSettingTab: Error using 'containerElLocal':", error);
-            // Если ошибка была "ReferenceError: containerEl is not defined" и указывала сюда,
-            // значит переменная containerElLocal (или containerEl до переименования) не была объявлена выше.
-            // Если ошибка TypeError, значит containerElLocal был undefined.
             new Notice("Произошла ошибка при отображении настроек Draw-io.");
         }
     }
