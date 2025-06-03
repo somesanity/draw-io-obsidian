@@ -1,6 +1,4 @@
 
----
-
 # 🖋️ Obsidian Draw\.io Plugin (Offline & Private)
 
 ![Draw.io Demo](demo.gif)
