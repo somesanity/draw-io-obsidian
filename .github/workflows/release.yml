@@ -29,14 +29,7 @@ jobs:
         run: |
           tag="${GITHUB_REF#refs/tags/}"
 
-          files_to_attach+=("main.js")
-          files_to_attach+=("manifest.json")
-
-          while IFS= read -r -d '' file; do
-            files_to_attach+=("$file")
-          done < <(find webapp -type f -print0)
-
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            "${files_to_attach[@]}"
+            main.js manifest.json $(find webapp -type f)

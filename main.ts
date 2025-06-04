@@ -5,11 +5,19 @@ import { launchDrawioServerLogic } from "src/launchDrawioServer";
 import { DRAWIO_VIEW } from "src/constants";
 import { PluginInitializer } from "./src/classes/plugin-initializer";
 
+import { WebappManager } from "./src/utils/webAppManager";
+
+
 export default class DrawIOPlugin extends Plugin {
     expressServer: Server | null = null;
     settings: DrawioPluginSettings;
+    private webappManager: WebappManager;
 
     async onload() {
+
+        this.webappManager = new WebappManager(this.app, this.manifest);
+        await this.webappManager.checkAndUnzipWebapp();
+
         await this.loadSettings();
         const initializer = new PluginInitializer(this);
         initializer.initialize();
