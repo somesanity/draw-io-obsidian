@@ -3,7 +3,7 @@
 	"name": "draw.io",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "It's a plugin for locally integrating the draw.io (diagrams.net) web interface into Obsidian.",
+	"description": "It's a plugin for locally integrating the draw.io (diagrams.net) web interface.",
 	"author": "somesanity",
 	"authorUrl": "https://github.com/somesanity",
 	"isDesktopOnly": true

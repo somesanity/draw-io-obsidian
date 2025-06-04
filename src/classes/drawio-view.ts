@@ -27,7 +27,7 @@ export class DrawIOView extends ItemView {
         this.iframe = container.createEl("iframe", {
             attr: {
                 src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
-                style: "width: 100%; height: 100%; border: none;",
+                
             },
         });
 
@@ -63,8 +63,6 @@ export class DrawIOView extends ItemView {
     public sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
             this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
-        } else {
-            console.warn("Попытка отправить сообщение в Draw.io, но iframe не готов.");
         }
     }
 
