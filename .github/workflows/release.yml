@@ -32,7 +32,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            files="main.js manifest.json"
-            for file in $(find webapp -type f); do
-              files="$files $file"
-            done
+            main.js manifest.json $(find webapp -type f)
