@@ -135,11 +135,8 @@ export class DrawioEmbedModal extends Modal {
                     this.handleChangeMessage(msg.xml);
                     break;
                 case "exit":
-                    console.log("👋 User exited Draw.io in modal via Draw.io button");
                     this.close();
                     break;
-                default:
-                    console.log("Unhandled Draw.io message event:", msg.event, msg);
             }
         };
     }

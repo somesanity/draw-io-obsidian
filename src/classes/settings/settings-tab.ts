@@ -8,21 +8,14 @@ export class DrawioSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: DrawIOPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-        console.log("DrawioSettingTab: Constructor called.");
     }
 
     display(): void {
-        console.log("DrawioSettingTab: display() called.");
-        console.log("DrawioSettingTab: 'this' is:", this);
-
         if (!this) {
             console.error("DrawioSettingTab: CRITICAL - 'this' is undefined or null in display()!");
             new Notice("Critical error: 'this' is undefined in display() of Draw-io.");
             return;
         }
-
-        console.log("DrawioSettingTab: 'this.containerEl' is:", this.containerEl);
-
         let containerElLocal: HTMLElement;
         try {
             const { containerEl } = this; 

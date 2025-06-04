@@ -15,7 +15,6 @@ export async function handleDrawioMessage(
 
     switch (msg.event) {
         case "init":
-            console.log("Draw.io отправил сообщение 'init'. Отвечаем 'ready' и загружаем данные, если доступны.");
             view.sendMessageToDrawio({ action: "ready" });
 
             if (view.currentFile) {
@@ -30,14 +29,6 @@ export async function handleDrawioMessage(
             break;
         case "export":
             await saveOrUpdateDrawioFile(app, view, msg.data);
-            break;
-        case "change":
-            break;
-        case "exit":
-            console.log("👋 Пользователь вышел из Draw.io из основного представления");
-            break;
-        default:
-            console.log("Неизвестное событие сообщения Draw.io:", msg.event, msg);
             break;
     }
 }

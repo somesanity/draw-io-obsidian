@@ -64,7 +64,6 @@ export class WebappManager {
             if (webappDirExists) {
                 const stat = await this.vault.adapter.stat(webappExpectedPath);
                 if (stat && stat.type === 'folder') {
-                    console.log(`${this.pluginName}: 'webapp' folder already exists at: ${webappExpectedPath}`);
                     const webappZipExists = await this.vault.adapter.exists(webappZipPath);
                     if (webappZipExists) {
                         new Notice(`${this.pluginName}: 'webapp' already exists, deleting residual 'webapp.zip'.`);
@@ -90,8 +89,6 @@ export class WebappManager {
             }
 
             new Notice(`${this.pluginName}: 'webapp.zip' found. Starting extraction...`);
-            console.log(`${this.pluginName}: '${webappZipPath}' found. Starting extraction relative to '${pluginBaseDir}'...`);
-
             const zipFileData = await this.vault.adapter.readBinary(webappZipPath);
             const zip = await JSZip.loadAsync(zipFileData);
 
@@ -125,9 +122,7 @@ export class WebappManager {
             }
 
             if (fileCount > 0) {
-                new Notice(`${this.pluginName}: 'webapp.zip' extraction complete. 'webapp' folder is available in plugin directory.`);
-                console.log(`${this.pluginName}: 'webapp.zip' extracted. ${fileCount} files processed. 'webapp' folder should now be available at '${webappExpectedPath}'.`);
-                
+                new Notice(`${this.pluginName}: 'webapp.zip' extraction complete. 'webapp' folder is available in plugin directory.`);                
                 await this._deleteWebappZip(webappZipPath);
 
             } else if (Object.keys(zip.files).filter(k => !zip.files[k].dir).length === 0 && Object.keys(zip.files).length > 0) {
@@ -147,7 +142,6 @@ export class WebappManager {
     private async _deleteWebappZip(zipPath: string): Promise<void> {
         try {
             await this.vault.adapter.remove(zipPath); 
-            console.log(`${this.pluginName}: 'webapp.zip' successfully deleted.`);
             new Notice(`${this.pluginName}: 'webapp.zip' successfully deleted.`, 3000);
         } catch (deleteError) {
             console.error(`${this.pluginName}: Failed to delete 'webapp.zip'.`, deleteError);
