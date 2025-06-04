@@ -1,5 +1,7 @@
 # 🖋️ Obsidian Draw.io Plugin (Offline & Private)
 
+![demo](demo.gif)
+
 > **A privacy-friendly, fully offline alternative to [obsidian-diagrams-net](https://github.com/jensmtg/obsidian-diagrams-net), preserving the full [Draw.io (diagrams.net)](https://app.diagrams.net/) experience.**
 
 ## 🚀 Features
@@ -22,7 +24,7 @@ This plugin launches a **local web server** that serves the [Draw.io web app](ht
 
 The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.
 
-
+![initial-plugin-demo](initial-plugin-demo.gif)
 
 This only needs to be done once.
 
