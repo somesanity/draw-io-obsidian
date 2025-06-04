@@ -1,0 +1,1 @@
+export const DRAWIO_VIEW = "drawio-webview";
