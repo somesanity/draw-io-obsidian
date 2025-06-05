@@ -28,8 +28,6 @@ function startExpressServer(webAppPath: string, port: number): Promise<Server> {
         app.use(express.static(webAppPath));
 
         const server = app.listen(port, () => {
-            console.log(`Draw.io server running at http://localhost:${port}`);
-            new Notice(`🚀 Draw.io server started on port ${port}`);
             resolve(server);
         }).on('error', (err: any) => {
             if (err.code === 'EADDRINUSE') {

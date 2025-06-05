@@ -2,7 +2,6 @@ import { Plugin, Notice } from "obsidian";
 import { Server } from "http";
 import { DrawioPluginSettings, DEFAULT_SETTINGS } from "src/classes/settings/Settings";
 import { launchDrawioServerLogic } from "src/launchDrawioServer";
-import { DRAWIO_VIEW } from "src/constants";
 import { PluginInitializer } from "./src/classes/plugin-initializer";
 
 import { WebappManager } from "./src/utils/webAppManager";
@@ -14,7 +13,6 @@ export default class DrawIOPlugin extends Plugin {
     private webappManager: WebappManager;
 
     async onload() {
-
         this.webappManager = new WebappManager(this.app, this.manifest);
         await this.webappManager.checkAndUnzipWebapp();
 
@@ -29,6 +27,10 @@ export default class DrawIOPlugin extends Plugin {
 
     async saveSettings() {
         await this.saveData(this.settings);
+    
+        this.app.workspace.onLayoutReady(() => {
+        });
+    
     }
 
     onunload() {
@@ -38,8 +40,7 @@ export default class DrawIOPlugin extends Plugin {
                 this.expressServer = null;
             });
         }
-        this.app.workspace.detachLeavesOfType(DRAWIO_VIEW);
-        document.body.removeClass("drawio-plugin-body");
+        document.body.removeClass("drawio-embed-modal");
     }
     
     public async launchDrawioServer() {

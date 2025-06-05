@@ -9,7 +9,7 @@ export class DrawIOView extends ItemView {
     private plugin: DrawIOPlugin;
     private iframe: HTMLIFrameElement | null = null;
     public currentFile: TFile | null = null;
-
+    
     constructor(leaf: WorkspaceLeaf, plugin: DrawIOPlugin) {
         super(leaf);
         this.plugin = plugin;
@@ -23,14 +23,15 @@ export class DrawIOView extends ItemView {
         const container = this.containerEl.children[1];
         container.empty();
         this.currentFile = null;
-
+        
         this.iframe = container.createEl("iframe", {
             attr: {
                 src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
-                
             },
         });
-
+        
+        
+        this.iframe.addClass('drawio-embed-iframe')
         this.iframe.addEventListener("dragover", this.handleDragOver.bind(this));
         this.iframe.addEventListener("dragleave", this.handleDragLeave.bind(this));
         this.iframe.addEventListener("drop", this.handleDrop.bind(this));

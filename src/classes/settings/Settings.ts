@@ -4,6 +4,6 @@ export interface DrawioPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: DrawioPluginSettings = {
-    port: 8080, 
+    port: 1717, 
     diagramsFolder: 'DrawIo'
 }

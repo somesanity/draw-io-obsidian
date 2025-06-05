@@ -40,6 +40,7 @@ export async function forceMarkdownViewUpdate(app: App, file: TFile | null) {
                     await leaf.setViewState(viewState);
                 }
             }
+            
         } catch (err) {
             const currentViewFilePathForLog = currentViewFile?.path ?? 'unknown file (no path)';
             const diagramFilePathForLog = diagramFile?.path ?? 'unknown diagram path'; 

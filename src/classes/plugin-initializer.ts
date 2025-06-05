@@ -24,7 +24,6 @@ export class PluginInitializer {
         this.addSettingTab();
 
         this.plugin.app.workspace.onLayoutReady(() => {
-            document.body.addClass("drawio-plugin-body");
             new Notice("✅ Draw.io plugin loaded");
         });
     }

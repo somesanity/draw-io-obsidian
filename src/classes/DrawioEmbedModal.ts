@@ -1,5 +1,3 @@
-// src/modals/DrawioEmbedModal.ts
-
 import { App, Modal, Editor, TFile, Notice, MarkdownView } from 'obsidian';
 import DrawioPlugin from '../../main';
 
@@ -19,9 +17,6 @@ export class DrawioEmbedModal extends Modal {
         this.plugin = plugin;
         this.currentFile = fileToEdit;
         this.modalEl.addClass("drawio-embed-modal");
-
-        this.modalEl.style.width = "98vw";
-        this.modalEl.style.height = "98vh";
     }
 
     async onOpen() {
@@ -46,9 +41,10 @@ export class DrawioEmbedModal extends Modal {
         this.iframe = contentEl.createEl("iframe", {
             attr: {
                 src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
-                style: "width: 100%; height: 100%; border: none;",
+                
             },
         });
+        this.iframe.addClass('drawio-embed-iframe');
 
         this.messageHandler = this.createMessageHandler();
         window.addEventListener("message", this.messageHandler);
@@ -100,7 +96,6 @@ export class DrawioEmbedModal extends Modal {
 
         try {
             const newFile = await this.app.vault.create(fullPath, emptySvgContent);
-            new Notice(`📝 Created temporary diagram file: ${fullPath}`);
             return newFile;
         } catch (e) {
             new Notice(`❌ Failed to create new diagram file: ${fullPath}`);
@@ -233,8 +228,7 @@ export class DrawioEmbedModal extends Modal {
         if (this.isEmptyDiagram || isFileContentEmpty) {
             try {
                 const pathToDelete = this.currentFile.path;
-                await this.app.vault.delete(this.currentFile);
-                new Notice(`🗑️ Deleted empty diagram file: ${pathToDelete}`);
+                await this.app.fileManager.trashFile(this.currentFile);
                 
                 const editorContent = this.editor.getValue();
                 const linkToDelete = `![[${pathToDelete}]]`;
@@ -242,10 +236,8 @@ export class DrawioEmbedModal extends Modal {
 
                 if (editorContent.includes(linkToDelete)) {
                     this.editor.setValue(editorContent.replace(linkToDelete, ''));
-                    new Notice("🔗 Removed empty diagram link from editor.");
                 } else if (editorContent.includes(linkToDeleteEncoded)) {
                     this.editor.setValue(editorContent.replace(linkToDeleteEncoded, ''));
-                    new Notice("🔗 Removed empty diagram link (encoded) from editor.");
                 }
 
             } catch (e) {
