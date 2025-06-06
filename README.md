@@ -32,6 +32,8 @@ there are 2 ways:
 
 ### 🕗 Install with using BRAT
 
+
+
 1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
 2. open [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) settings > Add beta-plugin
 3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
