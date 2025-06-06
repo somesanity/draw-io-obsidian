@@ -28,14 +28,15 @@ there are 2 ways:
 
 >📌 The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.!
 
-> This only needs to be done once. [initial-plugin-demo](initial-plugin-demo.gif)
+![initial-plugin-demo](initial-plugin-demo.gif)
+
+> This only needs to be done once.
 
 ### 🕗 Install with using BRAT
 
-
-
-1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
-2. open [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) settings > Add beta-plugin
+1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) 
+   or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
+2. open BRAT plugin settings > click `Add beta-plugin`
 3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
 4. download [`webapp.zip`](https://github.com/somesanity/draw-io-obsidian/raw/refs/heads/main/webapp.zip) (it's draw.io webapp) and unzip `webapp` folder to draw.io plugin.
 
