@@ -20,13 +20,35 @@ This plugin launches a **local web server** that serves the [Draw.io web app](ht
 
 ## 📦 Installation Guide
 
-### Important Note for Installation:
+there are 2 ways: 
 
-The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.
+1. using plugin for obsidian - [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+2. manually install
 
-![initial-plugin-demo](initial-plugin-demo.gif)
 
-This only needs to be done once.
+>📌 The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.!
+
+> This only needs to be done once. [initial-plugin-demo](initial-plugin-demo.gif)
+
+### 🕗 Install with using BRAT
+
+1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
+2. open [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) settings > Add beta-plugin
+3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
+4. download [`webapp.zip`](https://github.com/somesanity/draw-io-obsidian/raw/refs/heads/main/webapp.zip) (it's draw.io webapp) and unzip `webapp` folder to draw.io plugin.
+
+> ```lua
+> .obsidian/
+> └── plugins/
+>     └── draw-io/
+>         ├── manifest.json
+>         ├── main.js
+>         └── webapp   <-- unzipped webapp
+> ```
+
+5. Reload plugin.
+
+### 🙌 manually install
 
 1.  **Clone or download this repository**:
 
@@ -66,10 +88,10 @@ This only needs to be done once.
     > ```bash
     > .obsidian/
     > └── plugins/
-    >      └── draw-io/
-    >          ├── manifest.json
-    >          ├── main.js
-    >          └── webapp/     <-- This folder is essential!
+    >     └── draw-io/
+    >         ├── manifest.json
+    >         ├── main.js
+    >         └── webapp   <-- This folder is essential!
     > ```
 
 4.  **Enable the plugin** in Obsidian:
