@@ -34,7 +34,7 @@ there are 2 ways:
 
 ### 🕗 Install with using BRAT
 
-![install-BRAT-demo](./docs//installWithBRAT.gif)
+![install-BRAT-demo](./docs//installWithBRAT.mp4)
 
 1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) 
    or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
