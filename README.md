@@ -1,6 +1,6 @@
 # 🖋️ Obsidian Draw.io Plugin (Offline & Private)
 
-![demo](demo.gif)
+![demo](./docs/demo.gif)
 
 > **A privacy-friendly, fully offline alternative to [obsidian-diagrams-net](https://github.com/jensmtg/obsidian-diagrams-net), preserving the full [Draw.io (diagrams.net)](https://app.diagrams.net/) experience.**
 
@@ -28,11 +28,13 @@ there are 2 ways:
 
 >📌 The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.!
 
-![initial-plugin-demo](initial-plugin-demo.gif)
+![initial-plugin-demo](./docs/initial-plugin-demo.gif)
 
 > This only needs to be done once.
 
 ### 🕗 Install with using BRAT
+
+![install-BRAT-demo](./docs//installWithBRAT.gif)
 
 1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) 
    or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
