@@ -12,20 +12,14 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/express": "^5.0.2",
 		"@types/node": "^16.11.6",
-		"@types/open": "^6.1.0",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
-		"express": "^5.1.0",
 		"jszip": "^3.10.1",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
-	},
-	"dependencies": {
-		"open": "^10.1.2"
 	}
 }
