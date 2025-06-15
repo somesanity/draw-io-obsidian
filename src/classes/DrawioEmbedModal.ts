@@ -38,10 +38,18 @@ export class DrawioEmbedModal extends Modal {
             this.isEmptyDiagram = false;
         }
 
+        // --- Изменения начинаются здесь ---
+        // Определяем, какая тема активна (светлая или темная)
+        const isDarkTheme = document.body.hasClass("theme-dark");
+
+        // Формируем URL для iframe в зависимости от темы
+        const drawioUrl = `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&splash=0` +
+                          (isDarkTheme ? `&ui=dark&dark=1` : `&ui=atlas`); // 'atlas' - это светлая тема для Draw.io
+        // --- Изменения заканчиваются здесь ---
+
         this.iframe = contentEl.createEl("iframe", {
             attr: {
-                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
-                
+                src: drawioUrl, // Используем динамически сформированный URL
             },
         });
         this.iframe.addClass('drawio-embed-iframe');
@@ -73,8 +81,7 @@ export class DrawioEmbedModal extends Modal {
     }
 
     private async handleNewDiagramCreation(): Promise<TFile | null> {
-
-        const folderPath = this.plugin.settings.diagramsFolder || "Drawio"; 
+        const folderPath = this.plugin.settings.diagramsFolder; 
         try {
             await this.app.vault.createFolder(folderPath);
             new Notice(`Created folder: ${folderPath}`);
@@ -85,7 +92,6 @@ export class DrawioEmbedModal extends Modal {
                 return null;
             }
         }
-
 
         const now = new Date();
         const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
