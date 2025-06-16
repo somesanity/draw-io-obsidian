@@ -13,24 +13,26 @@ function getDrawioPaths(app: App, manifestDir: string) {
     const vaultBasePath = (app.vault.adapter as any).basePath as string;
     const pluginDir = path.join(vaultBasePath, manifestDir);
     const webAppPath = path.join(pluginDir, "webapp");
-    return { vaultBasePath, pluginDir, webAppPath };
+    const drawioClientPath = path.join(pluginDir, "drawioclient");
+    return { vaultBasePath, pluginDir, webAppPath, drawioClientPath };
 }
 
-function checkWebAppFolder(webAppPath: string): boolean {
-    if (!fs.existsSync(webAppPath)) {
-        new Notice("📂 'webapp' folder not found. Please ensure Draw.io webapp is in your plugin folder.");
-        return false;
+function getServePath(webAppPath: string, drawioClientPath: string): string | null {
+    if (fs.existsSync(drawioClientPath)) {
+        return drawioClientPath;
+    } else if (fs.existsSync(webAppPath)) {
+        return webAppPath;
     }
-    return true;
+    return null;
 }
 
-function startSimpleStaticServer(webAppPath: string, port: number): Promise<Server> {
+function startSimpleStaticServer(servePath: string, port: number): Promise<Server> {
     return new Promise((resolve, reject) => {
         const server = http.createServer((req, res) => {
             const parsedUrl = url.parse(req.url || '');
-            let filePath = path.join(webAppPath, parsedUrl.pathname === '/' ? 'index.html' : parsedUrl.pathname || '');
+            let filePath = path.join(servePath, parsedUrl.pathname === '/' ? 'index.html' : parsedUrl.pathname || '');
 
-            if (!filePath.startsWith(webAppPath)) {
+            if (!filePath.startsWith(servePath)) {
                 res.writeHead(403, { 'Content-Type': 'text/plain' });
                 res.end('403 Forbidden');
                 return;
@@ -89,14 +91,16 @@ function startSimpleStaticServer(webAppPath: string, port: number): Promise<Serv
 export async function launchDrawioServerLogic(plugin: DrawioPlugin): Promise<void> {
     if (plugin.expressServer) return;
 
-    const { webAppPath } = getDrawioPaths(plugin.app, plugin.manifest.dir!);
+    const { webAppPath, drawioClientPath } = getDrawioPaths(plugin.app, plugin.manifest.dir!);
+    const servePath = getServePath(webAppPath, drawioClientPath);
 
-    if (!checkWebAppFolder(webAppPath)) {
+    if (!servePath) {
+        new Notice("📂 Neither 'webapp' nor 'drawioclient' folder found. Please ensure one is in your plugin folder.");
         return;
     }
 
     try {
-        plugin.expressServer = await startSimpleStaticServer(webAppPath, plugin.settings.port);
+        plugin.expressServer = await startSimpleStaticServer(servePath, plugin.settings.port);
         await new Promise((res) => setTimeout(res, 1000));
     } catch (error) {
         plugin.expressServer = null;
