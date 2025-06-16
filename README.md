@@ -36,22 +36,9 @@ there are 2 ways:
 
 ![install-BRAT-demo](./docs/installWithBRAT.gif)
 
-1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) 
-   or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
-2. open BRAT plugin settings > click `Add beta-plugin`
-3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
-4. download [`drawioclient.zip`](https://github.com/somesanity/draw-io-obsidian/raw/main/drawioclient.zip) (it's draw.io webapp) and unzip `drawioclient` folder to draw.io plugin.
-
-> ```lua
-> .obsidian/
-> └── plugins/
->     └── draw-io/
->         ├── manifest.json
->         ├── main.js
->         └── drawioclient   <-- unzipped drawioclient
-> ```
-
-5. Reload plugin.
+1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
+2. open BRAT plugin `settings` > click `Add beta-plugin`
+3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin`.
 
 ### 🙌 manually install
 
@@ -63,7 +50,7 @@ there are 2 ways:
 
     Or download the ZIP and extract it.
 
-2.  **Build the plugin** (if `main.js` is not present):
+2.  **Build the plugin**
 
     ```bash
     npm install
