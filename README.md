@@ -26,7 +26,7 @@ there are 2 ways:
 2. manually install
 
 
->📌 The `webapp` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `webapp` content is provided as an archive. A small script (`webAppManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.!
+>📌 The `drawioclient` folder, which contains the core Draw.io application, is crucial for this plugin to function correctly. Because GitHub doesn't allow direct folder uploads and to ensure faster downloads, the `drawioclient` content is provided as an archive. A small script (`drawIoClientManager.ts`) will automatically extract it for you upon installation. Please allow a brief moment for this process to complete.!
 
 ![initial-plugin-demo](./docs/initial-plugin-demo.gif)
 
@@ -40,7 +40,7 @@ there are 2 ways:
    or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
 2. open BRAT plugin settings > click `Add beta-plugin`
 3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
-4. download [`webapp.zip`](https://github.com/somesanity/draw-io-obsidian/raw/refs/heads/main/webapp.zip) (it's draw.io webapp) and unzip `webapp` folder to draw.io plugin.
+4. download [`drawioclient.zip`](https://github.com/somesanity/draw-io-obsidian/raw/refs/heads/main/webapp.zip) (it's draw.io webapp) and unzip `drawioclient` folder to draw.io plugin.
 
 > ```lua
 > .obsidian/
@@ -48,7 +48,7 @@ there are 2 ways:
 >     └── draw-io/
 >         ├── manifest.json
 >         ├── main.js
->         └── webapp   <-- unzipped webapp
+>         └── drawioclient   <-- unzipped drawioclient
 > ```
 
 5. Reload plugin.
@@ -85,7 +85,7 @@ there are 2 ways:
         ```
         manifest.json
         main.js
-        webapp/
+        drawioclient/
         ```
 
     > Your plugin directory should look like this:
@@ -96,7 +96,7 @@ there are 2 ways:
     >     └── draw-io/
     >         ├── manifest.json
     >         ├── main.js
-    >         └── webapp   <-- This folder is essential!
+    >         └── drawioclient   <-- This folder is essential!
     > ```
 
 4.  **Enable the plugin** in Obsidian:
