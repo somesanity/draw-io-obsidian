@@ -38,18 +38,13 @@ export class DrawioEmbedModal extends Modal {
             this.isEmptyDiagram = false;
         }
 
-        // --- Изменения начинаются здесь ---
-        // Определяем, какая тема активна (светлая или темная)
         const isDarkTheme = document.body.hasClass("theme-dark");
 
-        // Формируем URL для iframe в зависимости от темы
         const drawioUrl = `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&splash=0` +
-                          (isDarkTheme ? `&ui=dark&dark=1` : `&ui=atlas`); // 'atlas' - это светлая тема для Draw.io
-        // --- Изменения заканчиваются здесь ---
-
+                            (isDarkTheme ? `&ui=dark&dark=1` : `&ui=atlas`);
         this.iframe = contentEl.createEl("iframe", {
             attr: {
-                src: drawioUrl, // Используем динамически сформированный URL
+                src: drawioUrl,
             },
         });
         this.iframe.addClass('drawio-embed-iframe');
@@ -81,7 +76,7 @@ export class DrawioEmbedModal extends Modal {
     }
 
     private async handleNewDiagramCreation(): Promise<TFile | null> {
-        const folderPath = this.plugin.settings.diagramsFolder; 
+        const folderPath = this.plugin.settings.diagramsFolder;
         try {
             await this.app.vault.createFolder(folderPath);
             new Notice(`Created folder: ${folderPath}`);
@@ -97,7 +92,7 @@ export class DrawioEmbedModal extends Modal {
         const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
         const fileName = `diagram_${timestamp}.drawio.svg`;
         const fullPath = `${folderPath}/${fileName}`;
-        
+
         const emptySvgContent = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1px" height="1px" viewBox="-0.5 -0.5 1 1" content="&lt;mxGraphModel&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;"><defs/><g/></svg>`;
 
         try {
@@ -117,9 +112,9 @@ export class DrawioEmbedModal extends Modal {
             let msg;
             try {
                 msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-            } catch (e) { 
+            } catch (e) {
                 console.warn("Could not parse Draw.io message:", event.data, e);
-                return; 
+                return;
             }
 
             switch (msg.event) {
@@ -143,12 +138,15 @@ export class DrawioEmbedModal extends Modal {
     }
 
     private async handleInitMessage() {
+        // Добавим небольшую задержку, чтобы убедиться, что Draw.io полностью инициализирован
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         if (this.currentFile) {
             const fileContent = await this.app.vault.read(this.currentFile);
-            this.sendMessageToDrawio({ action: "load", xml: fileContent, autosave: 1 });
+            this.sendMessageToDrawio({ action: "load", xml: fileContent }); // Убрал autosave
         } else {
             const emptyXml = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
-            this.sendMessageToDrawio({ action: "load", xml: emptyXml, autosave: 1 });
+            this.sendMessageToDrawio({ action: "load", xml: emptyXml }); // Убрал autosave
         }
     }
 
@@ -179,9 +177,9 @@ export class DrawioEmbedModal extends Modal {
         try {
             await this.app.vault.modify(this.currentFile, contentToSave);
             new Notice(`💾 Diagram saved: ${this.currentFile.path}`);
-            
+
             forceMarkdownViewUpdate(this.app, this.currentFile);
-            
+
             this.isEmptyDiagram = this.isSvgContentActuallyEmpty(contentToSave);
 
         } catch (e) {
@@ -204,7 +202,7 @@ export class DrawioEmbedModal extends Modal {
     private isSvgContentActuallyEmpty(content: string): boolean {
         const emptyDrawioXmlInSvgContent = `content="&lt;mxGraphModel&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;"`;
         const emptySvgStructureIndicator = `<g/>`;
-        
+
         return content.includes(emptyDrawioXmlInSvgContent) &&
                content.includes(emptySvgStructureIndicator) &&
                (content.match(/<g\b[^>]*>/g) || []).length === 1 &&
@@ -225,7 +223,7 @@ export class DrawioEmbedModal extends Modal {
             currentFileContent = await this.app.vault.read(this.currentFile);
         } catch (readError) {
             console.warn(`Could not read file ${this.currentFile.path} during modal close:`, readError);
-            this.currentFile = null; // Файл мог быть удален или недоступен
+            this.currentFile = null;
             return;
         }
 
@@ -235,10 +233,10 @@ export class DrawioEmbedModal extends Modal {
             try {
                 const pathToDelete = this.currentFile.path;
                 await this.app.fileManager.trashFile(this.currentFile);
-                
+
                 const editorContent = this.editor.getValue();
                 const linkToDelete = `![[${pathToDelete}]]`;
-                const linkToDeleteEncoded = `![[${encodeURI(pathToDelete)}]]`; // Учитываем закодированные пути
+                const linkToDeleteEncoded = `![[${encodeURI(pathToDelete)}]]`;
 
                 if (editorContent.includes(linkToDelete)) {
                     this.editor.setValue(editorContent.replace(linkToDelete, ''));

@@ -4,17 +4,18 @@ import { DrawioPluginSettings, DEFAULT_SETTINGS } from "src/classes/settings/Set
 import { launchDrawioServerLogic } from "src/launchDrawioServer";
 import { PluginInitializer } from "./src/classes/plugin-initializer";
 
-import { WebappManager } from "./src/utils/webAppManager";
-
+import { DrawioClientManager } from "./src/utils/drawioClientManager";
 
 export default class DrawIOPlugin extends Plugin {
     expressServer: Server | null = null;
     settings: DrawioPluginSettings;
-    private webappManager: WebappManager;
+    private drawioclientwebappManager: DrawioClientManager;
 
     async onload() {
-        this.webappManager = new WebappManager(this.app, this.manifest);
-        await this.webappManager.checkAndUnzipWebapp();
+        const drawioClientZipUrl = "https://github.com/somesanity/draw-io-obsidian/raw/main/drawioclient.zip";
+        this.drawioclientwebappManager = new DrawioClientManager(this.app, this.manifest);
+        
+        await this.drawioclientwebappManager.checkAndUnzipDrawioClient(drawioClientZipUrl);
 
         await this.loadSettings();
         const initializer = new PluginInitializer(this);
@@ -41,6 +42,7 @@ export default class DrawIOPlugin extends Plugin {
             });
         }
         document.body.removeClass("drawio-embed-modal");
+        
     }
     
     public async launchDrawioServer() {

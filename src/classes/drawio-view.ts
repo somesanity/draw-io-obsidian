@@ -1,5 +1,3 @@
-// src/drawio-view.ts
-
 import { ItemView, WorkspaceLeaf, Notice, TFile, App } from "obsidian";
 import type DrawIOPlugin from "../../main";
 import { DRAWIO_VIEW } from "../constants";
@@ -23,13 +21,41 @@ export class DrawIOView extends ItemView {
         const container = this.containerEl.children[1];
         container.empty();
         this.currentFile = null;
+
+        const theme = (this.app.vault as any).config?.theme || 'system'; 
+
+        const systemAppearanceIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
+        let drawioUi: string;
+        let drawioDark: number;
+
+        if (theme === 'system') {
+            if (systemAppearanceIsDark) {
+                drawioUi = 'dark';
+                drawioDark = 1;
+            } else {
+                drawioUi = 'kennedy';
+                drawioDark = 0;
+            }
+        } else if (theme === 'obsidian') { 
+            drawioUi = 'dark';
+            drawioDark = 1;
+        } else { 
+            drawioUi = 'kennedy';
+            drawioDark = 0;
+        }
+
+        // В этом классе `drawioPath` (webapp/drawioclient) больше не используется для формирования URL
+        // Предполагается, что HTTP-сервер, запущенный плагином, уже настроен
+        // на обслуживание нужной папки (webapp или drawioclient) как своей корневой.
+        // Поэтому URL iframe будет начинаться сразу с /, как в DrawioEmbedModal.
+        // Логика выбора drawioPath должна быть в файле, который запускает сервер (вероятно, main.ts).
+
         this.iframe = container.createEl("iframe", {
             attr: {
-                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=dark&dark=1&splash=0`,
+                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=${drawioUi}&dark=${drawioDark}&splash=0`,
             },
         });
-        
         
         this.iframe.addClass('drawio-embed-iframe')
         this.iframe.addEventListener("dragover", this.handleDragOver.bind(this));
@@ -103,6 +129,15 @@ export class DrawIOView extends ItemView {
             }
         } else {
             new Notice(`File not found: ${filePath}`);
+        }
+    }
+
+    private async checkPathExists(path: string): Promise<boolean> {
+        try {
+            return await this.app.vault.adapter.exists(path);
+        } catch (error) {
+            console.error(`Error checking path ${path}:`, error);
+            return false;
         }
     }
 }
