@@ -40,7 +40,7 @@ there are 2 ways:
    or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
 2. open BRAT plugin settings > click `Add beta-plugin`
 3. paste in input `https://github.com/somesanity/draw-io-obsidian` select version and click to `Add plugin` 
-4. download [`drawioclient.zip`](https://github.com/somesanity/draw-io-obsidian/raw/refs/heads/main/webapp.zip) (it's draw.io webapp) and unzip `drawioclient` folder to draw.io plugin.
+4. download [`drawioclient.zip`](https://github.com/somesanity/draw-io-obsidian/raw/main/drawioclient.zip) (it's draw.io webapp) and unzip `drawioclient` folder to draw.io plugin.
 
 > ```lua
 > .obsidian/
