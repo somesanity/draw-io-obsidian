@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Build plugin
+      - name: Install dependencies and build plugin
         run: |
           npm install
           npm run build
@@ -32,4 +32,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            main.js manifest.json
+            main.js manifest.json styles.css
