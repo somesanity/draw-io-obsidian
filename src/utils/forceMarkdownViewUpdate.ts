@@ -2,7 +2,7 @@ import { App, TFile, MarkdownView } from 'obsidian';
 
 export async function forceMarkdownViewUpdate(app: App, file: TFile | null) {
     if (!file) {
-        console.warn("forceMarkdownViewUpdate: Вызвана с null файлом. Невозможно определить, изменения какого файла отслеживать.");
+    console.warn("forceMarkdownViewUpdate: Called with a null file. Unable to determine which file's changes to track.");
         return; 
     }
     const diagramFile: TFile = file; 
@@ -18,7 +18,7 @@ export async function forceMarkdownViewUpdate(app: App, file: TFile | null) {
         try {
             let needsRebuild = false;
             if (!currentViewFile || !currentViewFile.path) {
-                console.warn(`forceMarkdownViewUpdate: currentViewFile или его путь стал null/undefined для листа ${leaf}. Пропускаем перестройку.`);
+                console.warn(`forceMarkdownViewUpdate: currentViewFile or its path became null/undefined for leaf ${leaf}. Skipping rebuild.`);
                 continue; 
             }
 
@@ -45,7 +45,7 @@ export async function forceMarkdownViewUpdate(app: App, file: TFile | null) {
             const currentViewFilePathForLog = currentViewFile?.path ?? 'unknown file (no path)';
             const diagramFilePathForLog = diagramFile?.path ?? 'unknown diagram path'; 
 
-            console.warn(`Не удалось обновить представление для ${currentViewFilePathForLog} относительно изменений в ${diagramFilePathForLog}:`, err);
+            console.warn(`Failed to update the view for ${currentViewFilePathForLog} in response to changes in ${diagramFilePathForLog}:`, err);
         }
     }
 }

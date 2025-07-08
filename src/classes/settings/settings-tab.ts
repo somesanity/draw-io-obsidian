@@ -26,17 +26,15 @@ export class DrawioSettingTab extends PluginSettingTab {
             new Notice("Error initializing containerEl in Draw-io.");
             return;
         }
-        
         if (!containerElLocal) {
             console.error("DrawioSettingTab: 'containerElLocal' is undefined after destructuring!");
             console.error("DrawioSettingTab: 'this.containerEl' was:", this.containerEl);
             new Notice("Error: containerEl is undefined after destructuring in Draw-io.");
             return; 
         }
-
         try {
-            containerElLocal.empty();
-            containerElLocal.createEl('h2', { text: 'Draw.io settings' });
+            containerElLocal.empty();   
+            containerElLocal.createEl('p', { text: 'Draw.io settings' });
 
             const defaultPort = 8080;
 

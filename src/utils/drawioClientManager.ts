@@ -18,14 +18,14 @@ export class DrawioClientManager {
 
     public async checkAndUnzipDrawioClient(drawioClientZipUrl: string): Promise<void> {
         if (DrawioClientManager.installationPromise) {
-            console.log(`[${this.pluginName}] Процесс установки draw.io клиента уже запущен, ожидаем завершения...`);
+            console.log(`[${this.pluginName}] The draw.io client installation process is already running. Waiting for it to finish...`);
             return DrawioClientManager.installationPromise;
         }
 
-        console.log(`[${this.pluginName}] Запускается первичная проверка и установка клиента draw.io...`);
+        console.log(`[${this.pluginName}] Starting initial check and installation of the draw.io client...`);
         DrawioClientManager.installationPromise = this._runInstallationProcess(drawioClientZipUrl);
         DrawioClientManager.installationPromise.catch(error => {
-            console.error(`[${this.pluginName}] Произошла ошибка в процессе установки, замок сброшен.`, error.message);
+            console.error(`[${this.pluginName}] An error occurred during installation. Lock has been reset.`, error.message);
             DrawioClientManager.installationPromise = null;
         });
 
@@ -34,11 +34,11 @@ export class DrawioClientManager {
 
     private async _runInstallationProcess(drawioClientZipUrl: string): Promise<void> {
         if (!drawioClientZipUrl) {
-            throw new Error("URL для скачивания не предоставлен.");
+            throw new Error("No download URL provided.");
         }
 
         if (!this.manifest.dir) {
-            throw new Error("Не удалось определить директорию плагина.");
+            throw new Error("Failed to determine plugin directory.");
         }
 
         const pluginBaseDir = this.manifest.dir;
@@ -53,22 +53,22 @@ export class DrawioClientManager {
                                        (await this.vault.adapter.stat(webappExpectedPath))?.type === 'folder';
 
             if (drawioClientFolderExists || webappFolderExists) {
-                console.log(`[${this.pluginName}] Папка 'drawioclient' или 'webapp' уже существует. Установка не требуется.`);
+                console.log(`[${this.pluginName}] 'drawioclient' or 'webapp' folder already exists. Installation is not required.`);
                 if (await this.vault.adapter.exists(drawioClientZipPath)) {
                     await this.vault.adapter.remove(drawioClientZipPath);
                 }
                 return;
             }
             
-            const startNotice = new Notice(`${this.pluginName}: Начинается скачивание клиента draw.io...`, 0);
+            const startNotice = new Notice(`${this.pluginName}: Starting draw.io client download...`, 0);
 
-            console.log(`${this.pluginName}: Скачивание drawioclient.zip с: ${drawioClientZipUrl}`);
+            console.log(`${this.pluginName}: Downloading drawioclient.zip from: ${drawioClientZipUrl}`);
             const response = await requestUrl({ url: drawioClientZipUrl });
-            if (response.status !== 200) throw new Error(`Ошибка сети: ${response.status}`);
+            if (response.status !== 200) throw new Error(`Network error: ${response.status}`);
             await this.vault.adapter.writeBinary(drawioClientZipPath, response.arrayBuffer);
-            console.log(`${this.pluginName}: drawioclient.zip успешно скачан.`);
+            console.log(`${this.pluginName}: drawioclient.zip downloaded successfully.`);
             
-            startNotice.setMessage(`${this.pluginName}: Распаковка архива...`);
+            startNotice.setMessage(`${this.pluginName}: Extracting archive...`);
             const zipFileData = await this.vault.adapter.readBinary(drawioClientZipPath);
             const zip = await JSZip.loadAsync(zipFileData);
 
@@ -83,16 +83,16 @@ export class DrawioClientManager {
             }
 
             startNotice.hide();
-            new Notice(`${this.pluginName}: Клиент draw.io успешно установлен!`, 5000);
-            console.log(`[${this.pluginName}] Клиент draw.io успешно установлен и распакован.`);
+            new Notice(`${this.pluginName}: draw.io client installed successfully!`, 5000);
+            console.log(`[${this.pluginName}] draw.io client successfully installed and extracted.`);
 
         } catch (error: any) {
-            console.error(`[${this.pluginName}] Критическая ошибка при установке 'drawioclient':`, error);
-            new Notice(`${this.pluginName}: Ошибка установки drawioclient: ${error.message}`, 8000);
+            console.error(`[${this.pluginName}] Critical error during draw.io client installation:`, error);
+            new Notice(`${this.pluginName}: Failed to install draw.io client: ${error.message}`, 8000);
             throw error;
         } finally {
             if (await this.vault.adapter.exists(drawioClientZipPath)) {
-                console.log(`[${this.pluginName}] Удаление временного файла drawioclient.zip.`);
+                console.log(`[${this.pluginName}] Removing temporary file drawioclient.zip.`);
                 await this.vault.adapter.remove(drawioClientZipPath);
             }
         }

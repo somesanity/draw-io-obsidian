@@ -14,11 +14,6 @@ export async function handleDiagramClick(event: MouseEvent, app: App, plugin: Dr
         const src = embedEl.getAttribute('src');
         if (src) {
             let filePath = src;
-            const obsidianProtocolPrefix = `app://local/${encodeURIComponent(app.vault.getName())}/`; 
-            if (filePath.startsWith(obsidianProtocolPrefix)) {
-                filePath = decodeURIComponent(filePath.substring(obsidianProtocolPrefix.length));
-            }
-
             if (filePath.endsWith('.drawio.svg')) {
                 event.preventDefault();
                 event.stopPropagation();
