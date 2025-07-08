@@ -16,14 +16,18 @@ export class DrawioClientManager {
         this.pluginName = manifest.name;
     }
 
-    public async checkAndUnzipDrawioClient(drawioClientZipUrl: string): Promise<void> {
+    public async checkAndUnzipDrawioClient(): Promise<void> {
         if (DrawioClientManager.installationPromise) {
             console.log(`[${this.pluginName}] The draw.io client installation process is already running. Waiting for it to finish...`);
             return DrawioClientManager.installationPromise;
         }
 
+        const drawioClientZipUrl = `https://github.com/somesanity/draw-io-obsidian/releases/download/${this.manifest.version}/webapp.zip`;
+        
         console.log(`[${this.pluginName}] Starting initial check and installation of the draw.io client...`);
+        
         DrawioClientManager.installationPromise = this._runInstallationProcess(drawioClientZipUrl);
+        
         DrawioClientManager.installationPromise.catch(error => {
             console.error(`[${this.pluginName}] An error occurred during installation. Lock has been reset.`, error.message);
             DrawioClientManager.installationPromise = null;
@@ -43,7 +47,7 @@ export class DrawioClientManager {
 
         const pluginBaseDir = this.manifest.dir;
         const drawioClientExpectedPath = `${pluginBaseDir}/drawioclient`;
-        const webappExpectedPath = `${pluginBaseDir}/webapp`;
+        const webappExpectedPath = `${pluginBaseDir}/webapp`; 
         const drawioClientZipPath = `${pluginBaseDir}/drawioclient.zip`;
         
         try {
@@ -62,11 +66,11 @@ export class DrawioClientManager {
             
             const startNotice = new Notice(`${this.pluginName}: Starting draw.io client download...`, 0);
 
-            console.log(`${this.pluginName}: Downloading drawioclient.zip from: ${drawioClientZipUrl}`);
+            console.log(`${this.pluginName}: Downloading draw.io client from: ${drawioClientZipUrl}`);
             const response = await requestUrl({ url: drawioClientZipUrl });
             if (response.status !== 200) throw new Error(`Network error: ${response.status}`);
             await this.vault.adapter.writeBinary(drawioClientZipPath, response.arrayBuffer);
-            console.log(`${this.pluginName}: drawioclient.zip downloaded successfully.`);
+            console.log(`${this.pluginName}: Client downloaded successfully.`);
             
             startNotice.setMessage(`${this.pluginName}: Extracting archive...`);
             const zipFileData = await this.vault.adapter.readBinary(drawioClientZipPath);
@@ -74,11 +78,12 @@ export class DrawioClientManager {
 
             for (const relativePath in zip.files) {
                 const zipEntry = zip.files[relativePath];
+                const fullPath = `${pluginBaseDir}/${relativePath}`;
                 if (zipEntry.dir) {
-                    await this.vault.adapter.mkdir(`${pluginBaseDir}/${relativePath}`);
+                    await this.vault.adapter.mkdir(fullPath);
                 } else {
                     const fileData = await zipEntry.async("uint8array");
-                    await this.vault.adapter.writeBinary(`${pluginBaseDir}/${relativePath}`, fileData.buffer as ArrayBuffer);
+                    await this.vault.adapter.writeBinary(fullPath, fileData.buffer as ArrayBuffer);
                 }
             }
 
@@ -92,7 +97,7 @@ export class DrawioClientManager {
             throw error;
         } finally {
             if (await this.vault.adapter.exists(drawioClientZipPath)) {
-                console.log(`[${this.pluginName}] Removing temporary file drawioclient.zip.`);
+                console.log(`[${this.pluginName}] Removing temporary file.`);
                 await this.vault.adapter.remove(drawioClientZipPath);
             }
         }
