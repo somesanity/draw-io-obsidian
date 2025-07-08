@@ -27,11 +27,7 @@ export default class DrawIOPlugin extends Plugin {
     }
 
     async saveSettings() {
-        await this.saveData(this.settings);
-    
-        this.app.workspace.onLayoutReady(() => {
-        });
-    
+        await this.saveData(this.settings);    
     }
 
     onunload() {

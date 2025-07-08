@@ -16,7 +16,7 @@ export async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgData
             contentToSave = Buffer.from(base64Part, 'base64').toString('utf-8');
         } catch (e) {
             new Notice("❌ Failed to decode SVG content.");
-            console.error("Ошибка декодирования SVG:", e);
+            console.error("SVG decoding error:", e);
             return;
         }
     } else if (svgDataUri.startsWith("data:image/svg+xml,")) {
@@ -24,12 +24,12 @@ export async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgData
             contentToSave = decodeURIComponent(svgDataUri.split(',')[1]);
         } catch (e) {
             new Notice("❌ Failed to decode SVG content (URI component).");
-            console.error("Ошибка декодирования SVG (компонент URI):", e);
+            console.error("SVG decoding error (URI component):", e);
             return;
         }
     } else {
         new Notice("❌ Invalid SVG data format received.");
-        console.error("Неверный формат данных SVG:", svgDataUri.substring(0, 100));
+        console.error("Invalid SVG data format:", svgDataUri.substring(0, 100));
         return;
     }
 
@@ -115,7 +115,7 @@ export async function saveOrUpdateDrawioFile(app: App, view: DrawIOView, svgData
                     await leaf.setViewState(currentViewState);
                 }
             } catch (err) {
-                console.warn(`Не удалось обновить представление для ${mdView.file.path}:`, err);
+                console.warn(`Failed to update view for ${mdView.file.path}:`, err);
             }
         }
     }

@@ -82,7 +82,7 @@ export class PluginInitializer {
                 } else {
                     menu.addItem((item) => {
                         item
-                            .setTitle("Embed New Draw.io Diagram")
+                            .setTitle("Embed new draw.io diagram")
                             .setIcon("shapes")
                             .setSection("drawio-actions")
                             .onClick(() => openDrawioModal());

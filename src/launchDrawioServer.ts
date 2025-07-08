@@ -1,4 +1,4 @@
-import { App, Notice } from 'obsidian';
+import { App, FileSystemAdapter, Notice } from 'obsidian';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as http from 'http';
@@ -10,7 +10,11 @@ import { DrawioPluginSettings } from './classes/settings/Settings';
 import DrawioPlugin from '../main';
 
 function getDrawioPaths(app: App, manifestDir: string) {
-    const vaultBasePath = (app.vault.adapter as any).basePath as string;
+    if (!(app.vault.adapter instanceof FileSystemAdapter)) {
+        new Notice("Draw.io server only works with a local filesystem.");
+        return null;
+    }
+    const vaultBasePath = app.vault.adapter.getBasePath();
     const pluginDir = path.join(vaultBasePath, manifestDir);
     const webAppPath = path.join(pluginDir, "webapp");
     const drawioClientPath = path.join(pluginDir, "drawioclient");
@@ -30,7 +34,8 @@ function startSimpleStaticServer(servePath: string, port: number): Promise<Serve
     return new Promise((resolve, reject) => {
         const server = http.createServer((req, res) => {
             const parsedUrl = url.parse(req.url || '');
-            let filePath = path.join(servePath, parsedUrl.pathname === '/' ? 'index.html' : parsedUrl.pathname || '');
+            const requestedPath = parsedUrl.pathname === '/' ? 'index.html' : (parsedUrl.pathname || '');
+            let filePath = path.join(servePath, requestedPath);
 
             if (!filePath.startsWith(servePath)) {
                 res.writeHead(403, { 'Content-Type': 'text/plain' });
@@ -51,6 +56,7 @@ function startSimpleStaticServer(servePath: string, port: number): Promise<Serve
                     const ext = path.extname(filePath).toLowerCase();
                     let contentType = 'application/octet-stream';
 
+                    // Set content type based on file extension
                     switch (ext) {
                         case '.html': contentType = 'text/html'; break;
                         case '.js': contentType = 'application/javascript'; break;
@@ -77,11 +83,11 @@ function startSimpleStaticServer(servePath: string, port: number): Promise<Serve
             resolve(server);
         }).on('error', (err: any) => {
             if (err.code === 'EADDRINUSE') {
-                new Notice(`❌ Порт ${port} уже занят. Сервер Draw.io не запущен.`);
-                console.error(`Порт ${port} уже занят.`);
+                new Notice(`❌ Port ${port} is already in use. Draw.io server not started.`);
+                console.error(`Port ${port} is already in use.`);
             } else {
-                new Notice(`❌ Не удалось запустить сервер Draw.io: ${err.message}`);
-                console.error(`Не удалось запустить сервер Draw.io:`, err);
+                new Notice(`❌ Failed to start Draw.io server: ${err.message}`);
+                console.error(`Failed to start Draw.io server:`, err);
             }
             reject(err);
         });
@@ -91,7 +97,12 @@ function startSimpleStaticServer(servePath: string, port: number): Promise<Serve
 export async function launchDrawioServerLogic(plugin: DrawioPlugin): Promise<void> {
     if (plugin.expressServer) return;
 
-    const { webAppPath, drawioClientPath } = getDrawioPaths(plugin.app, plugin.manifest.dir!);
+    const paths = getDrawioPaths(plugin.app, plugin.manifest.dir!);
+    if (!paths) {
+        return;
+    }
+    
+    const { webAppPath, drawioClientPath } = paths;
     const servePath = getServePath(webAppPath, drawioClientPath);
 
     if (!servePath) {
