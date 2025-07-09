@@ -3,7 +3,7 @@
 	"name": "draw.io",
 	"version": "1.1.1",
 	"minAppVersion": "0.15.0",
-	"description": "Create and edit diagrams by draw.io (diagrams.net), locally and offline.",
+	"description": "Create and edit diagrams with draw.io (diagrams.net), locally and offline.",
 	"author": "somesanity",
 	"authorUrl": "https://github.com/somesanity",
 	"isDesktopOnly": true
