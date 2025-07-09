@@ -12,10 +12,9 @@ export default class DrawIOPlugin extends Plugin {
     private drawioclientwebappManager: DrawioClientManager;
 
     async onload() {
-        const drawioClientZipUrl = "https://github.com/somesanity/draw-io-obsidian/raw/main/drawioclient.zip";
         this.drawioclientwebappManager = new DrawioClientManager(this.app, this.manifest);
         
-        await this.drawioclientwebappManager.checkAndUnzipDrawioClient(drawioClientZipUrl);
+        await this.drawioclientwebappManager.checkAndUnzipDrawioClient();
 
         await this.loadSettings();
         const initializer = new PluginInitializer(this);
