@@ -1,0 +1,6 @@
+{
+    "DrawIoViewName": "draw.io editor",
+    "ribonIconTitle": "open draw.io editor",
+    "StartDrawioClientSever": "Draw.io server started on port",
+    "StopDrawioClinetServer": "Draw.io server stopped"
+}
