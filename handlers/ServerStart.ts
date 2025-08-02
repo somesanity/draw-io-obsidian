@@ -7,9 +7,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const url = require('url');
-
-const PORT = 3000;
 
 function getDrawioPaths(app: App, manifestDir: string) {
     const vaultBasePath = (app.vault.adapter as any).basePath as string;
@@ -18,7 +15,7 @@ function getDrawioPaths(app: App, manifestDir: string) {
     return { vaultBasePath, pluginDir, webAppPath };
 }
 
-function serverStart(webAppPath: string, port: number): Promise<Server> {
+function serverStart(plugin: DrawioPlugin, webAppPath: string, port: number): Promise<Server> {
     return new Promise((resolve, reject) => {
         const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             const requestUrl = new URL(req.url || '', `http://${req.headers.host}`);
@@ -67,6 +64,7 @@ function serverStart(webAppPath: string, port: number): Promise<Server> {
         });
 
         server.listen(port, () => {
+            const port = plugin.settings.port;
             new Notice(`${t("StartDrawioClientSever")} ${port}`);
             resolve(server);
         }).on('error', (err: any) => {
@@ -85,11 +83,14 @@ function serverStart(webAppPath: string, port: number): Promise<Server> {
 export async function launchDrawioServerLogic(plugin: DrawioPlugin): Promise<void> {
     if (plugin.isServerOpen) return;
 
+    const PORT = plugin.settings.port
+
     const { webAppPath } = getDrawioPaths(plugin.app, plugin.manifest.dir!);
 
     try {
-        plugin.isServerOpen = await serverStart(webAppPath, PORT);
+        plugin.isServerOpen = await serverStart(plugin, webAppPath, Number(PORT));
         await new Promise((res) => setTimeout(res, 1000));
+        console.log(plugin.settings.port)
     } catch (error) {
         plugin.isServerOpen = null;
     }
