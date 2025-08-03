@@ -13,8 +13,7 @@ export async function DefaultDiagramSize(plugin: DrawioPlugin) {
                 const percentpattern = /^(100|[1-9]?\d)%$/;
 
                 if(percentpattern.test(width ?? '')) {
-                    console.log(width)
-                    embed.setAttribute('width', width)
+                    embed.setAttribute('width', width!)
                 }
             })
         })

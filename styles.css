@@ -3,6 +3,11 @@
     height: 100%;
 }
 
+.drawio-embed-modal {
+    width: 98vw;
+    height: 98vh;
+}
+
 .centered-diagram {
 	display: flex;
 	justify-content: center;

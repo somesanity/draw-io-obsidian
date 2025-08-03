@@ -1,9 +1,13 @@
+import DrawioPlugin from 'main';
 import { TFile, Vault, App } from 'obsidian';
+import { findFileByName } from 'utils/findFileByName';
 
 export function getFileContent(element: Element, app: App): TFile | null {
-    const src = element.getAttribute("src"); // drawio_*.svg
-    if (!src) return null;
 
-    const file = app.vault.getAbstractFileByPath(src);
+    const filename = element.getAttribute("src");
+    if (!filename) return null;
+
+    const file = findFileByName(filename, app);
+    
     return file instanceof TFile ? file : null;
 }
