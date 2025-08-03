@@ -137,7 +137,6 @@ export class DrawioEmbedModal extends Modal {
     }
 
     private async handleExportMessage(svgDataUri: string) {
-        // `handleExportMessage` теперь вызывает новую, переработанную `saveDiagramFromModal`
         await this.saveDiagramFromModal(svgDataUri);
     }
 
@@ -167,10 +166,20 @@ private async saveDiagramFromModal(svgDataUri: string) {
         this.currentFile = newFile;
         this.titleEl.setText(`Edit Diagram: ${this.currentFile.name}`); // Обновляем заголовок окна
 
-        // Вставляем ссылку в редактор
         const defaultWidth = this.plugin.settings.diagramSize;
-        const embedLink = defaultWidth?.trim() ? `![[${this.currentFile.path}|${defaultWidth.trim()}]]` : `![[${this.currentFile.path}]]`;
+        let embedLink: string;        
         
+        if (this.plugin.settings.useMarkdownLinks) {
+            const alt = defaultWidth?.trim() ?? "";
+            const relativePath = this.currentFile.path;
+
+            embedLink = `![${alt}](${relativePath})`;
+        } else {
+            embedLink = defaultWidth?.trim()
+                ? `![[${this.currentFile.path}|${defaultWidth.trim()}]]`
+                : `![[${this.currentFile.path}]]`;
+        }
+
         setTimeout(() => {
             this.editor.replaceSelection(embedLink);
         }, 500);

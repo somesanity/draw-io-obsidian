@@ -62,6 +62,19 @@ export class DrawioTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+      new Setting(containerEl)
+      .setName('Use markdown Links')
+      .setDesc('If enable link will be markdown link style')
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.useMarkdownLinks)
+          .onChange(async (value) => {
+            this.plugin.settings.useMarkdownLinks = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
       new Setting(containerEl)
       .setName('Select folder')
       .setDesc('Select folder that save diagrams')

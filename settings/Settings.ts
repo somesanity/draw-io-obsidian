@@ -5,6 +5,7 @@ export interface DrawioSettings {
   centeringDiagram: boolean;
   percentSize: boolean;
   interactiveDiagram: boolean;
+  useMarkdownLinks: boolean;
   Folder: string;
   diagramSize: string;
 }
@@ -14,6 +15,7 @@ export const DEFAULT_SETTINGS: Partial<DrawioSettings> = {
   centeringDiagram: true,
   percentSize: true,
   interactiveDiagram: true,
+  useMarkdownLinks: false,
   Folder: 'drawio',
   diagramSize: '',
 };
