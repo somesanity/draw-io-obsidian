@@ -23,8 +23,8 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 
 			if(img.hasAttribute('width')) {
 				imgSizee = img.getAttribute('width');
-			} if (img.getAttribute('alt').includes('%')) {
-				imgSizee = img.getAttribute('alt');
+			} if (img.hasAttribute('alt') && img.getAttribute('alt').includes('%')) {
+				imgSizee = img.getAttribute('alt')
 			}
 
 			const temp = document.createElement("div");
@@ -67,7 +67,7 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 
 		const matchDoubleSquare = hrefLink.match(/\[\[(.*?)\]\]/);
 		if (matchDoubleSquare) {
-			cleanHref = matchDoubleSquare[1]; // fsdfds
+			cleanHref = matchDoubleSquare[1];
 		}
 
 		link.setAttribute('href', cleanHref);
