@@ -21,3 +21,31 @@
 .drawio-scheme-light {
 	color-scheme: light !important;
 }
+
+.drawio-custom-tooltip {
+    position: absolute;
+    background-color: var(--background-secondary-alt);
+    color: var(--text-normal);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    border: 1px solid var(--background-modifier-border);
+}
+
+.drawio-custom-tooltip a {
+    color: var(--text-normal);
+    text-decoration: none;
+}
+
+.drawio-container svg pre {
+    background-color: inherit !important;
+}
+
+.drawio-container svg h1, h2, h3, h4, h5, h6 {
+    color: inherit !important;
+    border: inherit !important;
+}

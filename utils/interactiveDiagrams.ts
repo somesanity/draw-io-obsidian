@@ -10,6 +10,7 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 		const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
 		for (const embed of embeds) {
 
+			embed.addClass('drawio-container')
 			const file = getFileContent(embed, plugin.app);
 
 			if (!(file instanceof TFile)) continue;
@@ -33,6 +34,8 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 			if (!svgElement) continue;
 
 			img.replaceWith(svgElement);
+
+			svgElement.addClass('drawio-svg')
 
 			if (imgSizee !== null && !imgSizee.includes('%')) {
 				svgElement.setAttribute('width', imgSizee + 'px');
@@ -66,8 +69,6 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 		if (matchDoubleSquare) {
 			cleanHref = matchDoubleSquare[1]; // fsdfds
 		}
-
-
 
 		link.setAttribute('href', cleanHref);
 	}
