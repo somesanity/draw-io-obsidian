@@ -67,6 +67,21 @@ settings: DrawioSettings;
 			}
 		})
 	)
+
+        this.addCommand({
+            id: 'drawio-create-or-edit',
+            name: 'Create or edit Draw.io diagram',
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view); 
+                await launchDrawioServerLogic(this); 
+
+                if (fileToEdit) {
+                    new DrawioEmbedModal(this.app, editor, this, fileToEdit).open();
+                } else {
+                    new DrawioEmbedModal(this.app, editor, this).open();
+                }
+            }
+        });
   }
 
 
