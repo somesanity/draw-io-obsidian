@@ -1,13 +1,17 @@
 
+import { ExternalTooltip } from "handlers/externalTooltip";
 import { getFileContent } from "handlers/getFileContent";
 import DrawioPlugin from "main";
 import { MarkdownPostProcessorContext, TFile } from "obsidian";
+
+const tooltip = new ExternalTooltip();
 
 export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 	if (!plugin.settings.interactiveDiagram) return;
 
 	plugin.registerMarkdownPostProcessor(async (el, ctx: MarkdownPostProcessorContext) => {
 		const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
+
 		for (const embed of embeds) {
 
 			embed.addClass('drawio-container')
@@ -55,19 +59,39 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 	const links = svgElement.querySelectorAll('a');
 
 	for(const link of links) {
-		link.addClass('internal-link')
 	
 		const hrefLink = link.getAttribute('xlink:href');
 		let cleanHref = hrefLink;
 
+		const externalLinks = hrefLink.match(/^https?:\/\//);
+
+		if(externalLinks) {
+			cleanHref = externalLinks.input
+			link.addClass('external-link')
+
+			const moveHandler = tooltip.updatePosition.bind(tooltip);
+
+			link.addEventListener('mouseenter', (event) => {
+			tooltip.show(cleanHref, event as MouseEvent);
+			document.addEventListener('mousemove', moveHandler);
+		});
+
+		link.addEventListener('mouseleave', () => {
+			tooltip.hide();
+			document.removeEventListener('mousemove', moveHandler);
+		});
+		};
+
 		const matchRound = hrefLink.match(/\[.*?\]\((.*?)\)/);
 		if (matchRound) {
 			cleanHref = matchRound[1];
+			link.addClass('internal-link')
 		}
 
 		const matchDoubleSquare = hrefLink.match(/\[\[(.*?)\]\]/);
 		if (matchDoubleSquare) {
 			cleanHref = matchDoubleSquare[1];
+			link.addClass('internal-link')
 		}
 
 		link.setAttribute('href', cleanHref);

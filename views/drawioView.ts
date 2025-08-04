@@ -53,8 +53,7 @@ export class Drawioview extends ItemView {
                     action: 'export',
                     format: "xmlsvg",
                     xml: 1,
-                    }), `http://localhost:${this.plugin.settings.port}`);
-                    console.log('Диаграмма сохранена:', msg);         
+                    }), `http://localhost:${this.plugin.settings.port}`);       
                     break;
 
                 case "export": {
@@ -76,7 +75,6 @@ export class Drawioview extends ItemView {
                 }
 
                 case 'exit':
-                    console.log('Редактор закрыт');
                     break;
             }
         } catch (e) {

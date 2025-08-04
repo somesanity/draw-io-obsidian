@@ -94,11 +94,16 @@ async saveSettings() {
 }
 
   async onunload() {
-	if (this.isServerOpen) {
+	  if (this.isServerOpen) {
         this.isServerOpen.close(() => {
-            new Notice(t("StopDrawioClinetServer"));
-            this.isServerOpen = null;
+          new Notice(t("StopDrawioClinetServer"));
+          this.isServerOpen = null;
         });
+    }
+
+    const ExternalLinkTooltip = document.querySelector('.drawio-custom-tooltip');
+    if (ExternalLinkTooltip) {
+      ExternalLinkTooltip.remove();
     }
   }
 
