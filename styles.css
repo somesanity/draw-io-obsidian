@@ -43,9 +43,29 @@
 
 .drawio-container svg pre {
     background-color: inherit !important;
+    box-shadow: none !important;
+    padding: none !important;
 }
 
 .drawio-container svg h1, h2, h3, h4, h5, h6 {
     color: inherit !important;
     border: inherit !important;
+    font-family: inherit !important;
+    border-bottom: inherit !important;
+    margin: inherit !important;
+    padding: inherit !important;
+}
+
+.drawio-container svg h1::after,
+.drawio-container svg h2::after,
+.drawio-container svg h3::after,
+.drawio-container svg h4::after,
+.drawio-container svg h5::after,
+.drawio-container svg h6::after {
+    content: none !important;
+    display: none !important;
+    border: none !important;
+    background: none !important;
+    font-family: inherit !important;
+    border-bottom: none !important;
 }
