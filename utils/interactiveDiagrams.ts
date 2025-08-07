@@ -1,13 +1,18 @@
 
+import { DrawioDecoder } from "handlers/drawioDataDecoder";
 import { ExternalTooltip } from "handlers/externalTooltip";
 import { getFileContent } from "handlers/getFileContent";
 import DrawioPlugin from "main";
-import { MarkdownPostProcessorContext, TFile } from "obsidian";
+import { App, MarkdownPostProcessorContext, MarkdownRenderer, TFile } from "obsidian";
 
-const tooltip = new ExternalTooltip();
-
-export async function InteractiveDiagrams(plugin: DrawioPlugin) {
+export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 	if (!plugin.settings.interactiveDiagram) return;
+	
+	const tooltip = new ExternalTooltip();
+	const decoder = new DrawioDecoder();
+
+
+	const component = plugin;
 
 	plugin.registerMarkdownPostProcessor(async (el, ctx: MarkdownPostProcessorContext) => {
 		const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
@@ -56,6 +61,84 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin) {
 				svgElement.addClass('drawio-scheme-dark')
 			}
 	
+
+const model = decoder.extractDiagramData(svgElement);
+if (!model) return;
+
+const cellElements = svgElement.querySelectorAll('g[data-cell-id]');
+
+for (const cellElement of cellElements) {
+	const cellId = cellElement.getAttribute('data-cell-id');
+	if (!cellId) continue;
+
+	const objectNode = model.querySelector(`object[id="${cellId}"]`);
+	if (!objectNode) continue;
+
+	const markdownParts: string[] = [];
+
+	for (const attr of Array.from(objectNode.attributes)) {
+		if (attr.name.startsWith('md-') && attr.value.trim()) {
+			markdownParts.push(attr.value.trim());
+		}
+	}
+
+	if (markdownParts.length === 0) continue;
+
+	const tooltipDiv = createDiv({attr: { 'data-tooltip-id': cellId } });
+	tooltipDiv.addClass('drawio-markdown-tooltip')
+
+	el.appendChild(tooltipDiv);
+
+	await MarkdownRenderer.render(
+		app,
+		markdownParts.join('\n\n'),
+		tooltipDiv,
+		ctx.sourcePath,
+		plugin
+	).catch(err => console.error('Markdown render error:', err));
+
+	let hideTimeout: number | null = null;
+
+const showTooltip = (event: MouseEvent) => {
+	if (hideTimeout) {
+		clearTimeout(hideTimeout);
+		hideTimeout = null;
+	}
+
+	const elRect = el.getBoundingClientRect();
+
+	const relativeX = event.clientX - elRect.left;
+	const relativeY = event.clientY - elRect.top;
+
+	tooltipDiv.style.left = `${relativeX + 70}px`;
+	tooltipDiv.style.top = `${relativeY + 10}px`;
+	tooltipDiv.style.display = 'block';
+};
+
+
+
+
+	const scheduleHideTooltip = () => {
+		hideTimeout = window.setTimeout(() => {
+			tooltipDiv.style.display = 'none';
+		}, 200);
+	};
+
+	const cancelHide = () => {
+		if (hideTimeout !== null) {
+			clearTimeout(hideTimeout);
+			hideTimeout = null;
+		}
+	};
+
+	cellElement.addEventListener('mouseenter', showTooltip);
+	cellElement.addEventListener('mouseleave', scheduleHideTooltip);
+
+	tooltipDiv.addEventListener('mouseenter', cancelHide);
+	tooltipDiv.addEventListener('mouseleave', scheduleHideTooltip);
+}
+
+
 	const links = svgElement.querySelectorAll('a');
 
 	for(const link of links) {

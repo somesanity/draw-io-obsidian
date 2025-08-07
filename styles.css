@@ -22,18 +22,25 @@
 	color-scheme: light !important;
 }
 
+.drawio-markdown-tooltip {
+	position: absolute;
+	display: none;
+	z-index: 1000;
+	pointer-events: all;
+	max-width: 500px;
+	padding: 20px;
+	max-height: 600px;
+	overflow: auto;
+    border: var(--border-width) solid var(--background-modifier-border);
+    box-shadow: var(--shadow-l);
+    background-color: var(--background-primary);
+}
+
 .drawio-custom-tooltip {
-    position: absolute;
-    background-color: var(--background-secondary-alt);
-    color: var(--text-normal);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    white-space: nowrap;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: none;
-    border: 1px solid var(--background-modifier-border);
+    border: var(--border-width) solid var(--background-modifier-border);
+    box-shadow: var(--shadow-l);
+    background-color: var(--background-primary);
+    padding: 10px;
 }
 
 .drawio-custom-tooltip a {

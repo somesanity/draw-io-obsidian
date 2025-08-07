@@ -38,7 +38,7 @@ settings: DrawioSettings;
 
 	await CenteringDiagrams(this)
 	await DefaultDiagramSize(this)
-	await InteractiveDiagrams(this)
+	await InteractiveDiagrams(this, this.app)
 
 	this.registerEvent(
 		this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
@@ -105,6 +105,16 @@ async saveSettings() {
     if (ExternalLinkTooltip) {
       ExternalLinkTooltip.remove();
     }
+
+    const Markdowntooltips = document.querySelectorAll('.drawio-markdown-tooltip');
+
+    if(Markdowntooltips) {
+      Markdowntooltips.forEach(markdowntooltip => {
+        console.log('удалён')
+        markdowntooltip.remove();
+      });
+    }
+
   }
 
   async activateView() {
