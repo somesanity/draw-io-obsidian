@@ -1,4 +1,4 @@
-import { TFile, Vault, App } from 'obsidian';
+import { TFile, App } from 'obsidian';
 
 export function findFileByName(fileName: string, app: App): TFile | null {
     const files = app.vault.getFiles();

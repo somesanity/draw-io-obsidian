@@ -1,5 +1,6 @@
+import { t } from "locales/i18n";
 import DrawioPlugin from "main";
-import { App, DropdownComponent, PluginSettingTab, Setting, TFolder } from 'obsidian';
+import { App, PluginSettingTab, Setting, TFolder } from 'obsidian';
 
 export class DrawioTab extends PluginSettingTab {
   plugin: DrawioPlugin;
@@ -15,8 +16,8 @@ export class DrawioTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName('Set port')
-      .setDesc('Set port')
+      .setName(`${t('SETTINGS__SetPort_Name')}`)
+      .setDesc(`${t('SETTINGS__SetPort_Description')}`)
       .addText((text) =>
         text
           .setPlaceholder('1717')
@@ -28,8 +29,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('Centering Diagram')
-      .setDesc('If active all diagram will be position to center')
+      .setName(`${t('SETTINGS__CenteringDiagrams_Name')}`)
+      .setDesc(`${t('SETTINGS__CenteringDiagrams_Description')}`)
       .addToggle((toggle) => 
         toggle
           .setValue(this.plugin.settings.centeringDiagram)
@@ -40,8 +41,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('Percent size')
-      .setDesc('Percent Size')
+      .setName(`${t('SETTINGS__PercentDiagramsSize_Name')}`)
+      .setDesc(`${t('SETTINGS__PercentDiagramsSize_Description')}`)
       .addToggle((toggle) => 
         toggle
           .setValue(this.plugin.settings.percentSize)
@@ -52,8 +53,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('Interactive diagrams')
-      .setDesc('Interactive diagrams')
+      .setName(`${t('SETTINGS__InteractiveDiagrams_Name')}`)
+      .setDesc(`${t('SETTINGS__InteractiveDiagrams_Description')}`)
       .addToggle((toggle) => 
         toggle
           .setValue(this.plugin.settings.interactiveDiagram)
@@ -64,8 +65,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('Use markdown Links')
-      .setDesc('If enable link will be markdown link style')
+      .setName(`${t('SETTINGS__MarkdownLinks_Name')}`)
+      .setDesc(`${t('SETTINGS__MarkdownLinks_Description')}`)
       .addToggle((toggle) => 
         toggle
           .setValue(this.plugin.settings.useMarkdownLinks)
@@ -76,8 +77,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('Select folder')
-      .setDesc('Select folder that save diagrams')
+      .setName(`${t('SETTINGS__FolderForSaveDiagrams_Name')}`)
+      .setDesc(`${t('SETTINGS__FolderForSaveDiagrams_Description')}`)
       .addDropdown(dropdown => {
         const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
         
@@ -95,8 +96,8 @@ export class DrawioTab extends PluginSettingTab {
       );
 
       new Setting(containerEl)
-      .setName('diagram width')
-      .setDesc('Set default diagram size')
+      .setName(`${t('SETTINGS__DefaultDiagramsSize_Name')}`)
+      .setDesc(`${t('SETTINGS__DefaultDiagramsSize_Description')}`)
       .addText((text) =>
         text
           .setPlaceholder('100%')

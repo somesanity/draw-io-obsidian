@@ -1,5 +1,4 @@
 import DrawioPlugin from "main";
-import { MarkdownPostProcessor } from "obsidian";
 
 export async function DefaultDiagramSize(plugin: DrawioPlugin) {
     if(!plugin.settings.percentSize) {

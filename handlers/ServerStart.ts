@@ -69,11 +69,9 @@ function serverStart(plugin: DrawioPlugin, webAppPath: string, port: number): Pr
             resolve(server);
         }).on('error', (err: any) => {
             if (err.code === 'EADDRINUSE') {
-                new Notice(`❌ Порт ${port} уже занят. Сервер Draw.io не запущен.`);
-                console.error(`Порт ${port} уже занят.`);
+                new Notice(`❌ ${port} ${t('FailedStartDrawioServerPortAlreadyExist')}`);
             } else {
-                new Notice(`❌ Не удалось запустить сервер Draw.io: ${err.message}`);
-                console.error(`Не удалось запустить сервер Draw.io:`, err);
+                new Notice(`❌ ${t('FailedStartDrawioServer')} ${err.message}`);
             }
             reject(err);
         });

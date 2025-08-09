@@ -1,5 +1,4 @@
-import DrawioPlugin from 'main';
-import { TFile, Vault, App } from 'obsidian';
+import { TFile, App } from 'obsidian';
 import { findFileByName } from 'utils/findFileByName';
 
 export function getFileContent(element: Element, app: App): TFile | null {

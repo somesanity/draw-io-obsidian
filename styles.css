@@ -1,3 +1,7 @@
+.drawioView {
+    background-color: var(--background-primary);
+}
+
 .drawioIframe {
     width: 100%;
     height: 100%;

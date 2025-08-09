@@ -1,6 +1,7 @@
 import { App, Modal, Editor, TFile, Notice, MarkdownView } from 'obsidian';
 import DrawioPlugin from '../main';
 import { forceMarkdownViewUpdate } from '../utils/forceMarkdownViewUpdate';
+import { t } from 'locales/i18n';
 
 export class DrawioEmbedModal extends Modal {
     private editor: Editor;
@@ -28,7 +29,7 @@ export class DrawioEmbedModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
 
-        this.titleEl.setText(this.currentFile ? `Edit Diagram: ${this.currentFile.name}` : "Create New Diagram");
+        this.titleEl.setText(this.currentFile ? `${t('EditDiagraText')} ${this.currentFile.name}` : t('ModalNewDiagramCreateText'));
 
         if (this.currentFile) {
             this.isEmptyDiagram = false;
@@ -73,7 +74,7 @@ export class DrawioEmbedModal extends Modal {
             await this.app.vault.createFolder(folderPath);
         } catch (e: any) {
             if (!e.message.includes("Folder already exists")) {
-                new Notice("❌ Could not create folder for new diagram.");
+                new Notice(`❌ ${t('FailedCreateFolder')}`);
                 console.error("Error creating Drawio folder:", e);
                 return null;
             }
@@ -88,7 +89,7 @@ export class DrawioEmbedModal extends Modal {
         try {
             return await this.app.vault.create(fullPath, emptySvgContent);
         } catch (e) {
-            new Notice(`❌ Failed to create new diagram file: ${fullPath}`);
+            new Notice(`❌ ${t('FailedCreateNewDiagram')}: ${fullPath}`);
             console.error("Error creating new diagram file:", e);
             return null;
         }
@@ -150,12 +151,12 @@ private async saveDiagramFromModal(svgDataUri: string) {
     try {
         contentToSave = this.decodeSvgDataUri(svgDataUri);
     } catch (e: any) {
-        new Notice(`❌ Failed to decode SVG content: ${e.message}`);
+        new Notice(`❌ ${t('FailedDecodeSvg')} ${e.message}`);
         return;
     }
     
     if (this.isSvgContentActuallyEmpty(contentToSave)) {
-        new Notice("Diagram is empty. Nothing to save.");
+        new Notice(`${t('NotSaveEmptyDiagram')}`);
         return;
     }
 
@@ -164,7 +165,7 @@ private async saveDiagramFromModal(svgDataUri: string) {
         if (!newFile) return;
 
         this.currentFile = newFile;
-        this.titleEl.setText(`Edit Diagram: ${this.currentFile.name}`); // Обновляем заголовок окна
+        this.titleEl.setText(`${t('EditDiagraText')} ${this.currentFile.name}`);
 
         const defaultWidth = this.plugin.settings.diagramSize;
         let embedLink: string;        
@@ -187,11 +188,11 @@ private async saveDiagramFromModal(svgDataUri: string) {
 
     try {
         await this.app.vault.modify(this.currentFile, contentToSave);
-        new Notice(`💾 Diagram saved: ${this.currentFile.path}`);
+        new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
         forceMarkdownViewUpdate(this.app, this.currentFile);
         this.isEmptyDiagram = false;
     } catch (e) {
-        new Notice(`❌ Failed to save diagram: ${this.currentFile.path}`);
+        new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile.path}`);
         console.error("Error saving diagram:", e);
     }
 }
@@ -203,7 +204,7 @@ private async saveDiagramFromModal(svgDataUri: string) {
         } else if (svgDataUri.startsWith("data:image/svg+xml,")) {
             return decodeURIComponent(svgDataUri.split(',')[1]);
         } else {
-            throw new Error("Invalid SVG data format received.");
+            throw new Error(`${t('ErrorValidSvgData')}`);
         }
     }
 
@@ -213,9 +214,8 @@ private async saveDiagramFromModal(svgDataUri: string) {
     }
 
     private async handleModalCloseBasedOnContent() {
-        if (!this.currentFile) return; // Если файл так и не был создан, выходим
+        if (!this.currentFile) return;
 
-        // Эта логика нужна для случая, когда пользователь очистил *существующую* диаграмму.
         if (this.isEmptyDiagram) {
             try {
                 const pathToDelete = this.currentFile.path;
@@ -223,7 +223,6 @@ private async saveDiagramFromModal(svgDataUri: string) {
                 
                 const editorContent = this.editor.getValue();
                 const linkToDeleteSimple = `![[${pathToDelete}]]`;
-                const linkToDeleteEncoded = `![[${encodeURI(pathToDelete)}]]`;
                 
                 let finalContent = editorContent.replace(linkToDeleteSimple, '');
 
@@ -236,7 +235,7 @@ private async saveDiagramFromModal(svgDataUri: string) {
 
             } catch (e) {
                 if (!(e instanceof Error && e.message.toLowerCase().includes("file already deleted"))) {
-                    new Notice(`❌ Failed to delete empty diagram file: ${this.currentFile.path}`);
+                    new Notice(`❌ ${t('FailedDeleteEmptyDiagram')} ${this.currentFile.path}`);
                 }
             }
         }

@@ -1,5 +1,3 @@
-import { TFolder } from "obsidian";
-
 export interface DrawioSettings {
   port: string;
   centeringDiagram: boolean;

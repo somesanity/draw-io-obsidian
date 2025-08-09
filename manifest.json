@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "drawio",
+	"name": "draw.io",
+	"version": "2.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "Create and edit diagrams with draw.io (diagrams.net), locally and offline.",
+	"author": "somesanity",
+	"authorUrl": "https://github.com/somesanity",
+	"isDesktopOnly": true
 }

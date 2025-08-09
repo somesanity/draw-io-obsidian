@@ -12,13 +12,17 @@ import { DefaultDiagramSize } from 'utils/DefaultDiagramSize';
 import { InteractiveDiagrams } from 'utils/interactiveDiagrams';
 import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor';
 import { DrawioEmbedModal } from 'views/modalDrawio';
+import { DrawioClientManager } from 'utils/drawioClientManager';
 
 export default class DrawioPlugin extends Plugin {
 
 isServerOpen: Server | null = null;
 settings: DrawioSettings;
+private drawioclientwebappManager: DrawioClientManager;
 
   async onload() {
+  this.drawioclientwebappManager = new DrawioClientManager(this.app, this.manifest);
+  await this.drawioclientwebappManager.checkAndUnzipDrawioClient();
 
 	await this.loadSettings();
 	this.addSettingTab(new DrawioTab(this.app, this));
@@ -51,7 +55,7 @@ settings: DrawioSettings;
 			if(fileToEdit) {
 				menu.addItem((item) => {
 					item
-						.setTitle(`Edit ${fileToEdit.basename}`)
+						.setTitle(`${t("editDiagramContextMenu")} ${fileToEdit.basename}`)
                         .setIcon("pencil")
                         .setSection("drawio-actions")
                         .onClick(() => openDrawioModal(fileToEdit));
@@ -59,7 +63,7 @@ settings: DrawioSettings;
 			} else {
 				menu.addItem((item) => {
                     item
-                        .setTitle("Embed New Draw.io Diagram")
+                        .setTitle(t('CreateNewDiagram'))
                         .setIcon("shapes")
                         .setSection("drawio-actions")
                         .onClick(() => openDrawioModal());
@@ -70,7 +74,7 @@ settings: DrawioSettings;
 
         this.addCommand({
             id: 'drawio-create-or-edit',
-            name: 'Create or edit Draw.io diagram',
+            name: t('CreateAndEditNewDiagram'),
             editorCallback: async (editor: Editor, view: MarkdownView) => {
                 const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view); 
                 await launchDrawioServerLogic(this); 
@@ -110,11 +114,9 @@ async saveSettings() {
 
     if(Markdowntooltips) {
       Markdowntooltips.forEach(markdowntooltip => {
-        console.log('удалён')
         markdowntooltip.remove();
       });
     }
-
   }
 
   async activateView() {
