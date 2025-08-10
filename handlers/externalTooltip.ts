@@ -4,10 +4,8 @@ export class ExternalTooltip {
 
     constructor() {
         this.tooltipElement = document.createElement('div');
-        this.tooltipElement.classList.add('drawio-custom-tooltip');
-        this.tooltipElement.style.position = 'absolute';
-        this.tooltipElement.style.display = 'none';
-        this.tooltipElement.style.zIndex = '9999';
+        this.tooltipElement.classList.add('drawio-external-tooltip');
+        this.tooltipElement.classList.add('drawio-external-tooltip--position');
 
         this.tooltipElement.addEventListener('mouseenter', () => {
             if (this.hideTimeout) {
@@ -28,7 +26,8 @@ public show(text: string, event: MouseEvent): void {
     }
 
     this.tooltipElement.textContent = text;
-    this.tooltipElement.style.display = 'block';
+    this.tooltipElement.classList.add('drawio-external-tooltip--show');
+    this.tooltipElement.classList.remove('drawio-external-tooltip--hidden');
     this.updatePosition(event);
 }
 
@@ -38,33 +37,36 @@ public show(text: string, event: MouseEvent): void {
         }
 
         this.hideTimeout = setTimeout(() => {
-            this.tooltipElement.style.display = 'none';
+            this.tooltipElement.classList.remove('drawio-external-tooltip--show');
+            this.tooltipElement.classList.add('drawio-external-tooltip--hidden');
         }, delay);
     }
 
-    public updatePosition(event: MouseEvent) {
-        const offsetX = 15;
-        const offsetY = 15;
+public updatePosition(event: MouseEvent) {
+    const styles = getComputedStyle(this.tooltipElement);
 
-        let newLeft = event.clientX + window.scrollX + offsetX;
-        let newTop = event.clientY + window.scrollY + offsetY;
+    const offsetX = parseInt(styles.getPropertyValue('--drawio-external-tooltip-offset-x'), 10) || 0;
+    const offsetY = parseInt(styles.getPropertyValue('--drawio-external-tooltip-offset-y'), 10) || 0;
 
-        const tooltipWidth = this.tooltipElement.offsetWidth;
-        const tooltipHeight = this.tooltipElement.offsetHeight;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+    let newLeft = event.clientX + window.scrollX + offsetX;
+    let newTop = event.clientY + window.scrollY + offsetY;
 
-        if (newLeft + tooltipWidth > viewportWidth + window.scrollX) {
-            newLeft = event.clientX + window.scrollX - tooltipWidth - offsetX;
-        }
-        if (newTop + tooltipHeight > viewportHeight + window.scrollY) {
-            newTop = event.clientY + window.scrollY - tooltipHeight - offsetY;
-        }
+    const tooltipWidth = this.tooltipElement.offsetWidth;
+    const tooltipHeight = this.tooltipElement.offsetHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-        newLeft = Math.max(newLeft, window.scrollX + offsetX);
-        newTop = Math.max(newTop, window.scrollY + offsetY);
-
-        this.tooltipElement.style.left = `${newLeft}px`;
-        this.tooltipElement.style.top = `${newTop}px`;
+    if (newLeft + tooltipWidth > viewportWidth + window.scrollX) {
+        newLeft = event.clientX + window.scrollX - tooltipWidth - offsetX;
     }
+    if (newTop + tooltipHeight > viewportHeight + window.scrollY) {
+        newTop = event.clientY + window.scrollY - tooltipHeight - offsetY;
+    }
+
+    newLeft = Math.max(newLeft, window.scrollX + offsetX);
+    newTop = Math.max(newTop, window.scrollY + offsetY);
+
+    this.tooltipElement.style.left = `${newLeft}px`;
+    this.tooltipElement.style.top = `${newTop}px`;
+}
 }

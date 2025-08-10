@@ -33,7 +33,7 @@
     "SETTINGS__MarkdownLinks_Name": "Use markdown links",
     "SETTINGS__MarkdownLinks_Description": "If enable, links inserted after creating a diagram in the modal window will appear as markdown links – ![](Diagram_1231237567.drawio.svg)",
     "SETTINGS__FolderForSaveDiagrams_Name": "Folder for diagrams",
-    "SETTINGS__FolderForSaveDiagrams_Description": "set folder for saving diagrams",
+    "SETTINGS__FolderForSaveDiagrams_Description": "Allows set folder for saving diagrams",
     "SETTINGS__DefaultDiagramsSize_Name": "set default size for diagrams",
     "SETTINGS__DefaultDiagramsSize_Description": "By specifying a value, it will automatically be applied to new diagrams created in the modal window. For example, if set to 100%, then – ![[Diagram_1231237567.drawio.svg|100%]], or if set to 700 – [[Diagram_1231237567.drawio.svg|700]]. (for percentage size, the corresponding option must be enabled)"
 }

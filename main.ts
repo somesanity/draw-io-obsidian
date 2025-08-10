@@ -105,7 +105,7 @@ async saveSettings() {
         });
     }
 
-    const ExternalLinkTooltip = document.querySelector('.drawio-custom-tooltip');
+    const ExternalLinkTooltip = document.querySelector('.drawio-external-tooltip');
     if (ExternalLinkTooltip) {
       ExternalLinkTooltip.remove();
     }

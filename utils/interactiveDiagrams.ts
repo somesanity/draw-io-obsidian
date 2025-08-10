@@ -17,7 +17,9 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 
 	plugin.registerMarkdownPostProcessor(
 		async (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-			const embeds = el.querySelectorAll<HTMLSpanElement>('span.internal-embed[src$=".drawio.svg"]');
+			const embeds = el.querySelectorAll<HTMLSpanElement>(
+				'span.internal-embed[src$=".drawio.svg"]'
+			);
 
 			for (const embed of Array.from(embeds)) {
 				embed.addClass("drawio-container");
@@ -45,7 +47,6 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 				img.replaceWith(svgElement);
 				svgElement.classList.add("drawio-svg");
 
-				// Установка размеров
 				if (imgSize !== null) {
 					if (!imgSize.includes("%")) {
 						svgElement.setAttribute("width", imgSize + "px");
@@ -64,7 +65,10 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 				const model = decoder.extractDiagramData(svgElement);
 				if (!model) continue;
 
-				const cellElements = svgElement.querySelectorAll<SVGGElement>('g[data-cell-id]');
+				const cellElements = svgElement.querySelectorAll<SVGGElement>(
+					'g[data-cell-id]'
+				);
+
 				for (const cellElement of Array.from(cellElements)) {
 					const cellId = cellElement.getAttribute("data-cell-id");
 					if (!cellId) continue;
@@ -82,7 +86,10 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 					if (markdownParts.length === 0) continue;
 
 					const tooltipDiv = createDiv({ attr: { "data-tooltip-id": cellId } });
-					tooltipDiv.classList.add("drawio-markdown-tooltip");
+					tooltipDiv.classList.add(
+						"drawio-markdown-tooltip",
+						"drawio-markdown-tooltip--hidden"
+					);
 
 					el.appendChild(tooltipDiv);
 
@@ -92,7 +99,9 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 						tooltipDiv,
 						ctx.sourcePath,
 						plugin
-					).catch((err) => console.error("Markdown render error:", err));
+					).catch((err) =>
+						console.error("Markdown render error:", err)
+					);
 
 					let hideTimeout: number | null = null;
 
@@ -101,32 +110,53 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 							clearTimeout(hideTimeout);
 							hideTimeout = null;
 						}
-						const elRect = el.getBoundingClientRect();
-						const relativeX = event.clientX - elRect.left;
-						const relativeY = event.clientY - elRect.top;
 
-						tooltipDiv.style.left = `${relativeX + 70}px`;
-						tooltipDiv.style.top = `${relativeY + 10}px`;
-						tooltipDiv.style.display = "block";
+						tooltipDiv.classList.remove("drawio-markdown-tooltip--hidden");
+						tooltipDiv.classList.add("drawio-markdown-tooltip--show");
+
+						requestAnimationFrame(() => {
+							const tooltipRect = tooltipDiv.getBoundingClientRect();
+							const elRect = el.getBoundingClientRect();
+							const containerRect =
+								document.documentElement.getBoundingClientRect();
+
+							let left = event.clientX - elRect.left + 170;
+							let top = event.clientY - elRect.top + 30;
+
+							if (event.clientX + tooltipRect.width > containerRect.width) {
+								left =
+									event.clientX - elRect.left - tooltipRect.width - 10;
+							}
+
+							if (event.clientY + tooltipRect.height > containerRect.height) {
+								top =
+									event.clientY - elRect.top - tooltipRect.height - 10;
+							}
+
+							tooltipDiv.style.left = `${left}px`;
+							tooltipDiv.style.top = `${top}px`;
+						});
 					};
 
-					const scheduleHideTooltip = () => {
+					const hideTooltip = () => {
 						hideTimeout = window.setTimeout(() => {
-							tooltipDiv.style.display = "none";
+							tooltipDiv.classList.remove(
+								"drawio-markdown-tooltip--show"
+							);
 						}, 200);
 					};
 
-					const cancelHide = () => {
-						if (hideTimeout !== null) {
+					cellElement.addEventListener("mouseenter", showTooltip);
+					cellElement.addEventListener("mouseleave", hideTooltip);
+
+					tooltipDiv.addEventListener("mouseenter", () => {
+						if (hideTimeout) {
 							clearTimeout(hideTimeout);
 							hideTimeout = null;
 						}
-					};
+					});
 
-					cellElement.addEventListener("mouseenter", showTooltip);
-					cellElement.addEventListener("mouseleave", scheduleHideTooltip);
-					tooltipDiv.addEventListener("mouseenter", cancelHide);
-					tooltipDiv.addEventListener("mouseleave", scheduleHideTooltip);
+					tooltipDiv.addEventListener("mouseleave", hideTooltip);
 				}
 
 				const links = svgElement.querySelectorAll<SVGAElement>("a");

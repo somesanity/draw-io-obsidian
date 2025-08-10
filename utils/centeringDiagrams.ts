@@ -9,15 +9,7 @@ export async function CenteringDiagrams(plugin: DrawioPlugin) {
 
   embeds.forEach((embed) => {
     const wrapper = document.createElement('div');
-    wrapper.style.textAlign = 'center';
-    wrapper.style.width = '100%';
-
-    const img = embed.querySelector('img');
-    if (img) {
-      img.style.width = '100%';
-      img.style.height = 'auto';
-      img.style.maxWidth = '100%';
-    }
+    wrapper.classList.add('drawio-centering-diagrams')
 
     if (embed.parentElement && embed.parentElement.tagName === 'DIV') return;
     embed.parentElement?.insertBefore(wrapper, embed);
@@ -25,5 +17,5 @@ export async function CenteringDiagrams(plugin: DrawioPlugin) {
   });
 });
 
-    };
+};
 }
