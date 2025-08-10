@@ -35,7 +35,7 @@ private drawioclientwebappManager: DrawioClientManager;
 	const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
 	setLocale(userLang);
 
-	this.addRibbonIcon('dice', t("ribonIconTitle"), async () => {
+	this.addRibbonIcon('shapes', t("ribonIconTitle"), async () => {
 		this.activateView()
 		await launchDrawioServerLogic(this)
 	}) 
