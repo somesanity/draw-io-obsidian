@@ -7,6 +7,7 @@
     "FailedStartDrawioServerPortAlreadyExist": "is already in use. The Draw.io server is not running",
     "editDiagramContextMenu": "Edit diagram",
     "CreateNewDiagram": "Embed new draw.io diagram",
+    "EditDiagramByFileExplorer": "Edit draw.io diagram",
     "CreateAndEditNewDiagram": "Create or edit draw.io diagram",
     "EditDiagraText": "Edit diagram:",
     "ModalNewDiagramCreateText": "New diagram",

@@ -49,7 +49,7 @@ private drawioclientwebappManager: DrawioClientManager;
 			const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
 			const openDrawioModal = async (file?: TFile) => {
                 await launchDrawioServerLogic(this); 
-                new DrawioEmbedModal(this.app, editor, this, file).open();
+                new DrawioEmbedModal(this.app, this, file, editor).open();
             };
 
 			if(fileToEdit) {
@@ -72,6 +72,25 @@ private drawioclientwebappManager: DrawioClientManager;
 		})
 	)
 
+  this.registerEvent(
+    this.app.workspace.on("file-menu", (menu, file) => {
+        if (!(file instanceof TFile)) return;
+
+        if (!file.name.endsWith(".drawio.svg")) return;
+
+        menu.addItem((item) => {
+            item
+                .setTitle(t('EditDiagramByFileExplorer'))
+                .setIcon("pencil")
+                .onClick(async () => {
+                    await launchDrawioServerLogic(this);
+
+                    new DrawioEmbedModal(this.app, this, file, undefined).open();
+                });
+        });
+    })
+);
+
         this.addCommand({
             id: 'drawio-create-or-edit',
             name: t('CreateAndEditNewDiagram'),
@@ -80,9 +99,9 @@ private drawioclientwebappManager: DrawioClientManager;
                 await launchDrawioServerLogic(this); 
 
                 if (fileToEdit) {
-                    new DrawioEmbedModal(this.app, editor, this, fileToEdit).open();
+                    new DrawioEmbedModal(this.app, this, fileToEdit, editor).open();
                 } else {
-                    new DrawioEmbedModal(this.app, editor, this).open();
+                    new DrawioEmbedModal(this.app, this, null, editor).open();
                 }
             }
         });

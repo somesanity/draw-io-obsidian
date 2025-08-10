@@ -7,6 +7,7 @@
     "FailedStartDrawioServerPortAlreadyExist": "Порт уже занят.",
     "editDiagramContextMenu": "Редактировать диаграмму",
     "CreateNewDiagram": "Вставить новую диаграмму",
+    "EditDiagramByFileExplorer": "Редактировать диаграмму draw.io",
     "CreateAndEditNewDiagram": "Создать/редактировать диаграмму",
     "EditDiagraText": "Редактируемая диаграмма:",
     "ModalNewDiagramCreateText": "Новая диаграмма",
