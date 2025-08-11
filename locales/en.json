@@ -15,6 +15,8 @@
     "FailedToSaveDiagram": "Diagram saved:",
     "FailedCreateFolder": "Could not create folder for new diagram.",
     "FailedCreateNewDiagram": "Failed to create new diagram file:",
+    "FileNotFoundIntoVault": "File not found into the Vault:",
+    "FailedRecognizeTranslateData": "Failed to recognize the transferred data.",
     "FailedDecodeSvg": "Failed to decode SVG content:",
     "NotSaveEmptyDiagram": "Diagram is empty. Nothing to save.",
     "ErrorValidSvgData": "Invalid SVG data format received.",

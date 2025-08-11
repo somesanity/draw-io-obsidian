@@ -15,6 +15,8 @@
     "FailedToSaveDiagram": "Не удалось сохранить диаграмму:",
     "FailedCreateFolder": "Не удалось найти, а в последстивии и создать папку для сохранения диаграммы",
     "FailedCreateNewDiagram": "Не удалось сохранить диаграмму:",
+    "FileNotFoundIntoVault": "Не удалось найти файл в хранилище:",
+    "FailedRecognizeTranslateData": "Не удалось распознать перенесённые данные.",
     "FailedDecodeSvg": "Не удалось декодировать SVG-элемент:",
     "NotSaveEmptyDiagram": "Пустая диаграмма, сохранять нечего.",
     "ErrorValidSvgData": "Получена некорректное содержимое SVG.",
