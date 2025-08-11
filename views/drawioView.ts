@@ -103,7 +103,7 @@ const extractVaultPath = (s: string | null): string | null => {
 					const existing = this.app.vault.getAbstractFileByPath(candidatePath);
 					if (!existing) {
 						this.currentFile = await this.app.vault.create(candidatePath, text);
-						new Notice(`✅ ${t('CreateNewDiagram')} ${this.currentFile.path}`);
+						new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
 					} else if (existing instanceof TFile) {
 						this.currentFile = existing;
 						await this.app.vault.modify(this.currentFile, text);
@@ -231,7 +231,7 @@ const extractVaultPath = (s: string | null): string | null => {
 
 					try {
 						this.currentFile = await this.app.vault.create(fullPath, svgContent);
-						new Notice(`✅ ${t('CreateNewDiagram')} ${this.currentFile.path}`);
+						new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
 					} catch (e) {
 						new Notice(`❌ ${t('FailedCreateNewDiagram')} ${fileName}`);
 						console.error(e);

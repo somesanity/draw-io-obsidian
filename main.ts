@@ -63,7 +63,7 @@ private drawioclientwebappManager: DrawioClientManager;
 			} else {
 				menu.addItem((item) => {
                     item
-                        .setTitle(t('CreateNewDiagram'))
+                        .setTitle(t('CreateNewDiagramContextMenu'))
                         .setIcon("shapes")
                         .setSection("drawio-actions")
                         .onClick(() => openDrawioModal());
