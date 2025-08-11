@@ -85,6 +85,8 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 
 					if (markdownParts.length === 0) continue;
 
+					cellElement.addClass('interactiveElement')
+
 					const tooltipDiv = createDiv({ attr: { "data-tooltip-id": cellId } });
 					tooltipDiv.classList.add(
 						"drawio-markdown-tooltip",
@@ -117,26 +119,27 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 						requestAnimationFrame(() => {
 							const tooltipRect = tooltipDiv.getBoundingClientRect();
 							const elRect = el.getBoundingClientRect();
-							const containerRect =
-								document.documentElement.getBoundingClientRect();
+							const containerRect = document.documentElement.getBoundingClientRect();
 
-							let left = event.clientX - elRect.left + 170;
-							let top = event.clientY - elRect.top + 30;
+							const leftOffset = parseInt(tooltipDiv.getCssPropertyValue("--markdown-left-offset")) || 60;
+							const topOffset = parseInt(tooltipDiv.getCssPropertyValue("--markdown-top-offset")) || 30;
+
+							let left = event.clientX - elRect.left + leftOffset;
+							let top = event.clientY - elRect.top + topOffset;
 
 							if (event.clientX + tooltipRect.width > containerRect.width) {
-								left =
-									event.clientX - elRect.left - tooltipRect.width - 10;
+								left = event.clientX - elRect.left - tooltipRect.width - leftOffset;
 							}
 
 							if (event.clientY + tooltipRect.height > containerRect.height) {
-								top =
-									event.clientY - elRect.top - tooltipRect.height - 10;
+								top = event.clientY - elRect.top - tooltipRect.height - topOffset;
 							}
 
 							tooltipDiv.style.left = `${left}px`;
 							tooltipDiv.style.top = `${top}px`;
 						});
 					};
+
 
 					const hideTooltip = () => {
 						hideTimeout = window.setTimeout(() => {

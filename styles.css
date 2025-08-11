@@ -38,10 +38,16 @@
     border: var(--border-width) solid var(--background-modifier-border);
     box-shadow: var(--shadow-l);
     background-color: var(--background-primary);
+    --markdown-left-offset: 80;
+	--markdown-top-offset: 30;
 }
 
 .drawio-markdown-tooltip--show {
 	display: block;
+}
+
+.interactiveElement {
+    cursor: pointer;
 }
 
 .drawio-external-tooltip {
