@@ -107,39 +107,20 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 
 					let hideTimeout: number | null = null;
 
-					const showTooltip = (event: MouseEvent) => {
-						if (hideTimeout) {
-							clearTimeout(hideTimeout);
-							hideTimeout = null;
-						}
+					
+const showTooltip = (event: MouseEvent) => {
+	if (hideTimeout) {
+		clearTimeout(hideTimeout);
+		hideTimeout = null;
+	}
 
-						tooltipDiv.classList.remove("drawio-markdown-tooltip--hidden");
-						tooltipDiv.classList.add("drawio-markdown-tooltip--show");
+	tooltipDiv.classList.remove("drawio-markdown-tooltip--hidden");
+	tooltipDiv.classList.add("drawio-markdown-tooltip--show");
 
-						requestAnimationFrame(() => {
-							const tooltipRect = tooltipDiv.getBoundingClientRect();
-							const elRect = el.getBoundingClientRect();
-							const containerRect = document.documentElement.getBoundingClientRect();
+tooltipDiv.style.left = `${event.clientX / 2}px`;
+tooltipDiv.style.top = `${event.clientY}px`;
 
-							const leftOffset = parseInt(tooltipDiv.getCssPropertyValue("--markdown-left-offset")) || 60;
-							const topOffset = parseInt(tooltipDiv.getCssPropertyValue("--markdown-top-offset")) || 30;
-
-							let left = event.clientX - elRect.left + leftOffset;
-							let top = event.clientY - elRect.top + topOffset;
-
-							if (event.clientX + tooltipRect.width > containerRect.width) {
-								left = event.clientX - elRect.left - tooltipRect.width - leftOffset;
-							}
-
-							if (event.clientY + tooltipRect.height > containerRect.height) {
-								top = event.clientY - elRect.top - tooltipRect.height - topOffset;
-							}
-
-							tooltipDiv.style.left = `${left}px`;
-							tooltipDiv.style.top = `${top}px`;
-						});
-					};
-
+};
 
 					const hideTooltip = () => {
 						hideTimeout = window.setTimeout(() => {

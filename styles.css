@@ -27,7 +27,7 @@
 }
 
 .drawio-markdown-tooltip {
-	position: absolute;
+	position: fixed;
 	display: none;
 	z-index: 1000;
 	pointer-events: all;
@@ -38,8 +38,6 @@
     border: var(--border-width) solid var(--background-modifier-border);
     box-shadow: var(--shadow-l);
     background-color: var(--background-primary);
-    --markdown-left-offset: 80;
-	--markdown-top-offset: 30;
 }
 
 .drawio-markdown-tooltip--show {
@@ -95,8 +93,15 @@
 
 .drawio-container svg pre {
     background-color: inherit !important;
-    box-shadow: none !important;
-    padding: none !important;
+    box-shadow: inherit !important;
+    padding: inherit !important;
+}
+
+.drawio-container svg strong {
+    background-color: inherit !important;
+    box-shadow: inherit !important;
+    padding: inherit !important;
+    color: inherit !important;
 }
 
 .drawio-container svg h1, h2, h3, h4, h5, h6 {
@@ -114,10 +119,10 @@
 .drawio-container svg h4::after,
 .drawio-container svg h5::after,
 .drawio-container svg h6::after {
-    content: none !important;
-    display: none !important;
-    border: none !important;
-    background: none !important;
+    content: inherit !important;
+    display: inherit !important;
+    border: inherit !important;
+    background: inherit !important;
     font-family: inherit !important;
-    border-bottom: none !important;
+    border-bottom: inherit !important;
 }
