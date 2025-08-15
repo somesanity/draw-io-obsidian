@@ -104,7 +104,12 @@
     color: inherit !important;
 }
 
-.drawio-container svg h1, h2, h3, h4, h5, h6 {
+.drawio-container svg h1,
+.drawio-container svg h2,
+.drawio-container svg h3,
+.drawio-container svg h4,
+.drawio-container svg h5,
+.drawio-container svg h6 {
     color: inherit !important;
     border: inherit !important;
     font-family: inherit !important;
@@ -112,6 +117,7 @@
     margin: inherit !important;
     padding: inherit !important;
 }
+
 
 .drawio-container svg h1::after,
 .drawio-container svg h2::after,
