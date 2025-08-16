@@ -1,4 +1,4 @@
-# 🔶 Obsidian Draw.io Plugin (Offline & Private)
+# 🔶 Plugin draw.io for obsidian
 
 ![demo](./docs/demo.gif)
 
