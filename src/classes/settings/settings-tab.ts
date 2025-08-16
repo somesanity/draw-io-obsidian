@@ -34,7 +34,7 @@ export class DrawioSettingTab extends PluginSettingTab {
         }
         try {
             containerElLocal.empty();   
-            containerElLocal.createEl('p', { text: 'draw.io' });
+            containerElLocal.createEl('p', { text: 'general' });
 
             const defaultPort = 8080;
 
