@@ -3,6 +3,31 @@ var mxIsElectron = navigator.userAgent != null &&
 	navigator.userAgent.indexOf(' draw.io/') > -1;
 var GOOGLE_APPS_MAX_AREA = 25000000;
 var GOOGLE_SHEET_MAX_AREA = 1000000; // The maximum number of pixels is 1 million.
+var shadowBlocker = null;
+
+/**
+ * Adds shadow blocker style.
+ */
+function addShadowBlocker()
+{
+	if (shadowBlocker == null)
+	{
+		shadowBlocker = document.createElement('style');
+		shadowBlocker.setAttribute('type', 'text/css');
+		shadowBlocker.innerHTML = '@media print {\n' +
+			'    g[style*="filter: drop-shadow("] {\n' +
+			'        filter: none !important;\n' +
+			'    }\n' +
+			'}\n';
+		
+		var head = document.getElementsByTagName('head')[0];
+		
+		if (head != null)
+		{
+			head.appendChild(shadowBlocker);
+		}
+	}
+}
 
 /**
  * Adds meta tag to the page.
@@ -84,6 +109,11 @@ var cssPreload = {};
 
 function render(data)
 {
+	if (data.shadows == '0')
+	{
+		addShadowBlocker();
+	}
+	
 	if (data.csv != null)
 	{
 		// CSV loads orgChart asynchronously and needs mxscript
@@ -189,9 +219,14 @@ function render(data)
 		Graph.translateDiagram = true;
 	}
 
-	if (extras != null && extras.globalVars != null && extras.globalVars.filename != null)
+	if (data.fileTitle != null)
 	{
-		document.title = extras.globalVars.filename + '.pdf';
+		document.title = data.fileTitle;
+	}
+	else if (extras != null && extras.globalVars != null &&
+		extras.globalVars.filename != null)
+	{
+		document.title = extras.globalVars.filename;
 	}
 	
 	// Overrides graph bounds to include background images
@@ -216,13 +251,13 @@ function render(data)
 		return bounds;
 	};
 	
-	//PNG+XML format
+	// PNG+XML format
 	if (data.xml.substring(0, 5) == 'iVBOR' || (extras != null && extras.isPng))
 	{
 		data.xml = Editor.extractGraphModelFromPng('data:image/png;base64,' + data.xml);
 	}
 	
-	//IE11 sends incorrect xml
+	// IE11 sends incorrect xml
 	if (data.xml.substring(0, 11) == '<#document>')
 	{
 		data.xml = data.xml.substring(11, data.xml.length - 12);
@@ -832,11 +867,6 @@ function render(data)
 				graph.pageScale = ps;
 			}
 
-			if (data.fileTitle != null)
-			{
-				document.title = data.fileTitle;
-			}
-			
 			var pf = graph.pageFormat;
 			var temp = data.scale;
 			pf.width = Math.ceil(pf.width * graph.pageScale);
@@ -1076,7 +1106,18 @@ function render(data)
 					{
 						div.classList.add('geDisableMathJax')
 					}
-
+					
+					// Adds shadow
+					if (xmlDoc.documentElement.getAttribute('shadow') == '1')
+					{
+						var svgs = div.getElementsByTagName('svg');
+						
+						for (var i = 0; i < svgs.length; i++)
+						{
+							graph.addSvgShadow(svgs[i]);
+						}
+					}
+					
 					waitForGoogleFontImports(div);
 				};
 
@@ -1096,25 +1137,6 @@ function render(data)
 				preview.appendGraph(graph, scale, x0, y0, null, null, anchorId, pf);
 			}
 
-			// Adds shadow
-			// NOTE: Shadow rasterizes output
-			/*if (mxClient.IS_SVG && xmlDoc.documentElement.getAttribute('shadow') == '1')
-			{
-				var svgs = document.getElementsByTagName('svg');
-				
-				for (var i = 0; i < svgs.length; i++)
-				{
-					var svg = svgs[i];
-
-					var filter = graph.addSvgShadow(svg, null, true);
-					filter.setAttribute('id', 'shadow-' + i);
-					svg.appendChild(filter);
-					svg.setAttribute('filter', 'url(#' + 'shadow-' + i + ')');
-				}
-				
-				border = 7;
-			}*/
-			
 			bounds = new mxRectangle(0, 0, pf.width, pf.height);
 		}
 		else
@@ -1141,13 +1163,11 @@ function render(data)
 			}
 
 			// Adds shadow
-			// NOTE: PDF shadow rasterizes output so it's disabled
-			if (data.format != 'pdf' && mxClient.IS_SVG && xmlDoc.documentElement.getAttribute('shadow') == '1')
+			if (xmlDoc.documentElement.getAttribute('shadow') == '1')
 			{
-				graph.addSvgShadow(graph.view.canvas.ownerSVGElement, null, true);
-				graph.setShadowVisible(true);
-				bounds.width += 7;
-				bounds.height += 7;
+				var size = graph.setShadowVisible(true);
+				bounds.width += size;
+				bounds.height += size;
 			}
 			
 			document.body.style.width = Math.ceil(bounds.x + bounds.width) + 'px';
@@ -1195,7 +1215,7 @@ function render(data)
 				return (diagrams == null) ? 'Page-1' :
 					(diagrams[from].getAttribute('name') || ('Page-' + (from + 1)));
 			}
-			else if (name == 'pagenumber')
+			else if (name == 'pagenumber' && data.from != null)
 			{
 				return from + 1;
 			}

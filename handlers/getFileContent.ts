@@ -1,5 +1,5 @@
 import { TFile, App } from 'obsidian';
-import { findFileByName } from 'utils/findFileByName';
+import { findFileByName } from '../handlers/findFileByName';
 
 export function getFileContent(element: Element, app: App): TFile | null {
 

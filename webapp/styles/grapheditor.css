@@ -1,5 +1,5 @@
 :root {
-	--panel-color: #f1f3f4;
+	--ge-panel-color: #f1f3f4;
 	--toolbar-color: #f1f3f4;
 	--workspace-color: #ececec;
 	--dark-toolbar-color: #1e2022;
@@ -15,7 +15,7 @@
 	--scrollbar-hover-color: #959798;
 	--text-color: #3F3F3F;
 	--dark-color: #121212;
-	--dark-panel-color: #1B1D1E;
+	--ge-dark-panel-color: #1B1D1E;
 	--dark-border-color: #333333;
 	--dark-text-color: #C0C0C0;
 	--dark-accent-color: #003555;
@@ -26,7 +26,7 @@
 	--dark-header-color: #1B1D1E;
 }
 
-* {
+.geEditor * {
 	forced-color-adjust: none;
 }
 
@@ -51,7 +51,7 @@ html:has(.geFullscreen),
 .geShapePicker,
 .geDialogFooter,
 .geSidebarTooltip {
-	background-color: light-dark(var(--panel-color), var(--dark-panel-color));
+	background-color: light-dark(var(--ge-panel-color), var(--ge-dark-panel-color));
 }
 
 .geEditor>svg,
@@ -84,12 +84,13 @@ div[id*="dgeMermaidOutput-"] {
 	display: none;
 }
 
+.geEditor.geAtlas>.geMenubarContainer,
 .geEditor.geCompactMode>.geMenubarContainer {
 	margin-top: 0;
 	height: 30px;
 }
 
-.geEditor.geCompactMode>.geToolbarContainer:not(.geSketch *) {
+.geEditor.geCompactMode>.geToolbarContainer:not(.geSketch *, .geAtlas *) {
 	padding-left: 8px;
 }
 
@@ -227,14 +228,14 @@ div[id*="dgeMermaidOutput-"] {
 	color: light-dark(var(--text-color), var(--dark-text-color));
 }
 
-*:not(svg *, .mxCellEditor *, .mxRubberband) {
+:where(.geEditor *):not(svg *, .mxCellEditor *, .mxRubberband) {
 	border-color: light-dark(var(--border-color), var(--dark-border-color));
 }
 
-button:not(svg *),
-select:not(svg *),
-input:not(svg *),
-textarea:not(svg *) {
+:where(.geEditor button):not(svg *),
+:where(.geEditor select):not(svg *),
+:where(.geEditor input):not(svg *),
+:where(.geEditor textarea):not(svg *) {
 	color: light-dark(var(--text-color), var(--dark-text-color));
 	background-color: transparent;
 	border: 1px solid;
@@ -242,7 +243,7 @@ textarea:not(svg *) {
 	padding: 2px;
 }
 
-input:not(svg *, .geButton) {
+.geEditor input:not(svg *, .geButton) {
 	background-color: light-dark(white, var(--dark-toolbar-color));
 }
 
@@ -637,7 +638,7 @@ html body.geDarkMode .mxCellEditor {
 
 html body.geDarkMode.geEditor div.mxPopupMenu {
 	border: 1px solid var(--dark-border-color);
-	background-color: var(--dark-panel-color);
+	background-color: var(--ge-dark-panel-color);
 }
 
 .geTabContainer {
@@ -662,8 +663,8 @@ html body.geDarkMode.geEditor div.mxPopupMenu hr {
 	position: relative;
 	cursor: pointer;
 	margin: 5px;
-	height: 140px;
-	width: 140px;
+	height: 135px;
+	width: 135px;
 	font-size: 14pt;
 	border-width: 2px;
 	border-style: dashed;
@@ -827,7 +828,7 @@ html body.geDarkMode table.mxPopupMenu hr {
 html body.geDarkMode .geDialog,
 html body.geDarkMode div.mxWindow,
 html body div.mxWindow.geDarkMode {
-	background-color: var(--dark-panel-color);
+	background-color: var(--ge-dark-panel-color);
 	border-color: #565656;
 }
 
@@ -913,7 +914,7 @@ div td.mxWindowTitle {
 }
 
 .geEditor div.mxTooltip {
-	background-color: light-dark(var(--panel-color), var(--dark-panel-color));
+	background-color: light-dark(var(--ge-panel-color), var(--ge-dark-panel-color));
 	color: light-dark(var(--text-color), var(--dark-text-color));
 	box-shadow: 1px 1px 2px 0px #ddd;
 	font-size: 11px;
@@ -982,7 +983,7 @@ div.geFormatContainer {
 }
 
 .geDiagramContainer {
-	background-color: light-dark(var(--workspace-color), var(--dark-panel-color));
+	background-color: light-dark(var(--workspace-color), var(--ge-dark-panel-color));
 	font-size: 0px;
 	outline: none;
 }
@@ -1005,7 +1006,7 @@ div.geFormatContainer {
 }
 
 .geEditor .geHint {
-	background-color: light-dark(var(--panel-color), var(--dark-panel-color));
+	background-color: light-dark(var(--ge-panel-color), var(--ge-dark-panel-color));
 	border-color: light-dark(var(--border-color), var(--dark-border-color));
 	box-shadow: 1px 1px 2px 0px #ddd;
 	border-style: solid;
@@ -1086,7 +1087,7 @@ div.geFormatContainer {
 }
 
 .geEmbed.geAtlas>.geMenubarContainer>.geStatusDiv {
-    top: 16px;
+    top: 12px;
 }
 
 html body div.geBtn.geSmallBanner {
@@ -2021,7 +2022,7 @@ html div.mxRubberband {
 
 .geEditor div.mxPopupMenu {
 	box-shadow: 0px 0px 2px #C0C0C0;
-	background-color: var(--panel-color);
+	background-color: var(--ge-panel-color);
 	background-image: none;
 	border-radius: 4px;
 	border-style: solid;
@@ -2092,13 +2093,20 @@ table.geProperties tr td {
 	height: 21px;
 }
 
+.gePropValue {
+	width: 100%;
+    overflow: hidden;
+	white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .gePropHeader,
 .gePropRow {
-	border: 1px solid light-dark(var(--border-color), var(--dark-panel-color));
+	border: 1px solid light-dark(var(--border-color), var(--ge-dark-panel-color));
 }
 
 .gePropRowDark {
-	border: 1px solid light-dark(#4472C4, var(--dark-panel-color));
+	border: 1px solid light-dark(#4472C4, var(--ge-dark-panel-color));
 }
 
 .gePropHeader>.gePropHeaderCell {
@@ -2117,12 +2125,13 @@ table.geProperties tr td {
 }
 
 .gePropHeader {
-	background-color: light-dark(#e5e5e5, var(--dark-panel-color));
+	background-color: light-dark(#e5e5e5, var(--ge-dark-panel-color));
 	color: light-dark(black, #cccccc);
 }
 
 .gePropRowCell {
-	border-left: 1px solid light-dark(#f3f3f3, var(--dark-panel-color));
+	border-left: 1px solid light-dark(#f3f3f3, var(--ge-dark-panel-color));
+	vertical-align: middle;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -2130,15 +2139,15 @@ table.geProperties tr td {
 }
 
 .gePropRow>.gePropRowCell {
-	background-color: light-dark(#fff, var(--dark-panel-color));
+	background-color: light-dark(#fff, var(--ge-dark-panel-color));
 }
 
 .gePropRowAlt>.gePropRowCell {
-	background-color: light-dark(#fcfcfc, var(--dark-panel-color));
+	background-color: light-dark(#fcfcfc, var(--ge-dark-panel-color));
 }
 
 .gePropRowDark>.gePropRowCell {
-	background-color: light-dark(#fff, var(--dark-panel-color));
+	background-color: light-dark(#fff, var(--ge-dark-panel-color));
 	color: light-dark(#305496, #cccccc);
 	font-weight: bold;
 }

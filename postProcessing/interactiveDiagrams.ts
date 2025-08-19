@@ -108,17 +108,17 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 					let hideTimeout: number | null = null;
 
 					
-const showTooltip = (event: MouseEvent) => {
-	if (hideTimeout) {
-		clearTimeout(hideTimeout);
-		hideTimeout = null;
-	}
+					const showTooltip = (event: MouseEvent) => {
+						if (hideTimeout) {
+							clearTimeout(hideTimeout);
+							hideTimeout = null;
+					}
 
-	tooltipDiv.classList.remove("drawio-markdown-tooltip--hidden");
-	tooltipDiv.classList.add("drawio-markdown-tooltip--show");
+					tooltipDiv.classList.remove("drawio-markdown-tooltip--hidden");
+					tooltipDiv.classList.add("drawio-markdown-tooltip--show");
 
-tooltipDiv.style.left = `${event.clientX / 2}px`;
-tooltipDiv.style.top = `${event.clientY}px`;
+					tooltipDiv.style.left = `${event.clientX / 2}px`;
+					tooltipDiv.style.top = `${event.clientY}px`;
 
 };
 
@@ -176,8 +176,21 @@ tooltipDiv.style.top = `${event.clientY}px`;
 					const matchDoubleSquare = hrefLink.match(/\[\[(.*?)\]\]/);
 					if (matchDoubleSquare) {
 						cleanHref = matchDoubleSquare[1];
-						link.classList.add("internal-link");
+						link.classList.add("internal-link");		
 					}
+
+					link.addEventListener("mouseenter", (event) => {
+						if(link.hasClass('internal-link')) {
+						setTimeout(() => {
+						const linkPreview = document.querySelector(".popover") as HTMLElement | null;
+						if (linkPreview) {
+						linkPreview.style.top = event.clientY + "px";
+						linkPreview.style.left = event.clientX + "px";
+						}
+						console.log(linkPreview)
+					}, 400);
+						}
+					});
 
 					link.setAttribute("href", cleanHref);
 				}

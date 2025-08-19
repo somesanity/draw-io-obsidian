@@ -3,7 +3,6 @@ window.TEMPLATE_PATH = 'templates';
 window.DRAW_MATH_URL = 'math/es5';
 window.DRAWIO_BASE_URL = '.'; //Prevent access to online website since it is not allowed
 window.DRAWIO_SERVER_URL = '.';
-FeedbackDialog.feedbackUrl = 'https://log.draw.io/email';
 EditorUi.draftSaveDelay = 5000;
 //Disables eval for JS (uses shapes-14-6-5.min.js)
 mxStencilRegistry.allowEval = false;
@@ -222,11 +221,6 @@ mxStencilRegistry.allowEval = false;
 		menusInit.apply(this, arguments);
 
 		var editorUi = this.editorUi;
-
-		editorUi.actions.put('useOffline', new Action('useOffline' + '...', function()
-		{
-			editorUi.openLink('https://www.draw.io/')
-		}));
 		
 		this.put('openRecent', new Menu(function(menu, parent)
 		{
@@ -634,7 +628,7 @@ mxStencilRegistry.allowEval = false;
 		{
 			origCut();
 			cloneMxCLipboardToSys();
-		}, null, 'sprite-cut', Editor.ctrlKey + '+X');
+		}, null, '', Editor.ctrlKey + '+X');
 		
 		var origCopy = this.actions.get('copy').funct;
 		
@@ -642,7 +636,7 @@ mxStencilRegistry.allowEval = false;
 		{
 			origCopy();
 			cloneMxCLipboardToSys();
-		}, null, 'sprite-copy', Editor.ctrlKey + '+C');
+		}, null, '', Editor.ctrlKey + '+C');
 		
 		//Get data from system clipboard for pase/pasteHere
 		var origPaste = this.actions.get('paste').funct;
@@ -651,7 +645,7 @@ mxStencilRegistry.allowEval = false;
 		{
 			cloneSysCLipboardToMx();
 			origPaste();
-		}, false, 'sprite-paste', Editor.ctrlKey + '+V');
+		}, false, '', Editor.ctrlKey + '+V');
 	
 		var origPasteHere = this.actions.get('pasteHere').funct;
 
@@ -669,7 +663,7 @@ mxStencilRegistry.allowEval = false;
 			var pasteHere = this.actions.get('pasteHere');
 			
 			paste.setEnabled(this.editor.graph.cellEditor.isContentEditing() || 
-					(graph.isEnabled() && !graph.isCellLocked(graph.getDefaultParent())));
+				(graph.isEnabled() && !graph.isCellLocked(graph.getDefaultParent())));
 			pasteHere.setEnabled(paste.isEnabled());
 		};
 		
@@ -1070,6 +1064,11 @@ mxStencilRegistry.allowEval = false;
 	
 	EditorUi.prototype.normalizeFilename = function(title, defaultExtension)
 	{
+		if (!title || typeof title !== 'string')
+		{
+			title = mxResources.get('untitledDiagram');
+		}
+
 		var tokens = title.split('.');
 		var ext = (tokens.length > 1) ? tokens[tokens.length - 1] : '';
 		defaultExtension = (defaultExtension != null) ? defaultExtension : 'drawio';
@@ -1838,7 +1837,7 @@ mxStencilRegistry.allowEval = false;
 	/**
 	 * Copies the given cells and XML to the clipboard as an embedded image.
 	 */
-	EditorUi.prototype.writeImageToClipboard = async function(dataUrl, w, h, error)
+	EditorUi.prototype.writeImageToClipboard = async function(dataUrl, w, h, type, success, error)
 	{
 		try
 		{
@@ -1847,10 +1846,18 @@ mxStencilRegistry.allowEval = false;
 				method: 'writeImage',
 				data: {dataUrl: dataUrl, w: w, h: h}
 			});
+
+			if (success != null)
+			{
+				success();
+			}
 		}
 		catch (e)
 		{
-			error(e);
+			if (error != null)
+			{
+				error(e);
+			}
 		}
 	};
 
@@ -1874,7 +1881,7 @@ mxStencilRegistry.allowEval = false;
 	
 	EditorUi.prototype.saveRequest = function(filename, format, fn, data, base64Encoded, mimeType)
 	{
-		var xhr = fn(null, '1');
+		var xhr = fn(filename, '1');
 		
 		if (xhr != null && this.spinner.spin(document.body, mxResources.get('saving')))
 		{
@@ -1939,11 +1946,11 @@ mxStencilRegistry.allowEval = false;
 	// Direct export to pdf
 	EditorUi.prototype.createDownloadRequest = function(filename, format, ignoreSelection, base64,
 		transparent, currentPage, scale, border, grid, includeXml, pageRange, w, h, crop, margin,
-		fit, sheetsAcross, sheetsDown)
+		fit, sheetsAcross, sheetsDown, shadows)
 	{
 		var params = this.downloadRequestBuilder(filename, format, ignoreSelection, base64,
 			transparent, currentPage, scale, border, grid, includeXml, pageRange, w, h, crop,
-			margin, fit, sheetsAcross, sheetsDown);
+			margin, fit, sheetsAcross, sheetsDown, shadows);
 		
 		return new mxElectronRequest('export', params);
 	};
@@ -1976,7 +1983,8 @@ mxStencilRegistry.allowEval = false;
 			
 			editorUi.hideDialog();
 			
-			if ((format == 'png' || format == 'jpg' || format == 'jpeg') && editorUi.isExportToCanvas())
+			if ((format == 'png' || format == 'jpg' || format == 'jpeg') &&
+				editorUi.editor.isExportToCanvas())
 			{
 				if (format == 'png')
 				{

@@ -1,15 +1,15 @@
-import { Editor, MarkdownEditView, MarkdownView, Menu, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
+import { Editor, MarkdownView, Menu, Notice, Plugin, TFile } from 'obsidian';
 
 import { DRAWIOVIEW } from 'consts';
 import { Drawioview } from 'views/drawioView';
 import { setLocale, t } from 'locales/i18n';
 import { Server } from 'node:http';
-import { launchDrawioServerLogic } from 'handlers/ServerStart';
+import { launchDrawioServerLogic } from 'utils/ServerStart';
 import { DrawioSettings, DEFAULT_SETTINGS } from 'settings/Settings';
 import { DrawioTab } from 'settings/Settings-tab';
-import { CenteringDiagrams } from 'utils/centeringDiagrams';
-import { DefaultDiagramSize } from 'utils/DefaultDiagramSize';
-import { InteractiveDiagrams } from 'utils/interactiveDiagrams';
+import { CenteringDiagrams } from 'postProcessing/centeringDiagrams';
+import { DefaultDiagramSize } from 'postProcessing/DefaultDiagramSize';
+import { InteractiveDiagrams } from 'postProcessing/interactiveDiagrams';
 import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor';
 import { DrawioEmbedModal } from 'views/modalDrawio';
 import { DrawioClientManager } from 'utils/drawioClientManager';

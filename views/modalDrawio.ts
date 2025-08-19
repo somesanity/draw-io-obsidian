@@ -1,6 +1,6 @@
-import { App, Modal, Editor, TFile, Notice, MarkdownView } from 'obsidian';
+import { App, Modal, Editor, TFile, Notice } from 'obsidian';
 import DrawioPlugin from '../main';
-import { forceMarkdownViewUpdate } from '../utils/forceMarkdownViewUpdate';
+import { forceMarkdownViewUpdate } from '../handlers/forceMarkdownViewUpdate';
 import { t } from 'locales/i18n';
 
 export class DrawioEmbedModal extends Modal {

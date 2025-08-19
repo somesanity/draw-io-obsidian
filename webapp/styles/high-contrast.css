@@ -1,11 +1,11 @@
 :root {
-	--panel-color: #ffffff;
+	--ge-panel-color: #ffffff;
 	--border-color: #000000;
 	--text-color: #000000;
 	--toolbar-color: #ffffff;
 	--primary-color: #ffffff;
 	--dark-text-color: #ffffff;
-	--dark-panel-color: #121212;
+	--ge-dark-panel-color: #121212;
 	--dark-toolbar-color: #121212;
 }
 
