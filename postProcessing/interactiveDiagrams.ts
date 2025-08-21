@@ -119,8 +119,7 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 
 					tooltipDiv.style.left = `${event.clientX / 2}px`;
 					tooltipDiv.style.top = `${event.clientY}px`;
-
-};
+			};
 
 					const hideTooltip = () => {
 						hideTimeout = window.setTimeout(() => {
@@ -187,7 +186,6 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 						linkPreview.style.top = event.clientY + "px";
 						linkPreview.style.left = event.clientX + "px";
 						}
-						console.log(linkPreview)
 					}, 400);
 						}
 					});
