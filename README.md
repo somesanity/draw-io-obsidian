@@ -98,6 +98,7 @@ there are 2 ways:
         manifest.json
         main.js
         drawioclient/
+        styles.css
         ```
 
     > Your plugin directory should look like this:
@@ -108,6 +109,7 @@ there are 2 ways:
     >     └── draw-io/
     >         ├── manifest.json
     >         ├── main.js
+    >         ├── styles.css
     >         └── drawioclient   <-- This folder is essential!
     > ```
 
