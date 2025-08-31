@@ -7,6 +7,7 @@
   * 🧩 **Interactivity** – bind your note links to shapes, add external links, and insert markdown fragments!  
   * 🛜 **Works 100% offline** – No internet required!
   * 🔐 **Privacy-first** – Runs a local server on your machine.
+  * 📐 **Mermaid & LaTeX** - Support Mermaid and LaTeX, and export pdf.
 
 ## ✨ Interactive diagrams
 
@@ -35,6 +36,12 @@ Next, insert the markdown text into the property.
 📜 Adding a markdown fragment demo:
 
 ![docs/demo.gif](/docs//markdown-fragment-demo.gif)
+
+### * 📐 **Mermaid & LaTeX**
+
+You can use mermaid and LaTeX (Defaul support in draw.io)
+
+![docs/LaTeX&mermaid.gif](docs/LaTeX&mermaid.gif)
 
 ## ❓ How It Works
 
