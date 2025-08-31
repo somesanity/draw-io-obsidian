@@ -39,7 +39,7 @@ Next, insert the markdown text into the property.
 
 ### 📐 Mermaid & LaTeX
 
-You can use mermaid and LaTeX (Defaul support in draw.io)
+You can use mermaid and LaTeX (Default support in draw.io)
 
 ![docs/LaTeX&mermaid.gif](docs/LaTeX&mermaid.gif)
 
