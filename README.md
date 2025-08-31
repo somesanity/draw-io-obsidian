@@ -37,7 +37,7 @@ Next, insert the markdown text into the property.
 
 ![docs/demo.gif](/docs//markdown-fragment-demo.gif)
 
-### * 📐 **Mermaid & LaTeX**
+### 📐 Mermaid & LaTeX
 
 You can use mermaid and LaTeX (Defaul support in draw.io)
 
