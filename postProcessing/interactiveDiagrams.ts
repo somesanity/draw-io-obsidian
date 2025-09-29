@@ -35,9 +35,6 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 				if (img.hasAttribute("width")) {
 					imgSize = img.getAttribute("width");
 				}
-				if (img.hasAttribute("alt") && img.getAttribute("alt")!.includes("%")) {
-					imgSize = img.getAttribute("alt");
-				}
 
 				const temp = document.createElement("div");
 				temp.innerHTML = data;
