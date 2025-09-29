@@ -38,7 +38,7 @@ private drawioclientwebappManager: DrawioClientManager;
 	this.addRibbonIcon('shapes', t("ribonIconTitle"), async () => {
 		this.activateView()
 		await launchDrawioServerLogic(this)
-	}) 
+	})
 
 	await CenteringDiagrams(this)
 	await DefaultDiagramSize(this)
@@ -48,26 +48,17 @@ private drawioclientwebappManager: DrawioClientManager;
 		this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
 			const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
 			const openDrawioModal = async (file?: TFile) => {
-                await launchDrawioServerLogic(this); 
-                new DrawioEmbedModal(this.app, this, file, editor).open();
-            };
-
-			if(fileToEdit) {
+        await launchDrawioServerLogic(this); 
+        new DrawioEmbedModal(this.app, this, file, editor).open();
+    };
+			if(!fileToEdit) {
 				menu.addItem((item) => {
-					item
-						.setTitle(`${t("editDiagramContextMenu")} ${fileToEdit.basename}`)
-                        .setIcon("pencil")
-                        .setSection("drawio-actions")
-                        .onClick(() => openDrawioModal(fileToEdit));
-				})
-			} else {
-				menu.addItem((item) => {
-                    item
-                        .setTitle(t('CreateNewDiagramContextMenu'))
-                        .setIcon("shapes")
-                        .setSection("drawio-actions")
-                        .onClick(() => openDrawioModal());
-                    });
+          item
+              .setTitle(t('CreateNewDiagramContextMenu'))
+              .setIcon("shapes")
+              .setSection("drawio-actions")
+              .onClick(() => openDrawioModal());
+        });
 			}
 		})
 	)
@@ -80,7 +71,7 @@ private drawioclientwebappManager: DrawioClientManager;
 
         menu.addItem((item) => {
             item
-                .setTitle(t('EditDiagramByFileExplorer'))
+                .setTitle(t('editDiagramContextMenu'))
                 .setIcon("pencil")
                 .onClick(async () => {
                     await launchDrawioServerLogic(this);
@@ -91,7 +82,7 @@ private drawioclientwebappManager: DrawioClientManager;
     })
 );
 
-        this.addCommand({
+      this.addCommand({
             id: 'drawio-create-or-edit',
             name: t('CreateAndEditNewDiagram'),
             editorCallback: async (editor: Editor, view: MarkdownView) => {
@@ -103,6 +94,15 @@ private drawioclientwebappManager: DrawioClientManager;
                 } else {
                     new DrawioEmbedModal(this.app, this, null, editor).open();
                 }
+            }
+        });
+
+        this.addCommand({
+            id: 'open-drawio-editor',
+            name: t('ribonIconTitle'),
+            editorCallback: async () => {
+              this.activateView()
+		          await launchDrawioServerLogic(this)
             }
         });
   }
@@ -139,7 +139,7 @@ async saveSettings() {
   }
 
   async activateView() {
-	const leaf = this.app.workspace.getLeaf(false);
+	const leaf = this.app.workspace.getLeaf(true);
 	if(leaf) {
 		await leaf.setViewState({
 		type: DRAWIOVIEW,

@@ -9,7 +9,6 @@ export async function CenteringDiagrams(plugin: DrawioPlugin) {
 
         embeds.forEach((embed) => {
           embed.classList.remove('drawio-centering-diagrams');
-          
         })
         return
     } else {
