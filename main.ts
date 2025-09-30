@@ -86,7 +86,7 @@ private drawioclientwebappManager: DrawioClientManager;
             id: 'drawio-create-or-edit',
             name: t('CreateAndEditNewDiagram'),
             editorCallback: async (editor: Editor, view: MarkdownView) => {
-                const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view); 
+                const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
                 await launchDrawioServerLogic(this); 
 
                 if (fileToEdit) {
@@ -100,9 +100,16 @@ private drawioclientwebappManager: DrawioClientManager;
         this.addCommand({
             id: 'open-drawio-editor',
             name: t('ribonIconTitle'),
-            editorCallback: async () => {
-              this.activateView()
-		          await launchDrawioServerLogic(this)
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+              const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
+              await launchDrawioServerLogic(this)
+
+              if(fileToEdit) {
+                this.activateView(fileToEdit);
+              } else {
+                this.activateView();
+              }
+
             }
         });
   }
@@ -138,14 +145,28 @@ async saveSettings() {
     }
   }
 
-  async activateView() {
-	const leaf = this.app.workspace.getLeaf(true);
-	if(leaf) {
-		await leaf.setViewState({
-		type: DRAWIOVIEW,
-		active: true,
+async activateView(file?: TFile) {
+    const leaf = this.app.workspace.getLeaf(true);
+    if (!leaf) return;
+    await leaf.setViewState({
+        type: DRAWIOVIEW,
+        active: true,
     });
+
     this.app.workspace.revealLeaf(leaf);
-	}
-  }
+
+    const drawioView = leaf.view;
+
+    if (drawioView instanceof Drawioview && file) {
+        drawioView.setCurrentFile(file);
+        
+        const fileData = await this.app.vault.read(file);
+
+        drawioView.sendMessageToDrawio({
+            action: 'load',
+            xml: fileData,
+            autosave: 1,
+        });
+    }
+}
 }

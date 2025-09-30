@@ -1,18 +1,23 @@
-import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
+import { Editor, ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
 import { DRAWIOVIEW } from 'consts';
 import { t } from 'locales/i18n';
 import DrawioPlugin from 'main';
+import { forceMarkdownViewUpdate } from 'handlers/forceMarkdownViewUpdate';
 
 export class Drawioview extends ItemView {
     public iframe: HTMLIFrameElement | null = null;
     private messageHandler: (event: MessageEvent) => void;
     public plugin: DrawioPlugin;
     public currentFile: TFile | null = null;
-
+    private instanceId: string;
+    private awaitingExport: boolean = false;
     constructor(leaf: WorkspaceLeaf, plugin: DrawioPlugin) {
         super(leaf);
         this.plugin = plugin;
         this.messageHandler = this.listendrawiomessage.bind(this);
+        this.instanceId = (typeof crypto !== 'undefined' && (crypto as any).randomUUID)
+            ? (crypto as any).randomUUID()
+            : `inst_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
     }
 
     getViewType() {
@@ -51,7 +56,8 @@ export class Drawioview extends ItemView {
 
         this.iframe = container.createEl("iframe", {
             attr: {
-                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=${drawioUi}&dark=${drawioDark}&splash=0`,
+                src: `http://localhost:${this.plugin.settings.port}/?embed=1&proto=json&libraries=1&spin=1&ui=${drawioUi}&dark=${drawioDark}&splash=0&instance=${this.instanceId}`,
+                name: this.instanceId
             },
         });
         this.iframe?.addClass('drawioIframe');
@@ -207,64 +213,85 @@ export class Drawioview extends ItemView {
     }
 
     async listendrawiomessage(event: MessageEvent) {
-        if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
+    const expectedOrigin = `http://localhost:${this.plugin.settings.port}`;
+    if (event.origin !== expectedOrigin) return;
 
-        let msg;
-        try {
-            msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        } catch (e) {
-            console.warn('Invalid JSON from draw.io:', event.data);
+    try {
+        if (this.iframe && event.source !== this.iframe.contentWindow) {
             return;
         }
+    } catch (e) {
+        console.debug("Warning: couldn't compare event.source to iframe.contentWindow", e);
+    }
 
-        switch (msg.event) {
-            case 'init': {
-                const xml = this.currentFile
-                    ? await this.app.vault.read(this.currentFile)
-                    : "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
-                this.sendMessageToDrawio({ action: 'load', xml, autosave: 1 });
-                break;
-            }
-            case 'save': {
-                this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
-                break;
-            }
-            case 'export': {
-                let svgContent: string;
-                try {
-                    svgContent = this.decodeSvgDataUri(msg.data);
-                } catch (e: any) {
-                    new Notice(`❌ ${t('FailedDecodeSvg')} ${e.message}`);
-                    return;
-                }
+    let msg: any;
+    try {
+        msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+    } catch (e) {
+        console.warn('Invalid JSON from draw.io:', event.data);
+        return;
+    }
 
+    if (msg.instance && msg.instance !== this.instanceId) return;
+
+    switch (msg.event) {
+        case 'init': {
+            const xml = this.currentFile
+                ? await this.app.vault.read(this.currentFile)
+                : "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
+            this.sendMessageToDrawio({ action: 'load', xml, autosave: 1 });
+            break;
+        }
+
+        case 'save': {
+            if (this.awaitingExport) {
+                return;
+            }
+            this.awaitingExport = true;
+
+            this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
+
+            setTimeout(() => {
+                this.awaitingExport = false;
+            }, 5000);
+            break;
+        }
+
+        case 'export': {
+            this.awaitingExport = false;
+
+            let svgContent: string;
+            try {
+                svgContent = this.decodeSvgDataUri(msg.data);
+            } catch (e: any) {
+                new Notice(`❌ ${t('FailedDecodeSvg')} ${e?.message ?? e}`);
+                return;
+            }
+
+            try {
                 if (!this.currentFile) {
                     const now = new Date();
                     const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = `drawio_${timestamp}.drawio.svg`;
                     const folderPath = this.plugin.settings.Folder;
                     const fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
-
-                    try {
-                        this.currentFile = await this.app.vault.create(fullPath, svgContent);
-                        new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
-                    } catch (e) {
-                        new Notice(`❌ ${t('FailedCreateNewDiagram')} ${fileName}`);
-                        console.error(e);
-                    }
+                    this.currentFile = await this.app.vault.create(fullPath, svgContent);
+                    new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
-                    try {
-                        await this.app.vault.modify(this.currentFile, svgContent);
-                        new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
-                    } catch (e) {
-                        new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile.path}`);
-                        console.error(e);
-                    }
+                    await this.app.vault.modify(this.currentFile, svgContent);
+                    await forceMarkdownViewUpdate(this.app, this.currentFile);
+                    new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
                 }
-                break;
+            } catch (e) {
+                new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile?.path ?? ''}`);
+                console.error(e);
             }
-            case 'exit':
-                break;
+            break;
+        }
+
+        case 'exit': {
+            break;
         }
     }
+    }   
 }

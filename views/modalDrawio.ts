@@ -10,6 +10,8 @@ export class DrawioEmbedModal extends Modal {
     private messageHandler: ((event: MessageEvent) => Promise<void>) | null = null;
     private plugin: DrawioPlugin;
     private isEmptyDiagram: boolean = true;
+    private instanceId: string;
+    private awaitingExport: boolean = false;
 
     constructor(app: App, plugin: DrawioPlugin, fileToEdit: TFile | null = null, editor?: Editor) {
         super(app);
@@ -82,33 +84,50 @@ export class DrawioEmbedModal extends Modal {
     }
 
     private createMessageHandler(): (event: MessageEvent) => Promise<void> {
-        return async (event: MessageEvent) => {
-            if (event.origin !== `http://localhost:${this.plugin.settings.port}`) return;
-            let msg;
-            try {
-                msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-            } catch (e) {
-                console.warn("Could not parse Draw.io message:", event.data, e);
+    return async (event: MessageEvent) => {
+        const expectedOrigin = `http://localhost:${this.plugin.settings.port}`;
+        if (event.origin !== expectedOrigin) return;
+
+        try {
+            if (this.iframe && event.source !== this.iframe.contentWindow) {
                 return;
             }
-            switch (msg.event) {
-                case "init":
-                    await this.handleInitMessage();
-                    break;
-                case "save":
-                    this.sendMessageToDrawio({ action: "export", format: "xmlsvg", xml: 1, empty: 1 });
-                    break;
-                case "export":
-                    await this.handleExportMessage(msg.data);
-                    break;
-                case "change":
-                    this.handleChangeMessage(msg.xml);
-                    break;
-                case "exit":
-                    this.close();
-                    break;
-            }
-        };
+        } catch (e) {
+            console.debug("Warning: couldn't compare event.source to iframe.contentWindow", e);
+        }
+
+        let msg: any;
+        try {
+            msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        } catch (e) {
+            console.warn("Could not parse Draw.io message:", event.data, e);
+            return;
+        }
+
+        if (msg.instance && msg.instance !== this.instanceId) return;
+
+        switch (msg.event) {
+            case "init":
+                await this.handleInitMessage();
+                break;
+            case "save":
+                if (this.awaitingExport) return;
+                this.awaitingExport = true;
+                this.sendMessageToDrawio({ action: "export", format: "xmlsvg", xml: 1 });
+                setTimeout(() => { this.awaitingExport = false; }, 5000);
+                break;
+            case "export":
+                this.awaitingExport = false;
+                await this.handleExportMessage(msg.data);
+                break;
+            case "change":
+                this.handleChangeMessage(msg.xml);
+                break;
+            case "exit":
+                this.close();
+                break;
+        }
+    };
     }
 
     private async handleInitMessage() {
@@ -167,7 +186,7 @@ export class DrawioEmbedModal extends Modal {
         try {
             await this.app.vault.modify(this.currentFile, contentToSave);
             new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
-            forceMarkdownViewUpdate(this.app, this.currentFile);
+            await forceMarkdownViewUpdate(this.app, this.currentFile);
             this.isEmptyDiagram = false;
         } catch (e) {
             new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile.path}`);
