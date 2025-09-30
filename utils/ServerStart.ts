@@ -88,7 +88,6 @@ export async function launchDrawioServerLogic(plugin: DrawioPlugin): Promise<voi
     try {
         plugin.isServerOpen = await serverStart(plugin, webAppPath, Number(PORT));
         await new Promise((res) => setTimeout(res, 1000));
-        console.log(plugin.settings.port)
     } catch (error) {
         plugin.isServerOpen = null;
     }

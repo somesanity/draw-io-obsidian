@@ -26,6 +26,12 @@
 	color-scheme: light !important;
 }
 
+@media print {
+  .drawio-scheme-dark {
+    color-scheme: light !important;
+  }
+}
+
 .drawio-markdown-tooltip {
 	position: fixed;
 	display: none;

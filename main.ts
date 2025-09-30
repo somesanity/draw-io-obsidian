@@ -8,7 +8,7 @@ import { launchDrawioServerLogic } from 'utils/ServerStart';
 import { DrawioSettings, DEFAULT_SETTINGS } from 'settings/Settings';
 import { DrawioTab } from 'settings/Settings-tab';
 import { CenteringDiagrams } from 'postProcessing/centeringDiagrams';
-import { DefaultDiagramSize } from 'postProcessing/DefaultDiagramSize';
+import { PercentSize } from 'postProcessing/PercentSize';
 import { InteractiveDiagrams } from 'postProcessing/interactiveDiagrams';
 import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor';
 import { DrawioEmbedModal } from 'views/modalDrawio';
@@ -41,7 +41,7 @@ private drawioclientwebappManager: DrawioClientManager;
 	})
 
 	await CenteringDiagrams(this)
-	await DefaultDiagramSize(this)
+	await PercentSize(this)
 	await InteractiveDiagrams(this, this.app)
 
 	this.registerEvent(
