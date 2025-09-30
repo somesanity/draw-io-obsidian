@@ -21,6 +21,11 @@ export class ExternalTooltip {
     }
 
 public show(text: string, event: MouseEvent): void {
+    if (this.hideTimeout) {
+        clearTimeout(this.hideTimeout);
+        this.hideTimeout = null;
+    }
+
     if (!document.body.contains(this.tooltipElement)) {
         document.body.appendChild(this.tooltipElement);
     }
@@ -31,7 +36,7 @@ public show(text: string, event: MouseEvent): void {
     this.updatePosition(event);
 }
 
-    public hide(delay = 100) {
+    public hide(delay = 50) {
         if (this.hideTimeout) {
             clearTimeout(this.hideTimeout);
         }

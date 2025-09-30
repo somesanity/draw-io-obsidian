@@ -33,7 +33,9 @@ const drawioDomPlugin = ViewPlugin.fromClass(class {
 
     update(update: any) {
       if (update.docChanged || update.viewportChanged) {
-        this.applyCentering(update.view);
+            setTimeout(() => {
+      this.applyCentering(update.view);
+    }, 0);
       }
     }
 
