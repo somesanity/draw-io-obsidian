@@ -29,7 +29,7 @@ export class Drawioview extends ItemView {
     }
 
     getDisplayText() {
-        return t("DrawIoViewName");
+        return this.currentFile?.name ?? t("DrawIoViewName");
     }
     
     getIcon() {
@@ -43,6 +43,7 @@ export class Drawioview extends ItemView {
         container.empty();
         this.currentFile = null;
         this.isInitialized = false;
+        this.updateTitle();
 
         const theme = (this.app.vault as any).config?.theme || 'system';
         const systemAppearanceIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -197,10 +198,13 @@ export class Drawioview extends ItemView {
         this.iframe = null;
         this.currentFile = null;
         this.isInitialized = false;
+        this.updateTitle();
     }
 
     public async setCurrentFile(file: TFile) {
+        if (this.currentFile?.path === file.path) return;
         this.currentFile = file;
+        this.updateTitle();
         if (this.isInitialized) {
             await this.loadDiagramFromFile(file);
         }
@@ -220,6 +224,9 @@ export class Drawioview extends ItemView {
             if (file instanceof TFile) {
                 await this.setCurrentFile(file);
             }
+        } else {
+            this.currentFile = null;
+            this.updateTitle();
         }
     }
 
@@ -286,8 +293,8 @@ export class Drawioview extends ItemView {
             const isXml = isXmlFormat(this.currentFile);
             
             if (isXml) {
-                // For XML formats, request XML export
-                this.sendMessageToDrawio({ action: 'export', format: 'xml' });
+                // For XML formats, request XML export and include raw XML
+                this.sendMessageToDrawio({ action: 'export', format: 'xml', xml: 1 });
             } else {
                 // For SVG format, use xmlsvg
                 this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
@@ -307,13 +314,12 @@ export class Drawioview extends ItemView {
             let contentToSave: string;
             
             if (isXml) {
-                // For XML formats, the data is already XML string
-                try {
-                    contentToSave = typeof msg.data === 'string' ? msg.data : JSON.stringify(msg.data);
-                } catch (e: any) {
-                    new Notice(`❌ ${t('FailedDecodeSvg')} ${e?.message ?? e}`);
+                const xmlPayload = this.extractXmlPayload(msg);
+                if (!xmlPayload) {
+                    new Notice(`❌ ${t('FailedDecodeSvg')} ${t('NotSaveEmptyDiagram')}`);
                     return;
                 }
+                contentToSave = xmlPayload;
             } else {
                 // For SVG formats, decode the SVG data URI
                 try {
@@ -328,9 +334,10 @@ export class Drawioview extends ItemView {
                 if (!this.currentFile) {
                     const now = new Date();
                     const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
-                    const fileName = `drawio_${timestamp}.drawio.svg`;
+                    const fileName = `drawio_${timestamp}.drawio`;
                     const folderPath = this.plugin.settings.Folder;
                     const fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
+                    await this.ensureDiagramFolderExists();
                     this.currentFile = await this.app.vault.create(fullPath, contentToSave);
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
@@ -346,6 +353,7 @@ export class Drawioview extends ItemView {
         }
 
         case 'exit': {
+            this.leaf.detach();
             break;
         }
     }
@@ -359,5 +367,102 @@ export class Drawioview extends ItemView {
             xml: fileData,
             autosave: 1,
         });
+    }
+
+    private async ensureDiagramFolderExists() {
+        const folderPath = this.plugin.settings.Folder?.trim();
+        if (!folderPath) return;
+
+        const existing = this.app.vault.getAbstractFileByPath(folderPath);
+        if (!existing) {
+            try {
+                await this.app.vault.createFolder(folderPath);
+            } catch (error: any) {
+                if (!error?.message?.includes('already exists')) {
+                    console.error('Failed to create diagram folder', error);
+                }
+            }
+        }
+    }
+
+    private updateTitle() {
+        const title = this.getDisplayText();
+        const leaf: any = this.leaf as any;
+        if (leaf?.tabHeaderInnerTitleEl) {
+            if (typeof leaf.tabHeaderInnerTitleEl.setText === 'function') {
+                leaf.tabHeaderInnerTitleEl.setText(title);
+            } else {
+                leaf.tabHeaderInnerTitleEl.textContent = title;
+            }
+        }
+        if (leaf?.viewHeaderTitleEl) {
+            if (typeof leaf.viewHeaderTitleEl.setText === 'function') {
+                leaf.viewHeaderTitleEl.setText(title);
+            } else {
+                leaf.viewHeaderTitleEl.textContent = title;
+            }
+        }
+    }
+
+    private extractXmlPayload(msg: any): string | null {
+        const xmlField = typeof msg.xml === 'string' ? msg.xml.trim() : '';
+        if (xmlField) return xmlField;
+
+        const dataField = typeof msg.data === 'string' ? msg.data.trim() : '';
+        if (!dataField) return null;
+
+        if (dataField.startsWith('data:image/svg+xml')) {
+            try {
+                const svg = this.decodeSvgDataUri(dataField);
+                return this.extractXmlFromSvg(svg);
+            } catch (e) {
+                console.error('Failed to decode SVG for XML payload', e);
+            }
+            return null;
+        }
+
+        if (dataField.startsWith('data:')) {
+            const commaIndex = dataField.indexOf(',');
+            if (commaIndex !== -1) {
+                const payload = dataField.slice(commaIndex + 1);
+                try {
+                    if (dataField.substring(0, commaIndex).includes(';base64')) {
+                        return atob(payload);
+                    } else {
+                        return decodeURIComponent(payload);
+                    }
+                } catch (e) {
+                    console.error('Failed to decode data URL payload', e);
+                }
+            }
+        }
+
+        if (dataField.startsWith('<svg')) {
+            return this.extractXmlFromSvg(dataField);
+        }
+
+        return dataField.startsWith('<') ? dataField : null;
+    }
+
+    private extractXmlFromSvg(svgContent: string): string | null {
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+            const svgEl = doc.querySelector('svg');
+            const contentAttr = svgEl?.getAttribute('content');
+            if (!contentAttr) return null;
+
+            const decoded = contentAttr
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+
+            return decoded.trim() ? decoded : null;
+        } catch (e) {
+            console.error('Failed to extract XML from SVG', e);
+            return null;
+        }
     }
 }

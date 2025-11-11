@@ -78,16 +78,33 @@ function serverStart(plugin: DrawioPlugin, webAppPath: string, port: number): Pr
     });
 }
 
+async function waitForServerReady(port: number, timeout = 5000): Promise<void> {
+    const start = Date.now();
+    const endpoint = `http://localhost:${port}/index.html`;
+
+    while (Date.now() - start < timeout) {
+        try {
+            const response = await fetch(endpoint, { method: 'HEAD' });
+            if (response.ok || response.status === 404) {
+                return;
+            }
+        } catch (error) {
+            // ignore, retry below
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+}
+
 export async function launchDrawioServerLogic(plugin: DrawioPlugin): Promise<void> {
     if (plugin.isServerOpen) return;
 
-    const PORT = plugin.settings.port
-
+    const PORT = Number(plugin.settings.port);
     const { webAppPath } = getDrawioPaths(plugin.app, plugin.manifest.dir!);
 
     try {
-        plugin.isServerOpen = await serverStart(plugin, webAppPath, Number(PORT));
-        await new Promise((res) => setTimeout(res, 1000));
+        plugin.isServerOpen = await serverStart(plugin, webAppPath, PORT);
+        await waitForServerReady(PORT);
     } catch (error) {
         plugin.isServerOpen = null;
     }

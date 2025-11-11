@@ -140,18 +140,23 @@
 }
 
 /* File icon styles for draw.io files */
-.nav-file-title[data-path$=".drawid"]::before,
-.nav-file-title[data-path$=".drawio"]::before,
-.nav-file-title[data-path$=".drawio.svg"]::before {
-	content: "📐";
-	margin-right: 5px;
-	font-size: 1em;
-}
-
-/* Ensure draw.io files are visible in file explorer */
 .nav-file-title[data-path$=".drawid"],
 .nav-file-title[data-path$=".drawio"],
 .nav-file-title[data-path$=".drawio.svg"] {
 	display: flex;
 	align-items: center;
+}
+
+.nav-file-title[data-path$=".drawid"]::before,
+.nav-file-title[data-path$=".drawio"]::before,
+.nav-file-title[data-path$=".drawio.svg"]::before {
+	content: "";
+	display: inline-block;
+	width: calc(var(--icon-size) + 2px);
+	height: calc(var(--icon-size) + 2px);
+	margin-right: 6px;
+	background-color: currentColor;
+	opacity: 0.9;
+	mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http://www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27black%27%20d%3D%27M4%203a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v4a2%202%200%200%201-2%202H6a2%202%200%200%201-2-2zM14%203a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v4a2%202%200%200%201-2%202h-4a2%202%200%200%201-2-2zM4%2013a2%202%200%200%201%202-2h2.586a2%202%200%200%201%201.414.586l7%207A2%202%200%200%201%2015.586%2021H6a2%202%200%200%201-2-2zM12%209a2%202%200%200%201%202-2h2a2%202%200%200%201%202%202v2a2%202%200%200%201-2%202h-2a2%202%200%200%201-2-2z%27/%3E%3C/svg%3E") center / contain no-repeat;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http://www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27black%27%20d%3D%27M4%203a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v4a2%202%200%200%201-2%202H6a2%202%200%200%201-2-2zM14%203a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v4a2%202%200%200%201-2%202h-4a2%202%200%200%201-2-2zM4%2013a2%202%200%200%201%202-2h2.586a2%202%200%200%201%201.414.586l7%207A2%202%200%200%201%2015.586%2021H6a2%202%200%200%201-2-2zM12%209a2%202%200%200%201%202-2h2a2%202%200%200%201%202%202v2a2%202%200%200%201-2%202h-2a2%202%200%200%201-2-2z%27/%3E%3C/svg%3E") center / contain no-repeat;
 }
