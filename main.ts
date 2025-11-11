@@ -20,6 +20,7 @@ export default class DrawioPlugin extends Plugin {
 isServerOpen: Server | null = null;
 settings: DrawioSettings;
 private drawioclientwebappManager: DrawioClientManager;
+private cachedIframe: HTMLIFrameElement | null = null;
 
   async onload() {
   this.drawioclientwebappManager = new DrawioClientManager(this.app, this.manifest);
@@ -142,6 +143,9 @@ async saveSettings() {
         markdowntooltip.remove();
       });
     }
+
+    // Clear cached iframe
+    this.clearCachedIframe();
   }
 
 private async createNewDiagram() {
@@ -205,6 +209,22 @@ private async createDiagramInFolder(folder: TFolder) {
     } catch (error) {
         console.error('Failed to create diagram file', error);
         new Notice(`❌ ${t('FailedCreateNewDiagram')} ${fullPath}`);
+    }
+}
+
+// Iframe caching methods for performance
+getCachedIframe(): HTMLIFrameElement | null {
+    return this.cachedIframe;
+}
+
+cacheIframe(iframe: HTMLIFrameElement): void {
+    this.cachedIframe = iframe;
+}
+
+clearCachedIframe(): void {
+    if (this.cachedIframe) {
+        this.cachedIframe.remove();
+        this.cachedIframe = null;
     }
 }
 }

@@ -45,6 +45,23 @@ export class Drawioview extends FileView {
 
         const container = this.containerEl.children[1] as any;
         container.empty();
+
+        // Try to reuse cached iframe
+        const cachedIframe = this.plugin.getCachedIframe();
+        if (cachedIframe && cachedIframe.contentWindow) {
+            this.iframe = cachedIframe;
+            container.appendChild(this.iframe);
+            this.isInitialized = true;
+            
+            // Load current file if exists
+            const fileToLoad = this.file ?? this.currentFile;
+            if (fileToLoad) {
+                await this.loadDiagramFromFile(fileToLoad);
+            }
+            return;
+        }
+
+        // Create new iframe if no cache available
         this.isInitialized = false;
 
         const theme = (this.app.vault as any).config?.theme || 'system';
@@ -197,6 +214,13 @@ export class Drawioview extends FileView {
 
     async onClose() {
         window.removeEventListener('message', this.messageHandler);
+        
+        // Cache iframe for reuse instead of destroying it
+        if (this.iframe) {
+            this.plugin.cacheIframe(this.iframe);
+            this.iframe.remove(); // Remove from DOM but keep reference
+        }
+        
         this.iframe = null;
         this.currentFile = null;
         this.isInitialized = false;
