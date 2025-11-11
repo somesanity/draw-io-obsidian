@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * Replay plugin. To record steps in the Editor, click on Extras, Record.
  * To stop recording click Extras, Record again. Enter the delay between
  * the steps and use the URL that opens in the new window.
@@ -167,7 +171,7 @@ Draw.loadPlugin(function(ui) {
 				{
 					if (newValue != null)
 					{
-						var dlg = new EmbedDialog(ui, 'https://www.draw.io/?p=replay&lightbox=1&replay-delay=' +
+						var dlg = new EmbedDialog(ui, 'https://app.diagrams.net/?p=replay&lightbox=1&replay-delay=' +
 							parseFloat(newValue) + '&replay-data=' + Graph.compress('<recording>' +
 							tmp.join('') + '</recording>'));
 						ui.showDialog(dlg.container, 450, 240, true, true);

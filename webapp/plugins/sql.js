@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * Parse SQL CREATE TABLE. Simple initial version for community to improve.
  */
 Draw.loadPlugin(function(ui) {

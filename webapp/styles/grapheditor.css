@@ -313,6 +313,11 @@ div[id*="dgeMermaidOutput-"] {
 	position: relative;
 }
 
+.geFreehandMode,
+.geFreehandMode * {
+	cursor: crosshair !important;
+}
+
 .geDarkMode .geButton,
 .geDarkMode .geHelpIcon:not(.geTitle *),
 .geDarkMode .mxPopupMenuItem>div:not(:has(img)),
@@ -322,6 +327,7 @@ div[id*="dgeMermaidOutput-"] {
 .geDarkMode .geBtnStepper>div,
 .geDarkMode .geColorDropper,
 .geDarkMode .geStyleMenuItem,
+.geDarkMode .gePropHeader,
 .geDarkMode .geStyleBtn .geAdaptiveAsset.geArrow,
 .geAtlas .geMenubar .geButtonContainer .geButton:empty,
 .geAtlas .geMenubar .geButtonContainer .geButton img.geAdaptiveAsset:not(.geDarkMode *),
@@ -874,6 +880,12 @@ div td.mxWindowTitle {
 	right: 0px;
 	bottom: 0px;
 	opacity: 0.9;
+}
+
+.geDialog,
+.geBackground,
+.geEditor .picker-dialog,
+.geEditor .picker-dialog-bg {
 	z-index: 10002;
 }
 
@@ -1272,6 +1284,10 @@ html body div.geBtn.geSmallBanner {
 	height: 100%;
 }
 
+td.mxPopupMenuIcon .geStyleMenuItem {
+	margin: auto;
+}
+
 td.mxPopupMenuIcon .geStyleMenuItem>div {
 	background-position: bottom left;
 	background-repeat: repeat-x;
@@ -1660,7 +1676,7 @@ a.geStatus>div {
 	vertical-align: middle;
 	max-width: 50%;
 	width: 50%;
-	padding: 0;
+	padding: 0 0 0 2px;
 }
 
 .geFormatSection table td select {
@@ -1918,13 +1934,7 @@ a.geStatus>div {
 	max-height: 100%;
 	max-width: 100%;
 	transform: translate(-50%, -50%);
-	z-index: 10004;
 	box-sizing: border-box;
-}
-
-.geEditor .picker-dialog,
-.geEditor .picker-dialog-bg {
-	z-index: 10004;
 }
 
 .geDialog.geInlineDialog {
@@ -2089,7 +2099,8 @@ table.geProperties {
 	table-layout: fixed;
 }
 
-table.geProperties tr td {
+table.geProperties tr td,
+table.geProperties tr th {
 	height: 21px;
 }
 
@@ -2102,11 +2113,7 @@ table.geProperties tr td {
 
 .gePropHeader,
 .gePropRow {
-	border: 1px solid light-dark(var(--border-color), var(--ge-dark-panel-color));
-}
-
-.gePropRowDark {
-	border: 1px solid light-dark(#4472C4, var(--ge-dark-panel-color));
+	border: 1px solid light-dark(var(--border-color), var(--dark-border-color));
 }
 
 .gePropHeader>.gePropHeaderCell {
@@ -2125,17 +2132,21 @@ table.geProperties tr td {
 }
 
 .gePropHeader {
-	background-color: light-dark(#e5e5e5, var(--ge-dark-panel-color));
-	color: light-dark(black, #cccccc);
+	background-color: #e5e5e5;
+	color: black;
 }
 
 .gePropRowCell {
-	border-left: 1px solid light-dark(#f3f3f3, var(--ge-dark-panel-color));
 	vertical-align: middle;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	max-width: 50%;
+}
+
+.gePropHeaderCell:nth-child(2),
+.gePropRowCell:nth-child(2) {
+	border-left: 1px solid light-dark(var(--border-color), var(--dark-border-color));
 }
 
 .gePropRow>.gePropRowCell {

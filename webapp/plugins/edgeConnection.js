@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * Plugin that always creates a small black circle to represent a join
  * when a new edge is dropped with the target end in free space
  */

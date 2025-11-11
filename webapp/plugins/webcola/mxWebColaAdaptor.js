@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2006-2018, JGraph Ltd
- * Copyright (c) 2006-2018, Gaudenz Alder
+ * Copyright (c) 2006-2018, JGraph Holdings Ltd
+ * Copyright (c) 2006-2018, draw.io AG
  */
 /**
  * Class: mxWebColaAdaptor

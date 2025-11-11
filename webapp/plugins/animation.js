@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * Explore plugin.
  */
 Draw.loadPlugin(function(editorUi)
@@ -191,12 +195,20 @@ Draw.loadPlugin(function(editorUi)
 		list.style.height = '100%';
 		td11.appendChild(list);
 		
-		var root = editorUi.editor.graph.getModel().getRoot();
-		
-		if (root.value != null && typeof(root.value) == 'object')
+		var getAnimation = function(cell)
 		{
-			list.value = root.value.getAttribute('animation');
-		}
+			var value = editorUi.editor.graph.getAttributeForCell(cell, 'animation');
+
+			if (value == null)
+			{
+				value = '';
+			}
+			
+			return value;
+		};
+
+		var root = editorUi.editor.graph.getModel().getRoot();
+		list.value = getAnimation(root);
 		
 		var container = document.createElement('div');
 		container.style.border = '1px solid lightGray';
@@ -292,6 +304,7 @@ Draw.loadPlugin(function(editorUi)
 		
 		var applyBtn = mxUtils.button('Apply', function()
 		{
+			var root = editorUi.editor.graph.getModel().getRoot();
 			editorUi.editor.graph.setAttributeForCell(root, 'animation', list.value);
 		});
 		td21.appendChild(applyBtn);
@@ -309,6 +322,24 @@ Draw.loadPlugin(function(editorUi)
 		this.window.setResizable(true);
 		this.window.setClosable(true);
 		this.window.setVisible(true);
+
+		var currentRoot = editorUi.editor.graph.getModel().getRoot();
+
+		editorUi.editor.graph.addListener(mxEvent.ROOT, function()
+		{
+			var newRoot =  editorUi.editor.graph.getModel().getRoot();
+
+			if (newRoot != currentRoot)
+			{
+				if (getAnimation(currentRoot) != list.value)
+				{
+					editorUi.editor.graph.setAttributeForCell(currentRoot, 'animation', list.value);
+				}
+
+				currentRoot = newRoot;
+				list.value = getAnimation(currentRoot);
+			}
+		});
 	};
 	
 	// Autostart in chromeless mode

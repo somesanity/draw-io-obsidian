@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * Main
  */
 if (typeof AJS === 'undefined') // conf insists on pulling in this file into batch.js for atlas-debug

@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * A Draw.io diagram viewer component with configurable toolbar buttons for editing, deleting and zooming buttons.
  * Parameters :
  * diagramName - name of the diagram

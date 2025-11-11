@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
+/**
  * URL Parameters and protocol description are here:
  *
  * https://www.drawio.com/doc/faq/supported-url-parameters
@@ -72,7 +76,7 @@ if (urlParams['dev'] != '1')
             // Redirects apex, drive and rt to www
             if (host === 'draw.io' || host === 'rt.draw.io' || host === 'drive.draw.io')
             {
-                host = 'www.draw.io';
+                host = 'app.diagrams.net';
             }
             
             var href = proto + '//' + host + window.location.href.substring(

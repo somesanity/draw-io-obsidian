@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019-2020, JGraph Ltd
+ * Copyright (c) 2019-2020, JGraph Holdings Ltd
  */
 /**
  * Class: mxOrgChartLayout

@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2020-2025, JGraph Holdings Ltd
+ * Copyright (c) 2020-2025, draw.io AG
+ */
 window.PLUGINS_BASE_PATH = '.';
 window.TEMPLATE_PATH = 'templates';
 window.DRAW_MATH_URL = 'math/es5';
@@ -36,6 +40,9 @@ mxStencilRegistry.allowEval = false;
 	
 	// Overrides default mode
 	App.mode = App.MODE_DEVICE;
+	
+	// Automatic sync on conflicts
+	Editor.desktopAutoSync = false;
 	
 	// Disables all external transmission functionality
 	App.prototype.isExternalDataComms = function()
@@ -213,6 +220,20 @@ mxStencilRegistry.allowEval = false;
 		//Disable web plugins loading
 		urlParams['plugins'] = '0';
 		origAppMain.apply(this, arguments);
+	};
+
+	var editorCongigure = Editor.configure;
+	Editor.configure = function(config)
+	{
+		editorCongigure.apply(this, arguments);
+
+		if (config != null)
+		{
+			if (config.desktopAutoSync != null)
+			{
+				Editor.desktopAutoSync = config.desktopAutoSync;
+			}
+		}
 	};
 	
 	var menusInit = Menus.prototype.init;
@@ -894,18 +915,13 @@ mxStencilRegistry.allowEval = false;
 	EditorUi.prototype.fileLoaded = async function(file)
 	{
 		var oldFile = this.getCurrentFile();
-		
+
 		if (oldFile != null)
 		{
 			//TODO This assumes the user confirmed discarding the file changes to get to this function?
 			if (EditorUi.enableDrafts)
 			{
 				oldFile.removeDraft();
-			}
-
-			if (oldFile.fileObject != null)
-			{
-				await requestSync({action: 'unwatchFile', path: oldFile.fileObject.path});
 			}
 		}
 		
@@ -932,55 +948,112 @@ mxStencilRegistry.allowEval = false;
 			if (file.fileObject != null)
 			{
 				file.addToRecent();
-			
-				await requestSync({
-					action: 'watchFile', 
-					path: file.fileObject.path,
-					listener: mxUtils.bind(this, function(curr, prev) 
-					{
-						EditorUi.debug('EditorUi.watchFile', [this],
-							'file', [file], 'stat', [file.stat],
-							'curr', [curr], 'prev', [prev],
-							'inConflictState', file.inConflictState,
-							'unwatchedSaves', file.unwatchedSaves);
-						
-						// File not deleted, changed (not just accessed) and not already in conflict state
-						if (curr.mtimeMs != 0 && curr.mtimeMs != prev.mtimeMs && !file.inConflictState)
-						{
-							//Ignore our own changes
-							if (file.unwatchedSaves || (file.stat != null && file.stat.mtimeMs == curr.mtimeMs))
-							{
-								file.unwatchedSaves = false;
-								return;
-							}
-							
-							file.inConflictState = true;
-
-							file.addConflictStatus(null, mxUtils.bind(this, function()
-							{
-								file.ui.updateStatus(mxUtils.bind(this, function()
-								{
-									file.ui.editor.setStatus(mxUtils.htmlEntities(
-										mxResources.get('updatingDocument')));
-								}));
-
-								file.synchronizeFile(mxUtils.bind(this, function()
-								{
-									file.handleFileSuccess(false);
-								}), mxUtils.bind(this, function(err)
-								{
-									file.handleFileError(err, true);
-								}));
-							}));
-						}
-					})
-				});
 			}
 		}
-		
+
+		this.watchFile(file);
 		origFileLoaded.apply(this, arguments);
 	};
+
+	var origSetCurrentFile = EditorUi.prototype.setCurrentFile;
+
+	EditorUi.prototype.setCurrentFile = function(file)
+	{
+		origSetCurrentFile.apply(this, arguments);
+		this.watchFile(file);
+	};
+
+	// Monitor the given file for changes
+	EditorUi.prototype.watchFile = async function(file)
+	{
+		var newPath = (file != null && file.fileObject != null &&
+			file == this.getCurrentFile()) ? file.fileObject.path : null;
+		
+		if (this.watchedPath != newPath)
+		{
+			this.unwatchPath(this.watchedPath);
+		}
+
+		if (newPath != null)
+		{
+			this.watchedPath = newPath;
+			this.watchPath(newPath);
+		}
+	};
 	
+	// Unwatches the given path
+	EditorUi.prototype.unwatchPath = async function(path)
+	{
+		if (path != null)
+		{
+			EditorUi.debug('EditorUi.unwatchPath', [this], 'path', [path]);
+
+			await requestSync({action: 'unwatchFile', path: path});
+		};
+	};
+
+	// Watches the path for changes
+	EditorUi.prototype.watchPath = async function(path)
+	{
+		if (path != null)
+		{
+			EditorUi.debug('EditorUi.watchPath', [this], 'path', [path]);
+
+			await requestSync({
+				action: 'watchFile', 
+				path: path,
+				listener: mxUtils.bind(this, function(curr, prev) 
+				{
+					var file = this.getCurrentFile();
+
+					if (file != null && file.fileObject != null &&
+						file.fileObject.path == path)
+					{
+						this.handleFileChange(curr, prev, file);
+					}
+				})
+			});
+		}
+	};
+
+	// Uses local picker
+	EditorUi.prototype.handleFileChange = function(curr, prev, file)
+	{
+		// File not deleted, changed (not just accessed) and not already in conflict state
+		if (curr.mtimeMs != 0 && curr.mtimeMs != prev.mtimeMs && !file.inConflictState)
+		{
+			//Ignore our own changes
+			if (file.unwatchedSaves || (file.stat != null && file.stat.mtimeMs == curr.mtimeMs))
+			{
+				file.unwatchedSaves = false;
+				return;
+			}
+
+			EditorUi.debug('EditorUi.handleFileChange', [this],
+				'file', [file], 'stat', [file.stat],
+				'curr', [curr], 'prev', [prev],
+				'unwatchedSaves', file.unwatchedSaves);
+			file.inConflictState = true;
+
+			file.addConflictStatus(null, mxUtils.bind(this, function()
+			{
+				file.ui.updateStatus(mxUtils.bind(this, function()
+				{
+					file.ui.editor.setStatus(mxUtils.htmlEntities(
+						mxResources.get('updatingDocument')));
+				}));
+
+				file.synchronizeFile(mxUtils.bind(this, function()
+				{
+					file.handleFileSuccess(false);
+				}), mxUtils.bind(this, function(err)
+				{
+					file.handleFileError(err, true);
+				}));
+			}));
+		}
+	};
+
 	// Uses local picker
 	App.prototype.pickFile = function()
 	{
@@ -1392,7 +1465,7 @@ mxStencilRegistry.allowEval = false;
 		
 		if (!this.savingFile)
 		{
-			var fn = mxUtils.bind(this, function()
+			var fn = mxUtils.bind(this, function(fileSavedFn)
 			{
 				var doSave = mxUtils.bind(this, function(data, enc)
 				{
@@ -1431,8 +1504,14 @@ mxStencilRegistry.allowEval = false;
 						
 						this.fileSaved(savedData, lastDesc, mxUtils.bind(this, function()
 						{
+							this.ui.watchFile(this);
 							this.contentChanged();
 							
+							if (fileSavedFn != null)
+							{
+								fileSavedFn();
+							}
+
 							if (success != null)
 							{
 								success();
@@ -1507,7 +1586,17 @@ mxStencilRegistry.allowEval = false;
 						this.fileObject.type = 'utf-8';
 						this.title = this.fileObject.name;
 						this.addToRecent();
-						fn();
+						fn(mxUtils.bind(this, function()
+						{
+							if (EditorUi.enableDrafts)
+							{
+								this.removeDraft(true);
+							}
+						}));
+
+						// Updates format panel to show autosave option
+						var editor = this.ui.editor;
+						editor.setAutosave(editor.autosave);
 					}
 					else
 					{
@@ -1523,6 +1612,21 @@ mxStencilRegistry.allowEval = false;
 			{
 				error(e);
 			}
+		}
+	};
+
+
+	var origAddConflictStatus = LocalFile.prototype.addConflictStatus;
+
+	LocalFile.prototype.addConflictStatus = function(message, fn)
+	{
+		if (Editor.desktopAutoSync && this.ui.editor.autosave)
+		{
+			fn();
+		}
+		else
+		{
+			origAddConflictStatus.apply(this, arguments);
 		}
 	};
 
@@ -1577,7 +1681,11 @@ mxStencilRegistry.allowEval = false;
 				this.title = this.fileObject.name;
 				this.addToRecent();
 				this.setEditable(true); //In case original file is read only
-				this.save(false, success, error, null, true);
+				this.save(false, mxUtils.bind(this, function()
+				{
+					this.ui.watchFile(this);
+					success();
+				}), error, null, true);
 			}
 		}
 		catch (e)
@@ -1598,6 +1706,9 @@ mxStencilRegistry.allowEval = false;
 		}
 		else
 		{
+			EditorUi.debug('LocalFile.saveDraft', [this],
+				'fileObject', [this.fileObject]);
+			
 			electron.request({
 				action: 'saveDraft',
 				fileObject: this.fileObject,
@@ -1612,17 +1723,20 @@ mxStencilRegistry.allowEval = false;
 		}
 	};
 
-	LocalFile.prototype.removeDraft = async function()
+	LocalFile.prototype.removeDraft = async function(ignoreFileObject)
 	{
 		try
 		{
-			if (this.fileObject == null)
+			if (ignoreFileObject || this.fileObject == null)
 			{
 				//Use indexed db for unsaved files
 				DrawioFile.prototype.removeDraft.apply(this, arguments);
 			}
 			else if (this.fileObject.draftFileName != null)
 			{
+				EditorUi.debug('LocalFile.removeDraft', [this],
+					'draftFileName', [this.fileObject.draftFileName]);
+				
 				await requestSync({action: 'deleteFile', file: this.fileObject.draftFileName});
 			}
 		}
