@@ -34,8 +34,9 @@ private cachedIframe: HTMLIFrameElement | null = null;
 		(leaf) => new Drawioview(leaf, this) 
 	)
 
-	// Override file opening for draw.io files
-	this.registerExtensions(['drawid', 'drawio', 'drawio.svg'], DRAWIOVIEW);
+	// Override file opening for draw.io files (only .drawio and .drawid)
+	// .drawio.svg files are handled separately in file-open event
+	this.registerExtensions(['drawid', 'drawio'], DRAWIOVIEW);
 	
 	const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
 	setLocale(userLang);
@@ -47,6 +48,21 @@ private cachedIframe: HTMLIFrameElement | null = null;
 	await CenteringDiagrams(this)
 	await PercentSize(this)
 	await InteractiveDiagrams(this, this.app)
+
+	// Handle .drawio.svg files specifically
+	this.registerEvent(
+		this.app.workspace.on('file-open', (file) => {
+			if (file instanceof TFile && file.name.endsWith('.drawio.svg')) {
+				const leaf = this.app.workspace.getLeaf(false);
+				if (leaf && leaf.view.getViewType() !== DRAWIOVIEW) {
+					leaf.setViewState({
+						type: DRAWIOVIEW,
+						state: { file: file.path }
+					});
+				}
+			}
+		})
+	);
 
 	this.registerEvent(
 		this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
@@ -78,6 +94,34 @@ private cachedIframe: HTMLIFrameElement | null = null;
                         await this.createDiagramInFolder(file);
                     });
             });
+        } else if (file instanceof TFile) {
+            // Add "Edit with draw.io" for draw.io files
+            if (isDrawioFile(file)) {
+                menu.addItem((item) => {
+                    item
+                        .setTitle(t('editDiagramContextMenu'))
+                        .setIcon("pencil")
+                        .onClick(async () => {
+                            const leaf = this.app.workspace.getLeaf(false);
+                            await leaf.openFile(file);
+                        });
+                });
+            }
+            // Add "Open with draw.io" for any SVG file
+            if (file.extension === 'svg') {
+                menu.addItem((item) => {
+                    item
+                        .setTitle('Open with draw.io')
+                        .setIcon("shapes")
+                        .onClick(async () => {
+                            const leaf = this.app.workspace.getLeaf(false);
+                            await leaf.setViewState({
+                                type: DRAWIOVIEW,
+                                state: { file: file.path }
+                            });
+                        });
+                });
+            }
         }
     })
 );

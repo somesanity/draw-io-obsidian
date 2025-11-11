@@ -33,7 +33,9 @@ export class Drawioview extends FileView {
     }
 
     canAcceptExtension(extension: string): boolean {
-        return ['drawio', 'drawid'].includes(extension) || extension === 'drawio.svg';
+        // Accept drawio and drawid extensions
+        // .drawio.svg files are handled via file-open event in main.ts
+        return ['drawio', 'drawid'].includes(extension);
     }
     
     getIcon() {
@@ -228,6 +230,9 @@ export class Drawioview extends FileView {
     }
 
     async onLoadFile(file: TFile): Promise<void> {
+        // Accept all SVG files (both .drawio.svg and plain .svg)
+        // Plain .svg files can be opened via right-click menu "Open with draw.io"
+        
         if (this.currentFile?.path === file.path) return;
         this.currentFile = file;
         this.updateTitle();
