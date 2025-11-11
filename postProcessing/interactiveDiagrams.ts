@@ -18,7 +18,7 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 	plugin.registerMarkdownPostProcessor(
 		async (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 			const embeds = el.querySelectorAll<HTMLSpanElement>(
-				'span.internal-embed[src$=".drawio.svg"]'
+				'span.internal-embed[src$=".drawio.svg"], span.internal-embed[src$=".drawid"]'
 			);
 
 			for (const embed of Array.from(embeds)) {

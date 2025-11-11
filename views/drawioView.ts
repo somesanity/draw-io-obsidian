@@ -3,6 +3,7 @@ import { DRAWIOVIEW } from 'consts';
 import { t } from 'locales/i18n';
 import DrawioPlugin from 'main';
 import { forceMarkdownViewUpdate } from 'handlers/forceMarkdownViewUpdate';
+import { isXmlFormat } from 'handlers/fileExtensionUtils';
 
 export class Drawioview extends ItemView {
     public iframe: HTMLIFrameElement | null = null;
@@ -249,7 +250,16 @@ export class Drawioview extends ItemView {
             }
             this.awaitingExport = true;
 
-            this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
+            // Determine export format based on file extension
+            const isXml = isXmlFormat(this.currentFile);
+            
+            if (isXml) {
+                // For XML formats, request XML export
+                this.sendMessageToDrawio({ action: 'export', format: 'xml' });
+            } else {
+                // For SVG format, use xmlsvg
+                this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
+            }
 
             setTimeout(() => {
                 this.awaitingExport = false;
@@ -260,12 +270,26 @@ export class Drawioview extends ItemView {
         case 'export': {
             this.awaitingExport = false;
 
-            let svgContent: string;
-            try {
-                svgContent = this.decodeSvgDataUri(msg.data);
-            } catch (e: any) {
-                new Notice(`❌ ${t('FailedDecodeSvg')} ${e?.message ?? e}`);
-                return;
+            const isXml = isXmlFormat(this.currentFile);
+
+            let contentToSave: string;
+            
+            if (isXml) {
+                // For XML formats, the data is already XML string
+                try {
+                    contentToSave = typeof msg.data === 'string' ? msg.data : JSON.stringify(msg.data);
+                } catch (e: any) {
+                    new Notice(`❌ ${t('FailedDecodeSvg')} ${e?.message ?? e}`);
+                    return;
+                }
+            } else {
+                // For SVG formats, decode the SVG data URI
+                try {
+                    contentToSave = this.decodeSvgDataUri(msg.data);
+                } catch (e: any) {
+                    new Notice(`❌ ${t('FailedDecodeSvg')} ${e?.message ?? e}`);
+                    return;
+                }
             }
 
             try {
@@ -275,10 +299,10 @@ export class Drawioview extends ItemView {
                     const fileName = `drawio_${timestamp}.drawio.svg`;
                     const folderPath = this.plugin.settings.Folder;
                     const fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
-                    this.currentFile = await this.app.vault.create(fullPath, svgContent);
+                    this.currentFile = await this.app.vault.create(fullPath, contentToSave);
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
-                    await this.app.vault.modify(this.currentFile, svgContent);
+                    await this.app.vault.modify(this.currentFile, contentToSave);
                     await forceMarkdownViewUpdate(this.app, this.currentFile);
                     new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
                 }

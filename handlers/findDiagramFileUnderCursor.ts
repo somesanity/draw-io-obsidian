@@ -1,10 +1,11 @@
 import { Editor, MarkdownView, TFile, App } from "obsidian";
+import { DRAWIO_FILE_PATTERN } from "consts";
 
 export function findDiagramFileUnderCursor(app: App, editor: Editor, view: MarkdownView): TFile | null {
     const cursor = editor.getCursor();
     const line = editor.getLine(cursor.line);
 
-    const linkRegex = /!\[\[([^|\]]+\.(?:drawio(?:\.svg)?))[^\]]*\]\]|!\[[^\]]*\]\(([^)\s]+?\.(?:drawio(?:\.svg)?))\)/g;
+    const linkRegex = new RegExp(`!\\[\\[([^|\\]]+\\.(?:drawio(?:\\.svg)?|drawid))[^\\]]*\\]\\]|!\\[[^\\]]*\\]\\(([^)\\s]+?\\.(?:drawio(?:\\.svg)?|drawid))\\)`, 'g');
     let match: RegExpExecArray | null;
 
     while ((match = linkRegex.exec(line)) !== null) {
@@ -27,6 +28,7 @@ export function findDiagramFileUnderCursor(app: App, editor: Editor, view: Markd
             const byPath = app.vault.getAbstractFileByPath(linkText);
             if (byPath instanceof TFile) return byPath;
 
+            // Try alternative extensions
             if (linkText.endsWith(".drawio")) {
                 const alt = linkText + ".svg";
                 const altFile = app.vault.getAbstractFileByPath(alt);
@@ -35,6 +37,15 @@ export function findDiagramFileUnderCursor(app: App, editor: Editor, view: Markd
                 const alt = linkText.replace(/\.svg$/, "");
                 const altFile = app.vault.getAbstractFileByPath(alt);
                 if (altFile instanceof TFile) return altFile;
+            } else if (linkText.endsWith(".drawid")) {
+                // Try .drawio.svg and .drawio alternatives
+                const alt1 = linkText.replace(/\.drawid$/, ".drawio.svg");
+                const altFile1 = app.vault.getAbstractFileByPath(alt1);
+                if (altFile1 instanceof TFile) return altFile1;
+                
+                const alt2 = linkText.replace(/\.drawid$/, ".drawio");
+                const altFile2 = app.vault.getAbstractFileByPath(alt2);
+                if (altFile2 instanceof TFile) return altFile2;
             }
 
             return null;

@@ -4,7 +4,7 @@ import { ViewPlugin, EditorView } from "@codemirror/view";
 export async function CenteringDiagrams(plugin: DrawioPlugin) {
     if(!plugin.settings.centeringDiagram) {
         const embeds = document.querySelectorAll<HTMLDivElement>(
-        'div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]'
+        'div.internal-embed.media-embed.image-embed[src$=".drawio.svg"], div.internal-embed.media-embed.image-embed[src$=".drawid"]'
         );
 
         embeds.forEach((embed) => {
@@ -13,7 +13,7 @@ export async function CenteringDiagrams(plugin: DrawioPlugin) {
         return
     } else {
       plugin.registerMarkdownPostProcessor((el, ctx) => {
-      const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
+      const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"], span.internal-embed[src$=".drawid"]');
 
       embeds.forEach((embed) => {
         const wrapper = document.createElement('div');
@@ -43,7 +43,7 @@ const drawioDomPlugin = ViewPlugin.fromClass(class {
       const editorDom = view.dom;
 
       const embeds = editorDom.querySelectorAll<HTMLDivElement>(
-        'div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]'
+        'div.internal-embed.media-embed.image-embed[src$=".drawio.svg"], div.internal-embed.media-embed.image-embed[src$=".drawid"]'
       );
 
       embeds.forEach((embed) => {

@@ -3,12 +3,12 @@ import { ViewPlugin, EditorView } from "@codemirror/view";
 
 export async function PercentSize(plugin: DrawioPlugin) {
     if(!plugin.settings.percentSize) {
-        const embeds = document.body.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
+        const embeds = document.body.querySelectorAll('span.internal-embed[src$=".drawio.svg"], span.internal-embed[src$=".drawid"]');
         embeds.forEach(embed => {
             embed.removeAttribute('width');
         });
 
-        const editembeds = document.body.querySelectorAll('div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]')
+        const editembeds = document.body.querySelectorAll('div.internal-embed.media-embed.image-embed[src$=".drawio.svg"], div.internal-embed.media-embed.image-embed[src$=".drawid"]')
         for (const embed of Array.from(editembeds)) {
             const img = embed.querySelector("img");
             if(img?.hasAttribute('width')) {
@@ -19,7 +19,7 @@ export async function PercentSize(plugin: DrawioPlugin) {
         return;
     } else {
         plugin.registerMarkdownPostProcessor((el, ctx) => {
-            const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"]');
+            const embeds = el.querySelectorAll('span.internal-embed[src$=".drawio.svg"], span.internal-embed[src$=".drawid"]');
             embeds.forEach((embed) => {
                 const width = embed.getAttribute('alt')
 
@@ -45,7 +45,7 @@ export async function PercentSize(plugin: DrawioPlugin) {
     applyCentering(view: EditorView) {
       const editorDom = view.dom;
 
-            const embeds = editorDom.querySelectorAll('div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]');
+            const embeds = editorDom.querySelectorAll('div.internal-embed.media-embed.image-embed[src$=".drawio.svg"], div.internal-embed.media-embed.image-embed[src$=".drawid"]');
             const percentpattern = /^(100|[1-9]?\d)%$/;
             for (const embed of Array.from(embeds)) {
                 const img = embed.querySelector("img");

@@ -13,6 +13,7 @@ import { InteractiveDiagrams } from 'postProcessing/interactiveDiagrams';
 import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor';
 import { DrawioEmbedModal } from 'views/modalDrawio';
 import { DrawioClientManager } from 'utils/drawioClientManager';
+import { isDrawioFile } from 'handlers/fileExtensionUtils';
 
 export default class DrawioPlugin extends Plugin {
 
@@ -67,7 +68,7 @@ private drawioclientwebappManager: DrawioClientManager;
     this.app.workspace.on("file-menu", (menu, file) => {
         if (!(file instanceof TFile)) return;
 
-        if (!file.name.endsWith(".drawio.svg")) return;
+        if (!isDrawioFile(file)) return;
 
         menu.addItem((item) => {
             item

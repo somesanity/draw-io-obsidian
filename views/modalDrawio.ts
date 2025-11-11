@@ -2,6 +2,7 @@ import { App, Modal, Editor, TFile, Notice } from 'obsidian';
 import DrawioPlugin from '../main';
 import { forceMarkdownViewUpdate } from '../handlers/forceMarkdownViewUpdate';
 import { t } from 'locales/i18n';
+import { isXmlFormat } from '../handlers/fileExtensionUtils';
 
 export class DrawioEmbedModal extends Modal {
     private editor?: Editor;
@@ -113,7 +114,17 @@ export class DrawioEmbedModal extends Modal {
             case "save":
                 if (this.awaitingExport) return;
                 this.awaitingExport = true;
-                this.sendMessageToDrawio({ action: "export", format: "xmlsvg", xml: 1 });
+                
+                // Determine export format based on file extension
+                const isXml = isXmlFormat(this.currentFile);
+                
+                if (isXml) {
+                    // For XML formats, request XML export
+                    this.sendMessageToDrawio({ action: "export", format: "xml" });
+                } else {
+                    // For SVG format, use xmlsvg
+                    this.sendMessageToDrawio({ action: "export", format: "xmlsvg", xml: 1 });
+                }
                 setTimeout(() => { this.awaitingExport = false; }, 5000);
                 break;
             case "export":
@@ -140,8 +151,8 @@ export class DrawioEmbedModal extends Modal {
         }
     }
 
-    private async handleExportMessage(svgDataUri: string) {
-        await this.saveDiagramFromModal(svgDataUri);
+    private async handleExportMessage(data: string) {
+        await this.saveDiagramFromModal(data);
     }
 
     private handleChangeMessage(xmlContent: string) {
@@ -149,17 +160,41 @@ export class DrawioEmbedModal extends Modal {
         this.isEmptyDiagram = (!xmlContent || xmlContent === baseEmptyXml);
     }
 
-    private async saveDiagramFromModal(svgDataUri: string) {
+    private async saveDiagramFromModal(data: string) {
+        const isXml = isXmlFormat(this.currentFile);
+        
         let contentToSave: string;
-        try {
-            contentToSave = this.decodeSvgDataUri(svgDataUri);
-        } catch (e: any) {
-            new Notice(`❌ ${t('FailedDecodeSvg')} ${e.message}`);
-            return;
+        
+        if (isXml) {
+            // For XML formats, the data is already XML string
+            try {
+                contentToSave = typeof data === 'string' ? data : JSON.stringify(data);
+            } catch (e: any) {
+                new Notice(`❌ ${t('FailedDecodeSvg')} ${e.message}`);
+                return;
+            }
+        } else {
+            // For SVG formats, decode the SVG data URI
+            try {
+                contentToSave = this.decodeSvgDataUri(data);
+            } catch (e: any) {
+                new Notice(`❌ ${t('FailedDecodeSvg')} ${e.message}`);
+                return;
+            }
         }
-        if (this.isSvgContentActuallyEmpty(contentToSave)) {
+        // Check for empty content (only for SVG format)
+        if (!isXml && this.isSvgContentActuallyEmpty(contentToSave)) {
             new Notice(`${t('NotSaveEmptyDiagram')}`);
             return;
+        }
+        
+        // For XML format, check if it's empty
+        if (isXml) {
+            const baseEmptyXml = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
+            if (!contentToSave || contentToSave.trim() === baseEmptyXml || contentToSave.trim() === "") {
+                new Notice(`${t('NotSaveEmptyDiagram')}`);
+                return;
+            }
         }
         if (!this.currentFile) {
             const newFile = await this.handleNewDiagramCreation();
