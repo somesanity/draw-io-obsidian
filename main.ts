@@ -28,6 +28,9 @@ private drawioclientwebappManager: DrawioClientManager;
 	await this.loadSettings();
 	this.addSettingTab(new DrawioTab(this.app, this));
 
+	// Register draw.io file extensions with the custom view
+	this.registerExtensions(['drawid', 'drawio', 'drawio.svg'], DRAWIOVIEW);
+
 	this.registerView(
 		DRAWIOVIEW,
 		(leaf) => new Drawioview(leaf, this) 
@@ -37,9 +40,16 @@ private drawioclientwebappManager: DrawioClientManager;
 	setLocale(userLang);
 
 	this.addRibbonIcon('shapes', t("ribonIconTitle"), async () => {
-		this.activateView()
-		await launchDrawioServerLogic(this)
+		await this.activateView()
 	})
+
+	this.registerEvent(
+		this.app.workspace.on('file-open', async (file) => {
+			if (file && isDrawioFile(file)) {
+				await launchDrawioServerLogic(this);
+			}
+		})
+	)
 
 	await CenteringDiagrams(this)
 	await PercentSize(this)
@@ -75,9 +85,7 @@ private drawioclientwebappManager: DrawioClientManager;
                 .setTitle(t('editDiagramContextMenu'))
                 .setIcon("pencil")
                 .onClick(async () => {
-                    await launchDrawioServerLogic(this);
-
-                    new DrawioEmbedModal(this.app, this, file, undefined).open();
+                    await this.activateView(file);
                 });
         });
     })
@@ -103,12 +111,11 @@ private drawioclientwebappManager: DrawioClientManager;
             name: t('ribonIconTitle'),
             editorCallback: async (editor: Editor, view: MarkdownView) => {
               const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
-              await launchDrawioServerLogic(this)
 
               if(fileToEdit) {
-                this.activateView(fileToEdit);
+                await this.activateView(fileToEdit);
               } else {
-                this.activateView();
+                await this.activateView();
               }
 
             }
@@ -149,9 +156,15 @@ async saveSettings() {
 async activateView(file?: TFile) {
     const leaf = this.app.workspace.getLeaf(true);
     if (!leaf) return;
+
+    await launchDrawioServerLogic(this);
+
     await leaf.setViewState({
         type: DRAWIOVIEW,
         active: true,
+        state: {
+            file: file?.path ?? null,
+        }
     });
 
     this.app.workspace.revealLeaf(leaf);
@@ -159,15 +172,7 @@ async activateView(file?: TFile) {
     const drawioView = leaf.view;
 
     if (drawioView instanceof Drawioview && file) {
-        drawioView.setCurrentFile(file);
-        
-        const fileData = await this.app.vault.read(file);
-
-        drawioView.sendMessageToDrawio({
-            action: 'load',
-            xml: fileData,
-            autosave: 1,
-        });
+        await drawioView.setCurrentFile(file);
     }
 }
 }

@@ -1,8 +1,9 @@
-import { Editor, ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
 import { DRAWIOVIEW } from 'consts';
 import { t } from 'locales/i18n';
 import DrawioPlugin from 'main';
 import { forceMarkdownViewUpdate } from 'handlers/forceMarkdownViewUpdate';
+import { launchDrawioServerLogic } from 'utils/ServerStart';
 import { isXmlFormat } from 'handlers/fileExtensionUtils';
 
 export class Drawioview extends ItemView {
@@ -12,6 +13,8 @@ export class Drawioview extends ItemView {
     public currentFile: TFile | null = null;
     private instanceId: string;
     private awaitingExport: boolean = false;
+    private isInitialized: boolean = false;
+    private readonly EMPTY_DIAGRAM_XML = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
     constructor(leaf: WorkspaceLeaf, plugin: DrawioPlugin) {
         super(leaf);
         this.plugin = plugin;
@@ -34,9 +37,12 @@ export class Drawioview extends ItemView {
     }
 
     async onOpen() {
+        await launchDrawioServerLogic(this.plugin);
+
         const container = this.containerEl.children[1] as any;
         container.empty();
         this.currentFile = null;
+        this.isInitialized = false;
 
         const theme = (this.app.vault as any).config?.theme || 'system';
         const systemAppearanceIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -190,16 +196,39 @@ export class Drawioview extends ItemView {
         window.removeEventListener('message', this.messageHandler);
         this.iframe = null;
         this.currentFile = null;
+        this.isInitialized = false;
     }
 
-    public setCurrentFile(file: TFile) {
+    public async setCurrentFile(file: TFile) {
         this.currentFile = file;
+        if (this.isInitialized) {
+            await this.loadDiagramFromFile(file);
+        }
     }
 
     public sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
             this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
+    }
+
+    async setState(state: any, result?: any): Promise<void> {
+        await super.setState(state, result);
+
+        if (state?.file) {
+            const file = this.app.vault.getAbstractFileByPath(state.file);
+            if (file instanceof TFile) {
+                await this.setCurrentFile(file);
+            }
+        }
+    }
+
+    getState(): any {
+        const baseState = super.getState();
+        return {
+            ...baseState,
+            file: this.currentFile?.path ?? null,
+        };
     }
 
     private decodeSvgDataUri(svgDataUri: string): string {
@@ -237,10 +266,13 @@ export class Drawioview extends ItemView {
 
     switch (msg.event) {
         case 'init': {
-            const xml = this.currentFile
-                ? await this.app.vault.read(this.currentFile)
-                : "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
-            this.sendMessageToDrawio({ action: 'load', xml, autosave: 1 });
+            this.isInitialized = true;
+
+            if (this.currentFile) {
+                await this.loadDiagramFromFile(this.currentFile);
+            } else {
+                this.sendMessageToDrawio({ action: 'load', xml: this.EMPTY_DIAGRAM_XML, autosave: 1 });
+            }
             break;
         }
 
@@ -317,5 +349,15 @@ export class Drawioview extends ItemView {
             break;
         }
     }
-    }   
+    }
+
+    private async loadDiagramFromFile(file: TFile) {
+        const fileData = await this.app.vault.read(file);
+
+        this.sendMessageToDrawio({
+            action: 'load',
+            xml: fileData,
+            autosave: 1,
+        });
+    }
 }

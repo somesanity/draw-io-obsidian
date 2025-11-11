@@ -138,3 +138,20 @@
     font-family: inherit !important;
     border-bottom: inherit !important;
 }
+
+/* File icon styles for draw.io files */
+.nav-file-title[data-path$=".drawid"]::before,
+.nav-file-title[data-path$=".drawio"]::before,
+.nav-file-title[data-path$=".drawio.svg"]::before {
+	content: "📐";
+	margin-right: 5px;
+	font-size: 1em;
+}
+
+/* Ensure draw.io files are visible in file explorer */
+.nav-file-title[data-path$=".drawid"],
+.nav-file-title[data-path$=".drawio"],
+.nav-file-title[data-path$=".drawio.svg"] {
+	display: flex;
+	align-items: center;
+}
