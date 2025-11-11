@@ -28,28 +28,20 @@ private drawioclientwebappManager: DrawioClientManager;
 	await this.loadSettings();
 	this.addSettingTab(new DrawioTab(this.app, this));
 
-	// Register draw.io file extensions with the custom view
-	this.registerExtensions(['drawid', 'drawio', 'drawio.svg'], DRAWIOVIEW);
-
 	this.registerView(
 		DRAWIOVIEW,
 		(leaf) => new Drawioview(leaf, this) 
 	)
+
+	// Override file opening for draw.io files
+	this.registerExtensions(['drawid', 'drawio', 'drawio.svg'], DRAWIOVIEW);
 	
 	const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
 	setLocale(userLang);
 
 	this.addRibbonIcon('shapes', t("ribonIconTitle"), async () => {
-		await this.activateView()
+		await this.createNewDiagram();
 	})
-
-	this.registerEvent(
-		this.app.workspace.on('file-open', async (file) => {
-			if (file && isDrawioFile(file)) {
-				await launchDrawioServerLogic(this);
-			}
-		})
-	)
 
 	await CenteringDiagrams(this)
 	await PercentSize(this)
@@ -76,20 +68,6 @@ private drawioclientwebappManager: DrawioClientManager;
 
   this.registerEvent(
     this.app.workspace.on("file-menu", (menu, file) => {
-        if (file instanceof TFile) {
-            if (!isDrawioFile(file)) return;
-
-            menu.addItem((item) => {
-                item
-                    .setTitle(t('editDiagramContextMenu'))
-                    .setIcon("pencil")
-                    .onClick(async () => {
-                        await this.activateView(file);
-                    });
-            });
-            return;
-        }
-
         if (file instanceof TFolder) {
             menu.addItem((item) => {
                 item
@@ -121,15 +99,16 @@ private drawioclientwebappManager: DrawioClientManager;
         this.addCommand({
             id: 'open-drawio-editor',
             name: t('ribonIconTitle'),
-            editorCallback: async (editor: Editor, view: MarkdownView) => {
-              const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
+            callback: async () => {
+                await this.createNewDiagram();
+            }
+        });
 
-              if(fileToEdit) {
-                await this.activateView(fileToEdit);
-              } else {
-                await this.activateView();
-              }
-
+        this.addCommand({
+            id: 'create-new-diagram',
+            name: 'Create new diagram',
+            callback: async () => {
+                await this.createNewDiagram();
             }
         });
   }
@@ -165,45 +144,38 @@ async saveSettings() {
     }
   }
 
-async activateView(file?: TFile) {
-    const workspace = this.app.workspace;
-    const leaves = workspace.getLeavesOfType(DRAWIOVIEW);
+private async createNewDiagram() {
+    const folderPath = this.settings.Folder || '';
+    const baseName = 'diagram';
+    const extension = '.drawio';
 
-    if (file && leaves.length > 0) {
-        const existingLeaf = leaves.find((leaf) => {
-            const view = leaf.view;
-            return view instanceof Drawioview && view.currentFile?.path === file.path;
-        });
+    let fileName = `${baseName}${extension}`;
+    let counter = 1;
+    let fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
 
-        if (existingLeaf) {
-            workspace.revealLeaf(existingLeaf);
-            const existingView = existingLeaf.view;
-            if (existingView instanceof Drawioview) {
-                await existingView.setCurrentFile(file);
-            }
-            return;
-        }
+    while (this.app.vault.getAbstractFileByPath(fullPath)) {
+        fileName = `${baseName}-${counter}${extension}`;
+        fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
+        counter += 1;
     }
 
-    const targetLeaf = workspace.getLeaf(true);
-    if (!targetLeaf) return;
+    const emptyDiagram = "<mxGraphModel><root><mxCell id='0'/><mxCell id='1' parent='0'/></root></mxGraphModel>";
 
-    await launchDrawioServerLogic(this);
-
-    await targetLeaf.setViewState({
-        type: DRAWIOVIEW,
-        active: true,
-        state: {
-            file: file?.path ?? null,
+    try {
+        if (folderPath) {
+            const folder = this.app.vault.getAbstractFileByPath(folderPath);
+            if (!folder) {
+                await this.app.vault.createFolder(folderPath);
+            }
         }
-    });
-
-    workspace.revealLeaf(targetLeaf);
-
-    const drawioView = targetLeaf.view;
-
-    if (drawioView instanceof Drawioview && file) {
-        await drawioView.setCurrentFile(file);
+        const newFile = await this.app.vault.create(fullPath, emptyDiagram);
+        new Notice(`✅ ${t('CreatedNewDiagram')} ${newFile.path}`);
+        
+        const leaf = this.app.workspace.getLeaf(false);
+        await leaf.openFile(newFile);
+    } catch (error) {
+        console.error('Failed to create diagram file', error);
+        new Notice(`❌ ${t('FailedCreateNewDiagram')} ${fullPath}`);
     }
 }
 
@@ -227,7 +199,9 @@ private async createDiagramInFolder(folder: TFolder) {
     try {
         const newFile = await this.app.vault.create(fullPath, emptyDiagram);
         new Notice(`✅ ${t('CreatedNewDiagram')} ${newFile.path}`);
-        await this.activateView(newFile);
+        
+        const leaf = this.app.workspace.getLeaf(false);
+        await leaf.openFile(newFile);
     } catch (error) {
         console.error('Failed to create diagram file', error);
         new Notice(`❌ ${t('FailedCreateNewDiagram')} ${fullPath}`);

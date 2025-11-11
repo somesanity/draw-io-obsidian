@@ -1,4 +1,4 @@
-import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
+import { FileView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
 import { DRAWIOVIEW } from 'consts';
 import { t } from 'locales/i18n';
 import DrawioPlugin from 'main';
@@ -6,7 +6,7 @@ import { forceMarkdownViewUpdate } from 'handlers/forceMarkdownViewUpdate';
 import { launchDrawioServerLogic } from 'utils/ServerStart';
 import { isXmlFormat } from 'handlers/fileExtensionUtils';
 
-export class Drawioview extends ItemView {
+export class Drawioview extends FileView {
     public iframe: HTMLIFrameElement | null = null;
     private messageHandler: (event: MessageEvent) => void;
     public plugin: DrawioPlugin;
@@ -29,7 +29,11 @@ export class Drawioview extends ItemView {
     }
 
     getDisplayText() {
-        return this.currentFile?.name ?? t("DrawIoViewName");
+        return this.file?.name ?? t("DrawIoViewName");
+    }
+
+    canAcceptExtension(extension: string): boolean {
+        return ['drawio', 'drawid'].includes(extension) || extension === 'drawio.svg';
     }
     
     getIcon() {
@@ -41,9 +45,7 @@ export class Drawioview extends ItemView {
 
         const container = this.containerEl.children[1] as any;
         container.empty();
-        this.currentFile = null;
         this.isInitialized = false;
-        this.updateTitle();
 
         const theme = (this.app.vault as any).config?.theme || 'system';
         const systemAppearanceIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -201,7 +203,7 @@ export class Drawioview extends ItemView {
         this.updateTitle();
     }
 
-    public async setCurrentFile(file: TFile) {
+    async onLoadFile(file: TFile): Promise<void> {
         if (this.currentFile?.path === file.path) return;
         this.currentFile = file;
         this.updateTitle();
@@ -210,33 +212,17 @@ export class Drawioview extends ItemView {
         }
     }
 
+    async onUnloadFile(): Promise<void> {
+        this.currentFile = null;
+        this.updateTitle();
+    }
+
     public sendMessageToDrawio(message: object) {
         if (this.iframe && this.iframe.contentWindow) {
             this.iframe.contentWindow.postMessage(JSON.stringify(message), `http://localhost:${this.plugin.settings.port}`);
         }
     }
 
-    async setState(state: any, result?: any): Promise<void> {
-        await super.setState(state, result);
-
-        if (state?.file) {
-            const file = this.app.vault.getAbstractFileByPath(state.file);
-            if (file instanceof TFile) {
-                await this.setCurrentFile(file);
-            }
-        } else {
-            this.currentFile = null;
-            this.updateTitle();
-        }
-    }
-
-    getState(): any {
-        const baseState = super.getState();
-        return {
-            ...baseState,
-            file: this.currentFile?.path ?? null,
-        };
-    }
 
     private decodeSvgDataUri(svgDataUri: string): string {
         if (svgDataUri.startsWith("data:image/svg+xml;base64,")) {
@@ -275,8 +261,9 @@ export class Drawioview extends ItemView {
         case 'init': {
             this.isInitialized = true;
 
-            if (this.currentFile) {
-                await this.loadDiagramFromFile(this.currentFile);
+            const fileToLoad = this.file ?? this.currentFile;
+            if (fileToLoad) {
+                await this.loadDiagramFromFile(fileToLoad);
             } else {
                 this.sendMessageToDrawio({ action: 'load', xml: this.EMPTY_DIAGRAM_XML, autosave: 1 });
             }
@@ -331,7 +318,8 @@ export class Drawioview extends ItemView {
             }
 
             try {
-                if (!this.currentFile) {
+                const targetFile = this.file ?? this.currentFile;
+                if (!targetFile) {
                     const now = new Date();
                     const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = `drawio_${timestamp}.drawio`;
@@ -341,12 +329,13 @@ export class Drawioview extends ItemView {
                     this.currentFile = await this.app.vault.create(fullPath, contentToSave);
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
-                    await this.app.vault.modify(this.currentFile, contentToSave);
-                    await forceMarkdownViewUpdate(this.app, this.currentFile);
-                    new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
+                    await this.app.vault.modify(targetFile, contentToSave);
+                    await forceMarkdownViewUpdate(this.app, targetFile);
+                    new Notice(`💾 ${t('saveDiagram')} ${targetFile.path}`);
                 }
             } catch (e) {
-                new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile?.path ?? ''}`);
+                const fileForError = this.file ?? this.currentFile;
+                new Notice(`❌ ${t('FailedToSaveDiagram')} ${fileForError?.path ?? ''}`);
                 console.error(e);
             }
             break;
