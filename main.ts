@@ -13,6 +13,7 @@ import { InteractiveDiagrams } from 'postProcessing/interactiveDiagrams';
 import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor';
 import { DrawioEmbedModal } from 'views/modalDrawio';
 import { DrawioClientManager } from 'utils/drawioClientManager';
+import { SetFileNameModal } from 'views/SetFileNameModal';
 
 export default class DrawioPlugin extends Plugin {
 
@@ -29,7 +30,7 @@ private drawioclientwebappManager: DrawioClientManager;
 
 	this.registerView(
 		DRAWIOVIEW,
-		(leaf) => new Drawioview(leaf, this) 
+		(leaf) => new Drawioview(leaf, this)
 	)
 	
 	const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
@@ -48,9 +49,9 @@ private drawioclientwebappManager: DrawioClientManager;
 		this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
 			const fileToEdit = findDiagramFileUnderCursor(this.app, editor, view);
 			const openDrawioModal = async (file?: TFile) => {
-        await launchDrawioServerLogic(this); 
+        await launchDrawioServerLogic(this);
         new DrawioEmbedModal(this.app, this, file, editor).open();
-    };
+      };
 			if(!fileToEdit) {
 				menu.addItem((item) => {
           item
@@ -94,6 +95,24 @@ private drawioclientwebappManager: DrawioClientManager;
                 } else {
                     new DrawioEmbedModal(this.app, this, null, editor).open();
                 }
+            }
+        });
+
+        this.addCommand({
+            id: 'drawio-SetFileName',
+            name: t('SetFileNameForDiagram'),
+            callback: () => {
+              const leaf = this.app.workspace.getActiveViewOfType(Drawioview);
+
+              if(!leaf) {
+                return;
+              }
+
+              if(!leaf.currentFile) {
+                new SetFileNameModal(this.app, (fileName) => {
+                  leaf.setFileName(fileName);
+                }).open();
+              }
             }
         });
 
@@ -154,12 +173,10 @@ async activateView(file?: TFile) {
     });
 
     this.app.workspace.revealLeaf(leaf);
-
     const drawioView = leaf.view;
-
     if (drawioView instanceof Drawioview && file) {
         drawioView.setCurrentFile(file);
-        
+        drawioView.setFileName(file.basename.replace(/\.[^/.]+$/, ""))
         const fileData = await this.app.vault.read(file);
 
         drawioView.sendMessageToDrawio({

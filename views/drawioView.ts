@@ -9,6 +9,7 @@ export class Drawioview extends ItemView {
     private messageHandler: (event: MessageEvent) => void;
     public plugin: DrawioPlugin;
     public currentFile: TFile | null = null;
+    public fileName: string | null = null;
     private instanceId: string;
     private awaitingExport: boolean = false;
     constructor(leaf: WorkspaceLeaf, plugin: DrawioPlugin) {
@@ -18,14 +19,19 @@ export class Drawioview extends ItemView {
         this.instanceId = (typeof crypto !== 'undefined' && (crypto as any).randomUUID)
             ? (crypto as any).randomUUID()
             : `inst_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
-    }
+        this.fileName = this.fileName;
+        }
 
     getViewType() {
         return DRAWIOVIEW;
     }
 
     getDisplayText() {
-        return t("DrawIoViewName");
+        if(this.fileName) {
+            return `${this.fileName}`;
+        } else {
+            return t("DrawIoViewName");
+        }
     }
     
     getIcon() {
@@ -96,15 +102,16 @@ export class Drawioview extends ItemView {
             event.preventDefault();
             const dt = event.dataTransfer;
             if (!dt) return;
+            console.log
 
             try { console.debug('text/plain:', dt.getData && dt.getData('text/plain')); } catch(e) {}
-
             if (dt.files && dt.files.length > 0) {
                 for (let i = 0; i < dt.files.length; i++) {
                     const file = dt.files[i];
                     const text = await file.text();
                     const folder = this.plugin.settings.Folder;
                     const candidatePath = folder ? `${folder}/${file.name}` : file.name;
+                
                     try {
                         const existing = this.app.vault.getAbstractFileByPath(candidatePath);
                         if (!existing) {
@@ -115,6 +122,7 @@ export class Drawioview extends ItemView {
                             await this.app.vault.modify(this.currentFile, text);
                             new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
                         }
+
                     } catch (e) {
                         console.error(e);
                         new Notice(`❌ ${t('FailedCreateNewDiagram')} ${file.name}`);
@@ -144,6 +152,7 @@ export class Drawioview extends ItemView {
                                     if (!af && path.startsWith('/')) af = this.app.vault.getAbstractFileByPath(path.replace(/^\/+/, ''));
                                     if (af instanceof TFile) {
                                         this.currentFile = af;
+                                        this.setFileName(this.currentFile.basename.replace(/\.[^/.]+$/, ""));
                                         const xml = await this.app.vault.read(af);
                                         this.sendMessageToDrawio({ action: 'load', xml, autosave: 1 });
                                     } else {
@@ -193,6 +202,12 @@ export class Drawioview extends ItemView {
 
     public setCurrentFile(file: TFile) {
         this.currentFile = file;
+    }
+
+    public setFileName(fileName: string) {
+        this.fileName = fileName;
+
+        (this.leaf as any).updateHeader?.();
     }
 
     public sendMessageToDrawio(message: object) {
@@ -270,16 +285,24 @@ export class Drawioview extends ItemView {
 
             try {
                 if (!this.currentFile) {
+                    const folderPath = this.plugin.settings.Folder;
+                    if(this.fileName) {
+                        const fileName = `${this.fileName}.drawio.svg`;
+                        const fullPath = folderPath ? `${folderPath}/${fileName}` : this.fileName;
+                        this.currentFile = await this.app.vault.create(fullPath as string, svgContent);
+                        return new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
+                    }
                     const now = new Date();
                     const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
                     const fileName = `drawio_${timestamp}.drawio.svg`;
-                    const folderPath = this.plugin.settings.Folder;
-                    const fullPath = folderPath ? `${folderPath}/${fileName}` : fileName;
-                    this.currentFile = await this.app.vault.create(fullPath, svgContent);
+                    const fullPath = `${folderPath}/${fileName}`;
+                    this.currentFile = await this.app.vault.create(fullPath as string, svgContent);
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
                     await this.app.vault.modify(this.currentFile, svgContent);
+
                     await forceMarkdownViewUpdate(this.app, this.currentFile);
+                    this.setFileName(this.currentFile.basename.replace(/\.[^/.]+$/, ""))
                     new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
                 }
             } catch (e) {
