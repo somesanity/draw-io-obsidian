@@ -1,52 +1,60 @@
 import DrawioPlugin from "main";
-import { Plugin, Setting } from "obsidian";
+import { MarkdownPostProcessor } from "obsidian";
 
-export function enableDrawioResize(DrawioPlugin: DrawioPlugin): (plugin: DrawioPlugin) => void {
-    const isInsidePopover = (element: Element): boolean => {
-        return element.closest('.hover-popover') !== null;
+export function drawioHoverResizeProcessor(plugin: DrawioPlugin) {
+    const desired = plugin.settings.HoverSizeDiagram;
+
+    const matches = (el: Element) =>
+        el.matches('img[src*=".drawio.svg"], span.internal-embed');
+
+    const applyResize = (el: HTMLElement) => {
+        if (el.getAttribute("width") === desired) return;
+        el.setAttribute("width", desired);
     };
 
-    const applyAttributes = (element: HTMLElement | SVGElement) => {
-        if (!isInsidePopover(element)) return;
-        if (element.getAttribute("width") === DrawioPlugin.settings.HoverSizeDiagram) return; 
-        element.setAttribute("width", DrawioPlugin.settings.HoverSizeDiagram);
-        element.dataset.resized = "true";
-    };
+    const observePopover = () => {
+        const popovers = document.querySelectorAll(".hover-popover");
 
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) { 
-            if (mutation.type === 'childList' && mutation.addedNodes.length) {
-                mutation.addedNodes.forEach((node) => {
-                    if (node instanceof HTMLElement) {
-                        if (checkSelector(node)) {
-                            applyAttributes(node);
-                        }
-                        const children = node.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed');
-                        children.forEach((child) => applyAttributes(child as HTMLElement));
+        popovers.forEach(pop => {
+            if ((pop as HTMLElement).dataset.resizeObserverAttached === "1") return;
+            (pop as HTMLElement).dataset.resizeObserverAttached = "1";
+
+            const observer = new MutationObserver(mutations => {
+                for (const m of mutations) {
+                    if (m.type === "childList") {
+                        m.addedNodes.forEach(node => {
+                            if (!(node instanceof HTMLElement)) return;
+
+                            if (matches(node)) applyResize(node);
+
+                            node.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed')
+                                .forEach(ch => applyResize(ch as HTMLElement));
+                        });
                     }
-                });
-            }
 
-            if (mutation.type === 'attributes' && mutation.target instanceof HTMLElement) {
-                const target = mutation.target;
-                
-                if (checkSelector(target) && isInsidePopover(target)) {
-                    applyAttributes(target);
+                    if (m.type === "attributes") {
+                        const el = m.target as HTMLElement;
+                        if (matches(el)) applyResize(el);
+                    }
                 }
-            }
-        }
-    });
+            });
 
-    const checkSelector = (el: Element) => {
-        return el.matches('img[src*=".drawio.svg"]') || el.matches('span.internal-embed');
-    }
+            observer.observe(pop, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ["src", "width", "class"]
+            });
 
-    observer.observe(document.body, { 
-        childList: true, 
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['width', 'style', 'class']
-    });
+            plugin.register(() => observer.disconnect());
+        });
+    };
 
-    return () => observer.disconnect();
+    const interval = window.setInterval(observePopover, 200);
+    plugin.register(() => clearInterval(interval));
+
+    return (el: HTMLElement, ctx: MarkdownPostProcessor) => {
+        el.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed')
+            .forEach(t => applyResize(t as HTMLElement));
+    };
 }

@@ -14,7 +14,7 @@ import { findDiagramFileUnderCursor } from 'handlers/findDiagramFileUnderCursor'
 import { DrawioEmbedModal } from 'views/modalDrawio';
 import { DrawioClientManager } from 'utils/drawioClientManager';
 import { SetFileNameModal } from 'views/SetFileNameModal';
-import { enableDrawioResize } from 'postProcessing/ResizeEmbedDiagramsInLink';
+import { drawioHoverResizeProcessor } from 'postProcessing/ResizeEmbedDiagramsInLink'
 
 export default class DrawioPlugin extends Plugin {
 
@@ -46,7 +46,9 @@ private cleanupResizeListener: (DrawioPlugin: DrawioPlugin) => void;
 	await CenteringDiagrams(this)
 	await PercentSize(this)
 	await InteractiveDiagrams(this, this.app)
-  this.cleanupResizeListener = enableDrawioResize(this);
+  this.registerMarkdownPostProcessor(
+      drawioHoverResizeProcessor(this)
+  );
 
 	this.registerEvent(
 		this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
