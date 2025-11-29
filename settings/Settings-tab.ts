@@ -107,5 +107,18 @@ export class DrawioTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl)
+    .setName(`${t('SETTINGS__HoverSizeDiagram_Name')}`)
+    .setDesc(`${t('SETTINGS__HoverSizeDiagram_Description')}`)
+    .addText((text) =>
+      text
+        .setPlaceholder('100%')
+        .setValue(this.plugin.settings.HoverSizeDiagram)
+        .onChange(async (value) => {
+          this.plugin.settings.HoverSizeDiagram = value;
+          await this.plugin.saveSettings();
+        })
+    );
   }
 }

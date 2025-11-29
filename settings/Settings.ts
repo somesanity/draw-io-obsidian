@@ -6,6 +6,7 @@ export interface DrawioSettings {
   useMarkdownLinks: boolean;
   Folder: string;
   diagramSize: string;
+  HoverSizeDiagram: string;
 }
 
 export const DEFAULT_SETTINGS: Partial<DrawioSettings> = {
@@ -16,4 +17,5 @@ export const DEFAULT_SETTINGS: Partial<DrawioSettings> = {
   useMarkdownLinks: false,
   Folder: 'drawio',
   diagramSize: '',
+  HoverSizeDiagram: '100%',
 };
