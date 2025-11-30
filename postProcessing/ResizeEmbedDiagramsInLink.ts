@@ -1,15 +1,28 @@
 import DrawioPlugin from "main";
-import { MarkdownPostProcessor } from "obsidian";
+import { MarkdownPostProcessorContext, Plugin, Setting } from "obsidian";
 
 export function drawioHoverResizeProcessor(plugin: DrawioPlugin) {
     const desired = plugin.settings.HoverSizeDiagram;
 
-    const matches = (el: Element) =>
-        el.matches('img[src*=".drawio.svg"], span.internal-embed');
+    const isTarget = (node: Element) => {
+        return node.matches && (
+            node.matches('img[src*=".drawio.svg"]') || 
+            node.matches('span.internal-embed[src*=".drawio.svg"]')
+        );
+    };
 
     const applyResize = (el: HTMLElement) => {
-        if (el.getAttribute("width") === desired) return;
+        if (!el.closest('.hover-popover')) return;
+
+        if (el.getAttribute("width") === desired && el.style.width === desired) return;
+
         el.setAttribute("width", desired);
+        el.style.width = desired;
+        
+        const svg = el.querySelector('svg');
+        if (svg) {
+            svg.style.width = plugin.settings.HoverSizeDiagram;
+        }
     };
 
     const observePopover = () => {
@@ -25,16 +38,15 @@ export function drawioHoverResizeProcessor(plugin: DrawioPlugin) {
                         m.addedNodes.forEach(node => {
                             if (!(node instanceof HTMLElement)) return;
 
-                            if (matches(node)) applyResize(node);
+                            if (isTarget(node)) applyResize(node);
 
-                            node.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed')
-                                .forEach(ch => applyResize(ch as HTMLElement));
+                            const children = node.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed[src*=".drawio.svg"]');
+                            children.forEach(ch => applyResize(ch as HTMLElement));
                         });
                     }
-
                     if (m.type === "attributes") {
                         const el = m.target as HTMLElement;
-                        if (matches(el)) applyResize(el);
+                        if (isTarget(el)) applyResize(el);
                     }
                 }
             });
@@ -43,18 +55,25 @@ export function drawioHoverResizeProcessor(plugin: DrawioPlugin) {
                 subtree: true,
                 childList: true,
                 attributes: true,
-                attributeFilter: ["src", "width", "class"]
+                attributeFilter: ["src", "class", "width"]
             });
 
             plugin.register(() => observer.disconnect());
         });
     };
 
-    const interval = window.setInterval(observePopover, 200);
+    const interval = window.setInterval(observePopover, 500);
     plugin.register(() => clearInterval(interval));
 
-    return (el: HTMLElement, ctx: MarkdownPostProcessor) => {
-        el.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed')
-            .forEach(t => applyResize(t as HTMLElement));
+    return (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+        setTimeout(() => {
+            el.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed[src*=".drawio.svg"]')
+                .forEach(t => applyResize(t as HTMLElement));
+        }, 0);
+        
+        setTimeout(() => {
+            el.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed[src*=".drawio.svg"]')
+                .forEach(t => applyResize(t as HTMLElement));
+        }, 100);
     };
 }
