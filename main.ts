@@ -15,6 +15,7 @@ import { DrawioEmbedModal } from 'views/modalDrawio';
 import { DrawioClientManager } from 'utils/drawioClientManager';
 import { SetFileNameModal } from 'views/SetFileNameModal';
 import { drawioHoverResizeProcessor } from 'postProcessing/ResizeEmbedDiagramsInLink'
+import { DRAWIO_EXTENSION_RENDER_VIEW, DrawioExtensionRenderView } from 'views/DrawioExtensionRenderView';
 
 export default class DrawioPlugin extends Plugin {
 
@@ -34,7 +35,14 @@ private cleanupResizeListener: (DrawioPlugin: DrawioPlugin) => void;
 		DRAWIOVIEW,
 		(leaf) => new Drawioview(leaf, this)
 	)
-	
+
+  this.registerView(
+	  DRAWIO_EXTENSION_RENDER_VIEW,
+	  (leaf) => new DrawioExtensionRenderView(leaf, this)
+	)
+
+  this.registerExtensions(["drawio", ".drawid"], DRAWIO_EXTENSION_RENDER_VIEW);
+
 	const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
 	setLocale(userLang);
 

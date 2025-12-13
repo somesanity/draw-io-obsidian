@@ -18,6 +18,11 @@
 	align-items: center;
 }
 
+.centered-diagram--RenderView {
+	display: flex;
+	justify-content: center;
+}
+
 .drawio-scheme-dark {
 	color-scheme: dark !important;
 }
