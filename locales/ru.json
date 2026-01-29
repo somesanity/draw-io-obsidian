@@ -22,6 +22,7 @@
     "FileNotFoundIntoVault": "Не удалось найти файл в хранилище:",
     "FailedRecognizeTranslateData": "Не удалось распознать перенесённые данные.",
     "FailedDecodeSvg": "Не удалось декодировать SVG-элемент:",
+    "FileNameExist": "Файл с таким именем уже существует!",
     "NotSaveEmptyDiagram": "Пустая диаграмма, сохранять нечего.",
     "ErrorValidSvgData": "Получена некорректное содержимое SVG.",
     "FailedDeleteEmptyDiagram": "Не удалось удалить пустую диаграмму:",

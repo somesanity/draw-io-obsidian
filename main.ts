@@ -122,9 +122,10 @@ private cleanupResizeListener: (DrawioPlugin: DrawioPlugin) => void;
               }
 
               if(!leaf.currentFile) {
-                new SetFileNameModal(this.app, (fileName) => {
+                new SetFileNameModal(this.app, this.settings.Folder, (fileName) => {
                   leaf.setFileName(fileName);
-                }).open();
+                }).open()
+                return;
               }
             }
         });

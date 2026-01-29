@@ -22,6 +22,7 @@
     "FileNotFoundIntoVault": "File not found into the Vault:",
     "FailedRecognizeTranslateData": "Failed to recognize the transferred data.",
     "FailedDecodeSvg": "Failed to decode SVG content:",
+    "FileNameExist": "a file with that name already exists",
     "NotSaveEmptyDiagram": "Diagram is empty. Nothing to save.",
     "ErrorValidSvgData": "Invalid SVG data format received.",
     "FailedDeleteEmptyDiagram": "Failed to delete empty diagram file:",
