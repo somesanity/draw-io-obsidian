@@ -38,6 +38,22 @@ export class Drawioview extends ItemView {
         return 'shapes';
     }
 
+    async setState(state: any, result: any): Promise<void> {
+    if (state.file) {
+        const file = this.app.vault.getAbstractFileByPath(state.file);
+        if (file instanceof TFile) {
+            this.currentFile = file;
+            this.setFileName(file.basename);
+
+            if (this.iframe && this.iframe.contentWindow) {
+                const xml = await this.app.vault.read(file);
+                this.sendMessageToDrawio({ action: 'load', xml, autosave: 1 });
+            }
+        }
+    }
+    await super.setState(state, result);
+}
+
     async onOpen() {
         const container = this.containerEl.children[1] as any;
         container.empty();
@@ -227,14 +243,12 @@ export class Drawioview extends ItemView {
         }
     }
 
-    async listendrawiomessage(event: MessageEvent) {
+async listendrawiomessage(event: MessageEvent) {
     const expectedOrigin = `http://localhost:${this.plugin.settings.port}`;
     if (event.origin !== expectedOrigin) return;
 
     try {
-        if (this.iframe && event.source !== this.iframe.contentWindow) {
-            return;
-        }
+        if (this.iframe && event.source !== this.iframe.contentWindow) return;
     } catch (e) {
         console.debug("Warning: couldn't compare event.source to iframe.contentWindow", e);
     }
@@ -259,22 +273,15 @@ export class Drawioview extends ItemView {
         }
 
         case 'save': {
-            if (this.awaitingExport) {
-                return;
-            }
+            if (this.awaitingExport) return;
             this.awaitingExport = true;
-
             this.sendMessageToDrawio({ action: 'export', format: 'xmlsvg', xml: 1 });
-
-            setTimeout(() => {
-                this.awaitingExport = false;
-            }, 5000);
+            setTimeout(() => { this.awaitingExport = false; }, 5000);
             break;
         }
 
         case 'export': {
             this.awaitingExport = false;
-
             let svgContent: string;
             try {
                 svgContent = this.decodeSvgDataUri(msg.data);
@@ -286,36 +293,50 @@ export class Drawioview extends ItemView {
             try {
                 if (!this.currentFile) {
                     const folderPath = this.plugin.settings.Folder;
-                    if(this.fileName) {
-                        const fileName = `${this.fileName}.drawio.svg`;
-                        const fullPath = folderPath ? `${folderPath}/${fileName}` : this.fileName;
-                        this.currentFile = await this.app.vault.create(fullPath as string, svgContent);
-                        return new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
+                    const name = this.fileName || `drawio_${Date.now()}`;
+                    const fullPath = folderPath ? `${folderPath}/${name}.drawio.svg` : `${name}.drawio.svg`;
+                    
+                    if (this.app.vault.getAbstractFileByPath(fullPath)) {
+                        return new Notice(`⚠️ ${t('FileNameExist')}: ${fullPath}`);
                     }
-                    const now = new Date();
-                    const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
-                    const fileName = `drawio_${timestamp}.drawio.svg`;
-                    const fullPath = `${folderPath}/${fileName}`;
-                    this.currentFile = await this.app.vault.create(fullPath as string, svgContent);
-                    new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
-                    this.setFileName(this.currentFile.basename.replace('.drawio', ""));
-                } else {
-                    await this.app.vault.modify(this.currentFile, svgContent);
 
-                    await forceMarkdownViewUpdate(this.app, this.currentFile);
-                    this.setFileName(this.currentFile.basename.replace(/\.[^/.]+$/, ""))
-                    new Notice(`💾 ${t('saveDiagram')} ${this.currentFile.path}`);
+                    this.currentFile = await this.app.vault.create(fullPath, svgContent);
+                    new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
+                } else {
+                    let targetFile = this.currentFile;
+
+                    if (targetFile.extension === 'drawio') {
+                        const newPath = targetFile.path + '.svg'; 
+                        
+                        const existingFile = this.app.vault.getAbstractFileByPath(newPath);
+                        if (existingFile) {
+                            return new Notice(`⚠️ ${t('FileNameExist')}: ${existingFile.path}`);
+                        } else {
+                            // Если пути свободно — переименовываем
+                            await this.app.fileManager.renameFile(targetFile, newPath);
+                            
+                            // Обновляем ссылку на файл после успешного переименования
+                            const updatedFile = this.app.vault.getAbstractFileByPath(newPath);
+                            if (updatedFile instanceof TFile) {
+                                this.currentFile = updatedFile;
+                                targetFile = updatedFile;
+                            }
+                        }
+                    }
+                    // -----------------------------------------------------------
+
+                    // Если мы дошли сюда, значит либо файл не требовал переименования, 
+                    // либо переименование прошло успешно
+                    await this.app.vault.modify(targetFile, svgContent);
+                    await forceMarkdownViewUpdate(this.app, targetFile);
+                    
+                    this.setFileName(targetFile.basename.replace('.drawio', ''));
+                    new Notice(`💾 ${t('saveDiagram')} ${targetFile.path}`);
                 }
             } catch (e) {
                 new Notice(`❌ ${t('FailedToSaveDiagram')} ${this.currentFile?.path ?? ''}`);
                 console.error(e);
             }
             break;
-        }
-
-        case 'exit': {
-            break;
-        }
-    }
-    }   
+        }}}
 }

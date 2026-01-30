@@ -18,6 +18,7 @@ import { drawioHoverResizeProcessor } from 'postProcessing/ResizeEmbedDiagramsIn
 
 import { DrawioDecoder } from "handlers/drawioDataDecoder";
 import { ExternalTooltip } from "handlers/externalTooltip";
+import { DRAWIO_RESOLVER_VIEW, DrawioResolverView } from 'views/DrawioResolverView';
 
 export default class DrawioPlugin extends Plugin {
 
@@ -45,6 +46,13 @@ export default class DrawioPlugin extends Plugin {
             DRAWIOVIEW,
             (leaf) => new Drawioview(leaf, this)
         )
+
+    this.registerView(
+        DRAWIO_RESOLVER_VIEW,
+        (leaf) => new DrawioResolverView(leaf, this)
+    );
+
+    this.registerExtensions(['drawio'], DRAWIO_RESOLVER_VIEW);
 
         const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
         setLocale(userLang);
