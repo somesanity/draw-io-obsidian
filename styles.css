@@ -97,6 +97,13 @@
       max-width: 100%;
 }
 
+.drawio-diagram-Canvas {
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+}
+
 .drawio-container svg {
     max-width: 100%;
     height: auto;
