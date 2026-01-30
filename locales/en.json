@@ -8,7 +8,7 @@
     "editDiagramContextMenu": "Edit diagram",
     "CreateNewDiagramContextMenu": "Embed new draw.io diagram",
     "CreatedNewDiagram": "New diagram created:",
-    "CreateAndEditNewDiagram": "Create or edit draw.io diagram",
+    "CreateAndEditNewDiagram": "Create or edit draw.io diagram in modal window",
     "SetFileNameForDiagram": "Set File Name for creating diagram",
     "EditDiagraText": "Edit diagram:",
     "ModalNewDiagramCreateText": "New diagram",

@@ -110,7 +110,7 @@ export default class DrawioPlugin extends Plugin {
                         .onClick(async () => {
                             await launchDrawioServerLogic(this);
 
-                            new DrawioEmbedModal(this.app, this, file, undefined).open();
+                            this.activateView(file);
                         });
                 });
             })

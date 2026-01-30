@@ -298,6 +298,7 @@ export class Drawioview extends ItemView {
                     const fullPath = `${folderPath}/${fileName}`;
                     this.currentFile = await this.app.vault.create(fullPath as string, svgContent);
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
+                    this.setFileName(this.currentFile.basename.replace('.drawio', ""));
                 } else {
                     await this.app.vault.modify(this.currentFile, svgContent);
 
