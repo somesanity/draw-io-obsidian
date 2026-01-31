@@ -71,6 +71,19 @@ export default class DrawioPlugin extends Plugin {
             this.inlineSvgInDOM(el, ctx.sourcePath);
         });
 
+        // --- ИЗМЕНЕНИЕ: Слушатель для обновления Canvas ---
+        this.registerEvent(
+            this.app.vault.on("modify", async (file) => {
+                if (file instanceof TFile && file.name.endsWith(".drawio.svg")) {
+                    // Задержка 200мс, чтобы Obsidian успел записать изменения и обновить кэш чтения
+                    setTimeout(async () => {
+                        await this.reloadDrawioInCanvas(file);
+                    }, 200);
+                }
+            })
+        );
+        // -------------------------------------------------
+
         this.registerEvent(
             this.app.workspace.on('active-leaf-change', (leaf: WorkspaceLeaf) => {
                 this.setupCanvasObserver(leaf);
@@ -310,6 +323,66 @@ export default class DrawioPlugin extends Plugin {
         }
     }
 
+    // --- ИЗМЕНЕНИЕ: Метод обновления диаграммы в Canvas ---
+    private async reloadDrawioInCanvas(file: TFile) {
+        const leaves = this.app.workspace.getLeavesOfType("canvas");
+        
+        for (const leaf of leaves) {
+            const container = leaf.view.contentEl;
+            // Ищем все наши обработанные SVG
+            const svgs = container.querySelectorAll('.drawio-diagram-svg');
+            
+            for (const svg of Array.from(svgs)) {
+                // Проверяем 1: по явному ID файла
+                const fileAttr = svg.getAttribute('data-drawio-file');
+                // Проверяем 2: по исходному SRC (если ID не успел проставиться или старая версия)
+                const originalSrc = svg.getAttribute("data-original-src") || "";
+                
+                let isMatch = false;
+                if (fileAttr === file.path) {
+                    isMatch = true;
+                } else if (originalSrc) {
+                    // Декодируем, чтобы убрать %20 и т.д.
+                    const cleanPath = decodeURIComponent(originalSrc.split('?')[0]);
+                    if (cleanPath.endsWith(file.name)) {
+                        isMatch = true;
+                    }
+                }
+
+                if (!isMatch) continue;
+
+                const parent = svg.parentElement;
+                if (!parent) continue;
+
+                // Создаем временный IMG для замены
+                const img = document.createElement("img");
+                
+                // Добавляем timestamp (?t=...), чтобы браузер перечитал файл, а не брал из кэша
+                img.src = (originalSrc || this.app.vault.getResourcePath(file)) + "?t=" + Date.now();
+                
+                const originalClass = svg.getAttribute("data-original-class");
+                if (originalClass) img.className = originalClass;
+                
+                const originalStyle = svg.getAttribute("data-original-style");
+                if (originalStyle) img.setAttribute("style", originalStyle);
+
+                // Убираем маркер обработки
+                img.removeAttribute('data-svg-processed');
+
+                // Заменяем SVG на IMG
+                svg.replaceWith(img);
+                
+                // Даем браузеру такт на перерисовку DOM
+                await new Promise(resolve => requestAnimationFrame(resolve));
+
+                const canvasSourcePath = (leaf.view as any).file?.path || "";
+                // Запускаем инлайн заново
+                await this.inlineSvgInDOM(parent as HTMLElement, canvasSourcePath);
+            }
+        }
+    }
+    // -----------------------------------------------------
+
     private async inlineSvgInDOM(el: HTMLElement, sourcePath: string = "") {
         const images = el.querySelectorAll('img[src*=".drawio.svg"]');
         if (images.length === 0) return;
@@ -325,7 +398,7 @@ export default class DrawioPlugin extends Plugin {
                 if (cleanPath.startsWith('/') && cleanPath[2] === ':') cleanPath = cleanPath.slice(1);
 
                 let svgContent: string | null = null;
-                const file = this.app.metadataCache.getFirstLinkpathDest(cleanPath, sourcePath) ||
+                let file = this.app.metadataCache.getFirstLinkpathDest(cleanPath, sourcePath) ||
                     this.app.vault.getAbstractFileByPath(cleanPath);
 
                 if (file instanceof TFile) {
@@ -346,12 +419,28 @@ export default class DrawioPlugin extends Plugin {
                         const svgElement = container.querySelector('svg');
 
                         if (svgElement) {
+                            // --- ВАЖНО для обновления: Сохраняем путь к файлу ---
+                            if (file instanceof TFile) {
+                                svgElement.setAttribute('data-drawio-file', file.path);
+                            }
+                            // ----------------------------------------------------
+
+                            svgElement.setAttribute('data-original-src', src);
+                            svgElement.setAttribute('data-original-class', img.className);
+                            svgElement.setAttribute('data-original-style', img.getAttribute('style') || '');
+
                             if (img.className) svgElement.classList.add(...img.classList.values());
                             svgElement.setAttribute('style', img.getAttribute('style') || '');
                             svgElement.style.width = "100%";
                             svgElement.style.height = "100%";
                             svgElement.setAttribute('data-svg-processed', 'true');
                             svgElement.addClass("drawio-diagram-svg");
+
+                            // --- ИЗМЕНЕНИЕ: Включаем выделение текста ---
+                            svgElement.style.userSelect = "text";
+                            svgElement.style.webkitUserSelect = "text";
+                            svgElement.style.pointerEvents = "all";
+                            // --------------------------------------------
 
                             document.body.classList.contains("theme-light") ? svgElement.classList.add("drawio-scheme-light") : svgElement.classList.add("drawio-scheme-dark");
 
