@@ -46,7 +46,9 @@ You can use mermaid and LaTeX (Default support in draw.io)
 
 ### 🖼️ Canvas support
 
-Use diagrams in canvas! Link your notes, add external links, markdown-fragments!
+Use the diagrams in canvas! Link your notes, add external/internal links and markdown-fragments!
+
+![canvas-demo.gif](docs/canvas-demo.gif)
 
 ## ❓ How It Works
 
@@ -128,3 +130,7 @@ there are 2 ways:
 4.  **Enable the plugin** in Obsidian:
 
       * Open **Settings → Community Plugins → Enable plugin**.
+
+### 🛠️ How update draw.io webapp
+
+This plugin’s main benefit is that it’s just a connector between draw.io and Obsidian. It isn't locked to any fixed version; you can manually update it by swapping the webapp folder with the one from [the official repository](https://github.com/jgraph/drawio/tree/dev/src/main/webapp). Even if the plugin is no longer maintained, you can keep draw.io current on your own.
