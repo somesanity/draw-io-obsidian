@@ -97,6 +97,22 @@
       max-width: 100%;
 }
 
+.canvas-node-container-drawio--backgroundTransparent {
+    background-color: transparent;
+}
+
+.canvas-node-container-drawio--hiddenBorder {
+    border: none !important;
+}
+
+.canvas-node-label-drawio--hidden {
+    display: none !important;
+}
+
+.canvas-node-drawio--focusedBorderHidden {
+    --shadow-border-accent: none !important;
+}
+
 .drawio-diagram-Canvas {
     width: auto;
     height: auto;
@@ -150,3 +166,4 @@
     font-family: inherit !important;
     border-bottom: inherit !important;
 }
+

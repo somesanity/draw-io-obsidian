@@ -44,6 +44,16 @@
     "SETTINGS__FolderForSaveDiagrams_Description": "Позволяет выбрать папку в которую будут сохраняться диаграммы",
     "SETTINGS__DefaultDiagramsSize_Name": "Процентный размер диаграмм",
     "SETTINGS__DefaultDiagramsSize_Description": "Указав значение, оно автоматически будет подставляться в новые диаграммы созданные в модальном окне, например, если установленно 100%, то - ![[Diagram_1231237567.drawio.svg|100%]] или 700, - [[Diagram_1231237567.drawio.svg|700]] (для размера в процентах должна быть включа соответвующая опция)",
-        "SETTINGS__HoverSizeDiagram_Name": "Установить размер диаграммы в ссылочном окне",
-    "SETTINGS__HoverSizeDiagram_Description": "Позволяет установить размер диаграммы, в окне которое появляется при наведении на внутреннию ссылку"
+    "SETTINGS__HoverSizeDiagram_Name": "Установить размер диаграммы в ссылочном окне",
+    "SETTINGS__HoverSizeDiagram_Description": "Позволяет установить размер диаграммы, в окне которое появляется при наведении на внутреннию ссылку",
+    "SETTINGS__CANVAS__HiddenFrames_Name": "Скрыть рамки вокруг элемента в canvas",
+    "SETTINGS__CANVAS__HiddenFrames_Description": "Если включено, скрывает рамки вокруг элемента с диаграмой в canvas",
+    "SETTINGS__CANVAS__HiddenLabel_Name": "Скрыть имя файла диаграмму в canvas",
+    "SETTINGS__CANVAS__HiddenLabel_Description": "Если включено, позволяет скрыть плашку с именем файла диаграмму в canvas",
+    "SETTINGS__CANVAS__AlwaysFocusedDiagram_Name": "Постоянный фокус на элементах",
+    "SETTINGS__CANVAS__AlwaysFocusedDiagram_Description": "Если включено, устанавливает фокус на все диаграммы в canvas, что избавляет от нужды кликать для интерактивности",
+    "SETTINGS__CANVAS__HiddenBorderInFocusMode_Name": "Убрать рамки в режиме фокуса",
+    "SETTINGS__CANVAS__HiddenBorderInFocusMode_Description": "Убирает рамки вокруг элемента с диаграммой при нажатии (фокусе), в canvas",
+    "SETTINGS__CANVAS__TransparentBackground_Name": "Прозрачный фон элемента",
+    "SETTINGS__CANVAS__TransparentBackground_Description": "Если включено, делает фон элементов с диаграммами в canvas прозрачным"
 }

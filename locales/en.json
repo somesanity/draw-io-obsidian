@@ -45,5 +45,15 @@
     "SETTINGS__DefaultDiagramsSize_Name": "set default size for diagrams",
     "SETTINGS__DefaultDiagramsSize_Description": "By specifying a value, it will automatically be applied to new diagrams created in the modal window. For example, if set to 100%, then – ![[Diagram_1231237567.drawio.svg|100%]], or if set to 700 – [[Diagram_1231237567.drawio.svg|700]]. (for percentage size, the corresponding option must be enabled)",
     "SETTINGS__HoverSizeDiagram_Name": "Set the diagram size in popover link window",
-    "SETTINGS__HoverSizeDiagram_Description": "Allow set the size for the diagram by popover window."
+    "SETTINGS__HoverSizeDiagram_Description": "Allow set the size for the diagram by popover window.",
+    "SETTINGS__CANVAS__HiddenFrames_Name": "Hide frames around elements in the canvas",
+    "SETTINGS__CANVAS__HiddenFrames_Description": "When enabled, hides the frames around diagram elements in the canvas",
+    "SETTINGS__CANVAS__HiddenLabel_Name": "Hide diagram file name in the canvas",
+    "SETTINGS__CANVAS__HiddenLabel_Description": "When enabled, hides the label displaying the diagram file name in the canvas",
+    "SETTINGS__CANVAS__AlwaysFocusedDiagram_Name": "Always focus diagram elements",
+    "SETTINGS__CANVAS__AlwaysFocusedDiagram_Description": "When enabled, keeps all diagrams in the canvas focused, removing the need to click to enable interactivity",
+    "SETTINGS__CANVAS__HiddenBorderInFocusMode_Name": "Hide borders in focus mode",
+    "SETTINGS__CANVAS__HiddenBorderInFocusMode_Description": "Hides the borders around diagram elements when focused in the canvas",
+    "SETTINGS__CANVAS__TransparentBackground_Name": "Transparent diagram background",
+    "SETTINGS__CANVAS__TransparentBackground_Description": "When enabled, makes the background of diagram elements in the canvas transparent"
 }

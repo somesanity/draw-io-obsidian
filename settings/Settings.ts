@@ -7,6 +7,11 @@ export interface DrawioSettings {
   Folder: string;
   diagramSize: string;
   HoverSizeDiagram: string;
+  HiddenBorderInCanvas: boolean;
+  HiddenLabelInCanvas: boolean;
+  AlwaysFocusedInCanvas: boolean;
+  HiddenBorderInFocusMode: boolean;
+  TransparentDiagramBackgroundInCanavas: boolean;
 }
 
 export const DEFAULT_SETTINGS: Partial<DrawioSettings> = {
@@ -18,4 +23,9 @@ export const DEFAULT_SETTINGS: Partial<DrawioSettings> = {
   Folder: 'drawio',
   diagramSize: '',
   HoverSizeDiagram: '100%',
+  HiddenBorderInCanvas: true,
+  HiddenLabelInCanvas: true,
+  HiddenBorderInFocusMode: true,
+  AlwaysFocusedInCanvas: true,
+  TransparentDiagramBackgroundInCanavas: true,
 };

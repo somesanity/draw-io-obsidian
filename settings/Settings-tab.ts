@@ -120,5 +120,65 @@ export class DrawioTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         })
     );
+
+      new Setting(containerEl)
+      .setName(`${t('SETTINGS__CANVAS__HiddenFrames_Name')}`)
+      .setDesc(`${t('SETTINGS__CANVAS__HiddenFrames_Description')}`)
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.HiddenBorderInCanvas)
+          .onChange(async (value) => {
+            this.plugin.settings.HiddenBorderInCanvas = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+      new Setting(containerEl)
+      .setName(`${t('SETTINGS__CANVAS__HiddenLabel_Name')}`)
+      .setDesc(`${t('SETTINGS__CANVAS__HiddenLabel_Description')}`)
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.HiddenLabelInCanvas)
+          .onChange(async (value) => {
+            this.plugin.settings.HiddenLabelInCanvas = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+      new Setting(containerEl)
+      .setName(`${t('SETTINGS__CANVAS__AlwaysFocusedDiagram_Name')}`)
+      .setDesc(`${t('SETTINGS__CANVAS__AlwaysFocusedDiagram_Description')}`)
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.AlwaysFocusedInCanvas)
+          .onChange(async (value) => {
+            this.plugin.settings.AlwaysFocusedInCanvas = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+      new Setting(containerEl)
+      .setName(`${t('SETTINGS__CANVAS__HiddenBorderInFocusMode_Name')}`)
+      .setDesc(`${t('SETTINGS__CANVAS__HiddenBorderInFocusMode_Description')}`)
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.HiddenBorderInFocusMode)
+          .onChange(async (value) => {
+            this.plugin.settings.HiddenBorderInFocusMode = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+      new Setting(containerEl)
+      .setName(`${t('SETTINGS__CANVAS__TransparentBackground_Name')}`)
+      .setDesc(`${t('SETTINGS__CANVAS__TransparentBackground_Description')}`)
+      .addToggle((toggle) => 
+        toggle
+          .setValue(this.plugin.settings.TransparentDiagramBackgroundInCanavas)
+          .onChange(async (value) => {
+            this.plugin.settings.TransparentDiagramBackgroundInCanavas = value;
+            await this.plugin.saveSettings();
+          })
+      );
   }
 }
