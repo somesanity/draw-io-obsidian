@@ -8,6 +8,7 @@
   * 🛜 **Works 100% offline** – No internet required!
   * 🔐 **Privacy-first** – Runs a local server on your machine.
   * 📐 **Mermaid & LaTeX** - Support Mermaid and LaTeX, and export pdf.
+  * 🖼️ **Support Canvas** - Use diagram in Canvas, linking notes, add external links!
 
 ## ✨ Interactive diagrams
 
@@ -42,6 +43,10 @@ Next, insert the markdown text into the property.
 You can use mermaid and LaTeX (Default support in draw.io)
 
 ![docs/LaTeX&mermaid.gif](docs/LaTeX&mermaid.gif)
+
+### 🖼️ Canvas support
+
+Use diagrams in canvas! Link your notes, add external links, markdown-fragments!
 
 ## ❓ How It Works
 
