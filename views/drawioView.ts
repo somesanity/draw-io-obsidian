@@ -301,6 +301,7 @@ async listendrawiomessage(event: MessageEvent) {
                     }
 
                     this.currentFile = await this.app.vault.create(fullPath, svgContent);
+                    this.setFileName(this.currentFile.basename.replace(".drawio", ""))
                     new Notice(`✅ ${t('CreatedNewDiagram')} ${this.currentFile.path}`);
                 } else {
                     let targetFile = this.currentFile;
@@ -312,10 +313,8 @@ async listendrawiomessage(event: MessageEvent) {
                         if (existingFile) {
                             return new Notice(`⚠️ ${t('FileNameExist')}: ${existingFile.path}`);
                         } else {
-                            // Если пути свободно — переименовываем
                             await this.app.fileManager.renameFile(targetFile, newPath);
                             
-                            // Обновляем ссылку на файл после успешного переименования
                             const updatedFile = this.app.vault.getAbstractFileByPath(newPath);
                             if (updatedFile instanceof TFile) {
                                 this.currentFile = updatedFile;
@@ -323,10 +322,7 @@ async listendrawiomessage(event: MessageEvent) {
                             }
                         }
                     }
-                    // -----------------------------------------------------------
-
-                    // Если мы дошли сюда, значит либо файл не требовал переименования, 
-                    // либо переименование прошло успешно
+                    
                     await this.app.vault.modify(targetFile, svgContent);
                     await forceMarkdownViewUpdate(this.app, targetFile);
                     

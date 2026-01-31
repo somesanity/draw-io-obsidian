@@ -149,7 +149,7 @@ export default class DrawioPlugin extends Plugin {
                     return;
                 }
 
-                if (!leaf.currentFile) {
+                if (!leaf.currentFile && !leaf.fileName) {
                     new SetFileNameModal(this.app, this.settings.Folder, (fileName) => {
                         leaf.setFileName(fileName);
                     }).open()
