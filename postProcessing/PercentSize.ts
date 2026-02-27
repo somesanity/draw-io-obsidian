@@ -1,5 +1,6 @@
 import DrawioPlugin from "main";
 import { ViewPlugin, EditorView } from "@codemirror/view";
+import { wrap } from "node:module";
 
 export async function PercentSize(plugin: DrawioPlugin) {
     if(!plugin.settings.percentSize) {
@@ -45,14 +46,28 @@ export async function PercentSize(plugin: DrawioPlugin) {
     applyCentering(view: EditorView) {
       const editorDom = view.dom;
 
-            const embeds = editorDom.querySelectorAll('div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]');
+            const embeds = editorDom.querySelectorAll('.internal-embed.media-embed.image-embed.is-loaded[src$=".drawio.svg"]');
+            const wrappers = document.querySelectorAll<HTMLDivElement>(
+            'div.image-embed[src$=".drawio.svg"] .image-wrapper'
+            );
             const percentpattern = /^(100|[1-9]?\d)%$/;
             for (const embed of Array.from(embeds)) {
+                embed.style.width = "100%"
                 const img = embed.querySelector("img");
                 const width = img?.getAttribute('alt')
                 if(percentpattern.test(width ?? '')) {
                     img?.setAttribute('width', width!)
                 }
+
+                if(!img?.hasAttribute("width")) {
+                    img.style.width = 'auto'
+                } else {
+                    img.style.width = width!
+                }
+            }
+
+                for (const wrapper of Array.from(wrappers)) {
+                    wrapper.style.width = "100%"
             }
     }});
         plugin.registerEditorExtension(percentSize);

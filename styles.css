@@ -92,9 +92,19 @@
     width: 100%;
 }
 
+.drawio-centering-diagrams--editmode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .drawio-centering-diagrams img {
       height: auto;
       max-width: 100%;
+}
+
+.drawio-image-wrapper {
+    width: 100% !important;
 }
 
 .canvas-node-container-drawio--backgroundTransparent {

@@ -1,5 +1,5 @@
 import DrawioPlugin from "main";
-import { ViewPlugin, EditorView } from "@codemirror/view";
+import { ViewPlugin, EditorView, ViewUpdate } from "@codemirror/view";
 
 export async function CenteringDiagrams(plugin: DrawioPlugin) {
     if(!plugin.settings.centeringDiagram) {
@@ -31,9 +31,9 @@ const drawioDomPlugin = ViewPlugin.fromClass(class {
       this.applyCentering(view);
     }
 
-    update(update: any) {
-      if (update.docChanged || update.viewportChanged) {
-            setTimeout(() => {
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged || update.viewportMoved) {
+        setTimeout(() => {
       this.applyCentering(update.view);
     }, 0);
       }
@@ -43,11 +43,11 @@ const drawioDomPlugin = ViewPlugin.fromClass(class {
       const editorDom = view.dom;
 
       const embeds = editorDom.querySelectorAll<HTMLDivElement>(
-        'div.internal-embed.media-embed.image-embed[src$=".drawio.svg"]'
+        'div.image-embed[src$=".drawio.svg"] .image-wrapper'
       );
 
       embeds.forEach((embed) => {
-          embed.classList.add('drawio-centering-diagrams');
+        embed.classList.add("drawio-centering-diagrams--editmode")
       });
     }
   });

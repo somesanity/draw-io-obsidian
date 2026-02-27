@@ -169,7 +169,7 @@ export async function InteractiveDiagrams(plugin: DrawioPlugin, app: App) {
 						link.classList.add("internal-link");
 					}
 
-					const matchDoubleSquare = hrefLink.match(/\[\[(.*?)\]\]/);
+					const matchDoubleSquare = hrefLink.match(/\[\[([^|\]\n\r]+)(?:\|[^\]\n\r]*)?\]\]/);
 					if (matchDoubleSquare) {
 						cleanHref = matchDoubleSquare[1];
 						link.classList.add("internal-link");		
