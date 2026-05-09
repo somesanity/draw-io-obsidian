@@ -111,8 +111,10 @@ there are 2 ways:
         ```
         manifest.json
         main.js
-        drawioclient/
         styles.css
+        webapp/        (this is the draw.io web application.
+                        get it from the offical repository [see below]
+                        or from the 'Releases' section)
         ```
 
     > Your plugin directory should look like this:
@@ -124,7 +126,7 @@ there are 2 ways:
     >         ├── manifest.json
     >         ├── main.js
     >         ├── styles.css
-    >         └── drawioclient   <-- This folder is essential!
+    >         └── webapp         <-- This folder is essential!
     > ```
 
 4.  **Enable the plugin** in Obsidian:
