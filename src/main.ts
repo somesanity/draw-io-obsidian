@@ -1,14 +1,29 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, SettingTab } from 'obsidian';
-import { DEFAULT_SETTINGS, DrawioSettings, } from "./settings";
-import { pluginInit } from 'Utils/PluginInit';
+import { Plugin, PluginManifest} from 'obsidian';
+import { DEFAULT_SETTINGS, DrawioSettings, } from "./Settings/settings";
+import { PluginInit } from 'Utils/PluginInit';
+import { Server } from 'http';
+import { ServerManager } from 'Utils/ServerManager';
+import { DrawioClientManager } from 'Utils/DrawioClientManager';
 
 export default class DrawioPlugin extends Plugin {
-	settings: DrawioSettings;
+	settings!: DrawioSettings;
+    server!: Server
+	serverManager!: ServerManager;
+	drawioClientManager!: DrawioClientManager
 
 	async onload() {
-		const initter = new pluginInit(this);
+
+		// init classes
+		const initter = new PluginInit(this);
+		this.drawioClientManager = new DrawioClientManager(this);
+		this.serverManager = new ServerManager(this);
+
+		// init plugin
+		await initter.loadSettings();
 		initter.addRibbonIcon();
-		initter.loadSettingsTab();
+
+		await this.drawioClientManager.checkAndUpdate();
+
 	}
 
 	async loadSettings() {
@@ -20,5 +35,6 @@ export default class DrawioPlugin extends Plugin {
     }
 
 	onunload() {
+        this.serverManager.stopServer();
 	}
 }

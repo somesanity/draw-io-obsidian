@@ -1,19 +1,17 @@
 import DrawioPlugin from "main";
-import { Notice, PluginSettingTab } from "obsidian";
-import { DEFAULT_SETTINGS, SettingTab } from "settings";
-import { SampleModal } from "./View/ModalView";
-import { promises } from "dns";
+import { Notice, PluginManifest } from "obsidian";
+import { SettingTab } from "Settings/settings";
 
-export class pluginInit {
-    plugin: DrawioPlugin;
+export class PluginInit {
+    private plugin: DrawioPlugin;
 
     constructor(plugin: DrawioPlugin) {
         this.plugin = plugin
     };
 
-    async loadSettingsTab(): Promise<any> {
-        await this.plugin.loadSettings();
-        this.plugin.addSettingTab(new SettingTab(this.plugin.app, this.plugin));
+    async loadSettings(): Promise<void> {
+       await this.plugin.loadSettings();
+       this.plugin.addSettingTab(new SettingTab(this.plugin.app, this.plugin));
     }
 
     addRibbonIcon(): any {

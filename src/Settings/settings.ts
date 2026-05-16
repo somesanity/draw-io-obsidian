@@ -1,17 +1,19 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
-import DrawioPlugin from "./main";
+import MyPlugin from "../main";
+import DrawioPlugin from "../main";
 
 export interface DrawioSettings {
-	mySetting: string;
+	port: string;
+	currentlyDrawioClientVersion: string;
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
-	mySetting: 'default'
+	port: "4444",
+	currentlyDrawioClientVersion: "",
 }
 
 export class SettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: DrawioPlugin;
 
 	constructor(app: App, plugin: DrawioPlugin) {
 		super(app, plugin);
@@ -24,13 +26,13 @@ export class SettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
+			.setName('Port')
+			.setDesc('Set port for draw.io client')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setValue(this.plugin.settings.port)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.port = value;
 					await this.plugin.saveSettings();
 				}));
 	}
