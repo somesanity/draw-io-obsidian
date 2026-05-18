@@ -1,4 +1,4 @@
-import { Plugin, PluginManifest} from 'obsidian';
+import { Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, DrawioSettings, } from "./Settings/settings";
 import { PluginInit } from 'Utils/PluginInit';
 import { Server } from 'http';
@@ -21,9 +21,6 @@ export default class DrawioPlugin extends Plugin {
 		// init plugin
 		await initter.loadSettings();
 		initter.addRibbonIcon();
-
-		await this.drawioClientManager.checkAndUpdate();
-
 	}
 
 	async loadSettings() {

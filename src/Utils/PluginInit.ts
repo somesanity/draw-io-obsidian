@@ -14,9 +14,11 @@ export class PluginInit {
        this.plugin.addSettingTab(new SettingTab(this.plugin.app, this.plugin));
     }
 
-    addRibbonIcon(): any {
-        this.plugin.addRibbonIcon('dice', 'Sample', (evt: MouseEvent) => {
+    async addRibbonIcon(): Promise<any> {
+        this.plugin.addRibbonIcon('dice', 'Sample', async (evt: MouseEvent) => {
 			new Notice('This is a notice!');
-	    })
+            	await this.plugin.drawioClientManager.checkAndUpdate();
+		        this.plugin.serverManager.startServer();
+        })
     }
 }
