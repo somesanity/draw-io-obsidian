@@ -1,4 +1,6 @@
 import DrawioPlugin from "main";
+import { normalizePath } from "obsidian";
+import { savingNameFileFormatOption } from "Settings/settings";
 
 export class pluginUtils {
     private plugin: DrawioPlugin
@@ -17,6 +19,34 @@ export class pluginUtils {
             case "fullUrl": return embedmode
         
             default: return baseUrl
+        }
+    }
+
+    getFileNameForSave(): string {
+        const option: savingNameFileFormatOption = this.plugin.settings.savingNameFileFormat
+
+        switch (option) {
+            case "date": {
+                const folder = this.plugin.settings.folder
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                const ms = String(date.getMilliseconds()).padStart(3, '0');
+                
+                const fulldate = `${year}${month}${day}${hours}${minutes}${seconds}${ms}`;
+                const extension = '.drawio.svg'
+
+
+                const fullpath = normalizePath(`${folder}/${fulldate}${extension}`)
+
+                return fullpath;
+            }
+            
+            default: return ""
         }
     }
 }

@@ -1,15 +1,23 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "../main";
+import {App, DropdownComponent, PluginSettingTab, Setting, TFolder} from "obsidian";
 import DrawioPlugin from "../main";
+
+export type savingNameFileFormatOption =
+	"date" | 
+	"number"
+
 
 export interface DrawioSettings {
 	port: string;
 	currentlyDrawioClientVersion: string;
+	folder: string;
+	savingNameFileFormat: savingNameFileFormatOption
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
 	port: "4444",
 	currentlyDrawioClientVersion: "",
+	folder: "drawio",
+	savingNameFileFormat: "date"
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -34,6 +42,33 @@ export class SettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.port = value;
 					await this.plugin.saveSettings();
-				}));
+		}));
+
+		new Setting(containerEl)
+			.setName('Folder')
+			.setDesc('Set Folder for saving diagrams')
+			.addDropdown(DropdownComponent => {
+				const folders = this.app.vault.getAllFolders();
+				folders.forEach((folder: TFolder) => {
+					DropdownComponent.addOption(folder.path, folder.path)
+				});
+				
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.folder = value;
+					await this.plugin.loadSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('diagram name')
+			.setDesc('Select the format what save diagram')
+			.addDropdown(DropdownComponent => {
+				DropdownComponent.addOption("date" as savingNameFileFormatOption, "date: 2025.05.12.svg.drawio")
+				
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.folder = value;
+					await this.plugin.loadSettings()
+				})
+			})
 	}
 }

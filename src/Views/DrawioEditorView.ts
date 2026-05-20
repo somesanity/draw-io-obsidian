@@ -1,16 +1,16 @@
 import { DRAWIO_EDITOR_VIEW } from 'consts';
 import DrawioPlugin from 'main';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import { DrawioAppMessageController } from 'Utils/DrawioAppMessageController';
+import { DrawioAppController } from 'Utils/DrawioAppController';
 import { pluginUtils } from 'Utils/PluginUtils';
 
 export class DrawioEditorView extends ItemView {
   plugin: DrawioPlugin
   Utils: pluginUtils
-  drawioMessageController!: DrawioAppMessageController
-  iframe!: HTMLIFrameElement
+  drawioAppController!: DrawioAppController
+  
+  private iframe!: HTMLIFrameElement
   private MessageListener!: Promise<(event: MessageEvent) => Promise<void>>;
-
 
   constructor(leaf: WorkspaceLeaf, plugin: DrawioPlugin) {
     super(leaf);
@@ -41,8 +41,8 @@ export class DrawioEditorView extends ItemView {
       }
     })
 
-    this.drawioMessageController = new DrawioAppMessageController(this.plugin, this.iframe, this.Utils.getServerUrl("baseurl"))
-    this.MessageListener = this.drawioMessageController.handleDrawIoMessage();
+    this.drawioAppController = new DrawioAppController(this.plugin, this.iframe, this.Utils.getServerUrl("baseurl"))
+    this.MessageListener = this.drawioAppController.handleDrawIoMessage();
   }
 
   async onClose() {

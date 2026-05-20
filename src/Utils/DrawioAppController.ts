@@ -1,15 +1,20 @@
 import DrawioPlugin from "main";
+import { pluginUtils } from "./PluginUtils";
 
-export class DrawioAppMessageController {
+export class DrawioAppController {
 
   private plugin: DrawioPlugin
   private iframe: HTMLIFrameElement
   private url: string
+  private Utils: pluginUtils
+
+  public fileName: string | null = null
 
   constructor(plugin: DrawioPlugin, iframe: HTMLIFrameElement, url: string) {
     this.plugin = plugin
     this.iframe = iframe
     this.url = url;
+    this.Utils = new pluginUtils(this.plugin)
   }
 
   async handleDrawIoMessage() {
@@ -34,8 +39,6 @@ export class DrawioAppMessageController {
   }
 
   onInit(data: any) {
-      console.log('Draw.io говорит: Я загрузился!');
-
       const messageToDrawIo = {
         action: 'load',
         xml: ""
@@ -45,8 +48,6 @@ export class DrawioAppMessageController {
   }
 
   onSaveData(data: any) {
-      console.log(data.xml)
-
       this.iframe.contentWindow?.postMessage(JSON.stringify({
           action: 'export',
           format: 'xmlsvg',
@@ -54,11 +55,16 @@ export class DrawioAppMessageController {
   }
 
   async onExportData(data: any) {
-      console.log(data.data)
-
       const svgString = data.data.split(',')[1];
       const svg = decodeURIComponent(escape(atob(svgString)));
-      await this.plugin.app.vault.create("file.svg", svg)
-      console.log(svg)
+
+      if(this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
+        const file = this.plugin.app.vault.getFileByPath(this.fileName)
+        return await this.plugin.app.vault.modify(file!, svg);
+      }
+
+      this.fileName = this.Utils.getFileNameForSave()
+
+      await this.plugin.app.vault.create(this.fileName, svg);
     }
 }
