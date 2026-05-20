@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { DEFAULT_SETTINGS, DrawioSettings, } from "./Settings/settings";
 import { PluginInit } from 'Utils/PluginInit';
 import { Server } from 'http';
@@ -20,6 +20,8 @@ export default class DrawioPlugin extends Plugin {
 
 		// init plugin
 		await initter.loadSettings();
+		await initter.registerCommands();
+		await initter.registerViews();
 		initter.addRibbonIcon();
 	}
 
@@ -33,5 +35,21 @@ export default class DrawioPlugin extends Plugin {
 
 	onunload() {
         this.serverManager.stopServer();
+	}
+
+	async activateView(ViewType: string) {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(ViewType);
+
+		if (leaves.length > 0) {
+		leaf = leaves[0] as WorkspaceLeaf | null;
+		} else {
+		leaf = workspace.getLeaf(false);
+		await leaf.setViewState({ type: ViewType, active: true });
+		}
+
+		workspace.revealLeaf(leaf!);
 	}
 }

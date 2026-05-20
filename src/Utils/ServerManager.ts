@@ -17,11 +17,12 @@ export class ServerManager {
         const paths = this.getDrawioPaths(this.plugin.app, this.plugin.manifest.dir!);
         const baseDir = paths.webAppPath;
 
-        const server = http.createServer((req, res) => {
-            const safeUrl = req.url === '/' ? '/index.html' : req.url;
+        const server = http.createServer((req, res) => {  
+            const cleanUrl = (req.url || '/').split('?')[0];
             
-            const cleanUrl = safeUrl?.split('?')[0] || '/index.html';     
-            const filePath = path.join(baseDir, cleanUrl);
+            const relativePath = cleanUrl === '/' ? 'index.html' : cleanUrl;
+            
+            const filePath = path.join(baseDir, relativePath!);
             
             const extname = String(path.extname(filePath)).toLowerCase();
             const contentType = MIME_TYPES[extname] || 'application/octet-stream';
@@ -30,7 +31,7 @@ export class ServerManager {
                 if (error) {
                     if (error.code === 'ENOENT') {
                         res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-                        res.end(`404: Файл не найден по пути ${cleanUrl}`);
+                        res.end(`404: Файл не найден: ${relativePath}`);
                     } else {
                         res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
                         res.end(`500: Ошибка сервера (${error.code})`);
@@ -39,7 +40,7 @@ export class ServerManager {
                     res.writeHead(200, { 
                         'Content-Type': contentType,
                         'Access-Control-Allow-Origin': '*',
-                        'Content-Security-Policy': "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+                        'Content-Security-Policy': "default-src 'self' 'unsafe-inline' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
                     });
                     res.end(content);
                 }
@@ -48,7 +49,7 @@ export class ServerManager {
 
         const port = this.plugin.settings.port || 4444;
         server.listen(port, () => {
-        
+
         });        
 
         return server;
