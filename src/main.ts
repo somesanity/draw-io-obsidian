@@ -24,6 +24,7 @@ export default class DrawioPlugin extends Plugin {
 		await initter.registerViews();
 		initter.addRibbonIcon();
 		initter.registerPostProcessings();
+		initter.registerEditorExtensions();
 
 		await this.drawioClientManager.checkAndUpdate();
 	}

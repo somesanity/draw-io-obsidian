@@ -1,7 +1,7 @@
 import { DRAWIO_EDITOR_VIEW } from "consts";
+import { CenteringEditorExtension } from "EditorExtensions/CenteringEditorExtension";
 import DrawioPlugin from "main";
 import { CenteringDiagrams } from "MarkdownPostProcessors/CenteringDiagram";
-import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Notice } from "obsidian";
 import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
@@ -56,6 +56,12 @@ export class PluginInit {
     registerPostProcessings() {
         this.plugin.settings.centeringDiagrams
             ? CenteringDiagrams(this.plugin)
+            : ""
+    }
+
+    registerEditorExtensions() {
+        this.plugin.settings.centeringDiagrams
+            ? this.plugin.registerEditorExtension(CenteringEditorExtension())
             : ""
     }
 }
