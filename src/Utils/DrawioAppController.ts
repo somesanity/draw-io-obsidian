@@ -44,7 +44,7 @@ export class DrawioAppController {
       xml: ""
     };
 
-    this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), "http://localhost:4444");
+    this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), this.Utils.getServerUrl("baseurl"));
   }
 
   onSaveData(data: any) {
