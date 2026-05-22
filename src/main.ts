@@ -7,7 +7,7 @@ import { DrawioClientManager } from 'Utils/DrawioClientManager';
 
 export default class DrawioPlugin extends Plugin {
 	settings!: DrawioSettings;
-    server!: Server
+	server!: Server
 	serverManager!: ServerManager;
 	drawioClientManager!: DrawioClientManager
 
@@ -23,18 +23,21 @@ export default class DrawioPlugin extends Plugin {
 		await initter.registerCommands();
 		await initter.registerViews();
 		initter.addRibbonIcon();
+		initter.registerPostProcessings();
+
+		await this.drawioClientManager.checkAndUpdate();
 	}
 
 	async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    }
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	}
 
-    async saveSettings() {
-        await this.saveData(this.settings);
-    }
+	async saveSettings() {
+		await this.saveData(this.settings);
+	}
 
 	onunload() {
-        this.serverManager.stopServer();
+		this.serverManager.stopServer();
 	}
 
 	async activateView(ViewType: string) {
@@ -44,10 +47,10 @@ export default class DrawioPlugin extends Plugin {
 		const leaves = workspace.getLeavesOfType(ViewType);
 
 		if (leaves.length > 0) {
-		leaf = leaves[0] as WorkspaceLeaf | null;
+			leaf = leaves[0] as WorkspaceLeaf | null;
 		} else {
-		leaf = workspace.getLeaf(false);
-		await leaf.setViewState({ type: ViewType, active: true });
+			leaf = workspace.getLeaf(false);
+			await leaf.setViewState({ type: ViewType, active: true });
 		}
 
 		workspace.revealLeaf(leaf!);

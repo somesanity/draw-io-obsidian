@@ -1,8 +1,8 @@
-import {App, DropdownComponent, PluginSettingTab, Setting, TFolder} from "obsidian";
+import { App, DropdownComponent, PluginSettingTab, Setting, TFolder } from "obsidian";
 import DrawioPlugin from "../main";
 
 export type savingNameFileFormatOption =
-	"date" | 
+	"date" |
 	"number"
 
 
@@ -11,13 +11,15 @@ export interface DrawioSettings {
 	currentlyDrawioClientVersion: string;
 	folder: string;
 	savingNameFileFormat: savingNameFileFormatOption
+	centeringDiagrams: boolean
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
 	port: "4444",
 	currentlyDrawioClientVersion: "",
 	folder: "drawio",
-	savingNameFileFormat: "date"
+	savingNameFileFormat: "date",
+	centeringDiagrams: true,
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -29,7 +31,7 @@ export class SettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
@@ -42,7 +44,7 @@ export class SettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.port = value;
 					await this.plugin.saveSettings();
-		}));
+				}));
 
 		new Setting(containerEl)
 			.setName('Folder')
@@ -52,10 +54,10 @@ export class SettingTab extends PluginSettingTab {
 				folders.forEach((folder: TFolder) => {
 					DropdownComponent.addOption(folder.path, folder.path)
 				});
-				
+
 				DropdownComponent.onChange(async (value) => {
 					this.plugin.settings.folder = value;
-					await this.plugin.loadSettings()
+					await this.plugin.saveSettings()
 				})
 			})
 
@@ -64,11 +66,23 @@ export class SettingTab extends PluginSettingTab {
 			.setDesc('Select the format what save diagram')
 			.addDropdown(DropdownComponent => {
 				DropdownComponent.addOption("date" as savingNameFileFormatOption, "date: 2025.05.12.svg.drawio")
-				
+
 				DropdownComponent.onChange(async (value) => {
 					this.plugin.settings.folder = value;
-					await this.plugin.loadSettings()
+					await this.plugin.saveSettings()
 				})
 			})
+
+		new Setting(containerEl)
+			.setName('centering diagrams')
+			.setDesc("if enable, diagram will be center")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.centeringDiagrams)
+				.onChange(async (value) => {
+					this.plugin.settings.centeringDiagrams = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
 	}
 }

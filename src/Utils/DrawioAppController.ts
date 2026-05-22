@@ -18,19 +18,19 @@ export class DrawioAppController {
   }
 
   async handleDrawIoMessage() {
-      const listener = async (event: MessageEvent) => {
-        if (event.origin !== this.url) { return; }
+    const listener = async (event: MessageEvent) => {
+      if (event.origin !== this.url) { return; }
 
-        const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
 
-        switch(data.event) {
-          case "init": this.onInit(data) 
-            break
-          case "save": this.onSaveData(data) 
-            break
-          case "export": this.onExportData(data) 
-            break
-        }
+      switch (data.event) {
+        case "init": this.onInit(data)
+          break
+        case "save": this.onSaveData(data)
+          break
+        case "export": this.onExportData(data)
+          break
+      }
     }
 
     window.addEventListener("message", listener);
@@ -39,32 +39,34 @@ export class DrawioAppController {
   }
 
   onInit(data: any) {
-      const messageToDrawIo = {
-        action: 'load',
-        xml: ""
-      };
+    const messageToDrawIo = {
+      action: 'load',
+      xml: ""
+    };
 
-      this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), "http://localhost:4444");
+    this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), "http://localhost:4444");
   }
 
   onSaveData(data: any) {
-      this.iframe.contentWindow?.postMessage(JSON.stringify({
-          action: 'export',
-          format: 'xmlsvg',
-        }), this.url);
+    this.iframe.contentWindow?.postMessage(JSON.stringify({
+      action: 'export',
+      format: 'xmlsvg',
+    }), this.url);
   }
 
   async onExportData(data: any) {
-      const svgString = data.data.split(',')[1];
-      const svg = decodeURIComponent(escape(atob(svgString)));
+    const svgString = data.data.split(',')[1];
+    const svg = decodeURIComponent(escape(atob(svgString)));
 
-      if(this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
-        const file = this.plugin.app.vault.getFileByPath(this.fileName)
-        return await this.plugin.app.vault.modify(file!, svg);
-      }
+    const folder = this.plugin.settings.folder;
 
-      this.fileName = this.Utils.getFileNameForSave()
-
-      await this.plugin.app.vault.create(this.fileName, svg);
+    if (this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
+      const file = this.plugin.app.vault.getFileByPath(this.fileName)
+      return await this.plugin.app.vault.modify(file!, svg);
     }
+
+    this.fileName = await this.Utils.getFileNameForSave()
+
+    await this.plugin.app.vault.create(this.fileName, svg);
+  }
 }

@@ -6,3 +6,7 @@ export const DRAWIO_CLIENT_DOWNLOADING_LINK = "https://api.github.com/repos/jgra
 // VIEWS
 
 export const DRAWIO_EDITOR_VIEW = "drawio-editor-view"
+
+// REGEX
+
+export const PERCENT_SIZE_REGEX = /^(?:100(?:\.0+)?|[1-9]?\d(?:\.\d+)?)%$/;

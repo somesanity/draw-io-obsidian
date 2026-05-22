@@ -1,5 +1,7 @@
 import { DRAWIO_EDITOR_VIEW } from "consts";
 import DrawioPlugin from "main";
+import { CenteringDiagrams } from "MarkdownPostProcessors/CenteringDiagram";
+import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Notice } from "obsidian";
 import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
@@ -12,15 +14,15 @@ export class PluginInit {
     };
 
     async loadSettings(): Promise<void> {
-       await this.plugin.loadSettings();
-       this.plugin.addSettingTab(new SettingTab(this.plugin.app, this.plugin));
+        await this.plugin.loadSettings();
+        this.plugin.addSettingTab(new SettingTab(this.plugin.app, this.plugin));
     }
 
     async addRibbonIcon(): Promise<any> {
         this.plugin.addRibbonIcon('dice', 'Sample', async (evt: MouseEvent) => {
-			new Notice('This is a notice!');
-            	await this.plugin.drawioClientManager.checkAndUpdate();
-		        this.plugin.serverManager.startServer();
+            new Notice('This is a notice!');
+            await this.plugin.drawioClientManager.checkAndUpdate();
+            this.plugin.serverManager.startServer();
         })
     }
 
@@ -45,10 +47,15 @@ export class PluginInit {
             id: "open-drawio-editor-view",
             name: "Запустить редактор draw.io",
             callback: async () => {
-               this.plugin.serverManager.startServer();
-               await this.plugin.activateView(DRAWIO_EDITOR_VIEW)
+                this.plugin.serverManager.startServer();
+                await this.plugin.activateView(DRAWIO_EDITOR_VIEW)
             }
         })
+    }
 
+    registerPostProcessings() {
+        this.plugin.settings.centeringDiagrams
+            ? CenteringDiagrams(this.plugin)
+            : ""
     }
 }

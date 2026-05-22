@@ -15,48 +15,50 @@ export class DrawioClientManager {
     public async checkAndUpdate() {
         const isUpdate = await this.compareVersions();
         const folderIsExist = await this.plugin.app.vault.adapter.exists(`${this.plugin.manifest.dir}/webapp`)
-        if(!isUpdate || !folderIsExist) {
+        if (!isUpdate || !folderIsExist) {
             await this.runInstallationProcess();
             await this.unzipDrawioClient();
             const LastVersion = await this.getLastVersion();
-            if(LastVersion) {
-                this.plugin.settings.currentlyDrawioClientVersion = LastVersion 
+            if (LastVersion) {
+                this.plugin.settings.currentlyDrawioClientVersion = LastVersion
                 await this.plugin.saveSettings()
             }
         }
     }
 
     private async getLastVersion(): Promise<string | void> {
-    try {
-        const response = await requestUrl({        
-            url: DRAWIO_CLIENT_LAST_RELEASE,
-            method: 'GET',
-            headers: {
-                'Accept': 'application/vnd.github+json',
-                'User-Agent': 'Obsidian-Plugin-CheckUpdate'
-            }
-        });
-        
-        const data: LastReleaseData = await response.json;
-        
-        return data.tag_name
+        try {
+            const response = await requestUrl({
+                url: DRAWIO_CLIENT_LAST_RELEASE,
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.github+json',
+                    'User-Agent': 'Obsidian-Plugin-CheckUpdate',
+                    'Cache-Control': 'no-store, no-cache, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            const data: LastReleaseData = response.json;
+
+            return data.tag_name
 
         } catch (error) {
-          return console.error("Не удалось узнать версию", error);
+            return console.error("Не удалось узнать версию", error);
         }
     }
 
-    async compareVersions(): Promise<boolean | unknown> {
+    private async compareVersions(): Promise<boolean | unknown> {
         try {
             const lastVersion = await this.getLastVersion();
             const currentlyVersion = this.plugin.settings.currentlyDrawioClientVersion;
 
-            if(currentlyVersion === lastVersion) {
+            if (currentlyVersion === lastVersion) {
                 return true;
             } else {
                 return false;
             }
-            
+
         } catch (error) {
             return console.log(error);
         }
@@ -67,13 +69,13 @@ export class DrawioClientManager {
             const pluginBaseDir = this.plugin.manifest.dir;
             const drawioClientZipPath = `${pluginBaseDir}/webapp.zip`;
             const response = await requestUrl({ url: DRAWIO_CLIENT_DOWNLOADING_LINK });
-            
+
             if (response.status !== 200) {
                 throw new Error(`Network error: ${response.status}`);
             }
 
             await this.plugin.app.vault.adapter.writeBinary(drawioClientZipPath, response.arrayBuffer);
-            
+
             new Notice("Клиент успешно скачен!");
 
         } catch (error: any) {
@@ -95,40 +97,40 @@ export class DrawioClientManager {
 
             const zipBuffer = await adapter.readBinary(drawioClientZipPath);
             const zip = await JSZip.loadAsync(zipBuffer);
-            
+
             const RootFolderInZip = Object.keys(zip.files)[0];
 
-            if(!RootFolderInZip) {
+            if (!RootFolderInZip) {
                 throw new Error("zip is empty.")
             }
 
             const rootDirInZip = RootFolderInZip.split('/')[0];
-            
+
             const webappFolder = `${rootDirInZip}/src/main/webapp/`;
-            
+
             new Notice(`${this.plugin.manifest.name}: Распаковка клиента draw.io...`);
 
             for (const relativePath in zip.files) {
                 if (relativePath.startsWith(webappFolder) && relativePath !== webappFolder) {
                     const zipEntry = zip.files[relativePath];
-                    
+
                     const cleanSubPath = relativePath.substring(webappFolder.length);
-                    
+
                     const fullPathOnDisk = `${pluginBaseDir}/webapp/${cleanSubPath}`;
-                    
+
                     if (zipEntry!.dir) {
                         if (!(await adapter.exists(fullPathOnDisk))) {
                             await adapter.mkdir(fullPathOnDisk);
                         }
                     } else {
                         const fileData = await zipEntry!.async("uint8array");
-                        
+
                         const parentDir = fullPathOnDisk.substring(0, fullPathOnDisk.lastIndexOf('/'));
                         if (!(await adapter.exists(parentDir))) {
                             await adapter.mkdir(parentDir);
                         }
 
-                    await adapter.writeBinary(fullPathOnDisk, fileData.buffer as ArrayBuffer);
+                        await adapter.writeBinary(fullPathOnDisk, fileData.buffer as ArrayBuffer);
                     }
                 }
             }
