@@ -1,7 +1,9 @@
 import { DRAWIO_EDITOR_VIEW } from "consts";
 import { CenteringEditorExtension } from "EditorExtensions/CenteringEditorExtension";
+import { DeleteResizeBlockEditorExtension } from "EditorExtensions/DeleteResizeBlockEditorExtension";
 import DrawioPlugin from "main";
 import { CenteringDiagrams } from "MarkdownPostProcessors/CenteringDiagram";
+import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Notice } from "obsidian";
 import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
@@ -57,11 +59,15 @@ export class PluginInit {
         this.plugin.settings.centeringDiagrams
             ? CenteringDiagrams(this.plugin)
             : ""
+
+        PercentSize(this.plugin)
     }
 
     registerEditorExtensions() {
         this.plugin.settings.centeringDiagrams
             ? this.plugin.registerEditorExtension(CenteringEditorExtension())
             : ""
+
+        this.plugin.registerEditorExtension(DeleteResizeBlockEditorExtension())
     }
 }
