@@ -1,6 +1,7 @@
 import { DRAWIO_EDITOR_VIEW } from "consts";
 import { CenteringEditorExtension } from "EditorExtensions/CenteringEditorExtension";
 import { DeleteResizeBlockEditorExtension } from "EditorExtensions/DeleteResizeBlockEditorExtension";
+import { PercentSizeEditorExtension } from "EditorExtensions/PercentSizeEditorExtension";
 import DrawioPlugin from "main";
 import { CenteringDiagrams } from "MarkdownPostProcessors/CenteringDiagram";
 import { PercentSize } from "MarkdownPostProcessors/PercentSize";
@@ -69,5 +70,6 @@ export class PluginInit {
             : ""
 
         this.plugin.registerEditorExtension(DeleteResizeBlockEditorExtension())
+        this.plugin.registerEditorExtension(PercentSizeEditorExtension())
     }
 }

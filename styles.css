@@ -11,7 +11,12 @@
 
 .drawio-centering-diagrams--editmode {
     width: 100% !important;
+    display: block !important;
+}
+
+.drawio-diagram-wrapper {
     display: flex !important;
     justify-content: center !important;
-    align-items: center !important;
 }
+
+.drawio-diagram-wrappe
