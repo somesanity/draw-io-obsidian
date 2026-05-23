@@ -18,3 +18,31 @@
     display: flex !important;
     justify-content: center !important;
 }
+
+.drawio-external-link-tooltip {
+    position: absolute;
+    border: var(--border-width) solid var(--background-modifier-border);
+    box-shadow: var(--shadow-l);
+    background-color: var(--background-primary);
+    padding: 10px;
+    z-index: 9999;
+}
+
+.drawio-external-link-tooltip a {
+    color: var(--text-normal);
+    text-decoration: none;
+}
+
+.drawio-external-link-tooltip--hidden {
+    display: none;
+    z-index: 9999;
+}
+
+.drawio-external-link-tooltip--show {
+    display: block;
+}
+
+.drawio-external-link-tooltip--position {
+    --drawio-external-link-tooltip-offset-x: 15px;
+    --drawio-external-link-tooltip-offset-y: 15px;
+}

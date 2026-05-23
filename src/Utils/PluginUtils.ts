@@ -1,6 +1,7 @@
 import DrawioPlugin from "main";
 import { normalizePath } from "obsidian";
 import { savingNameFileFormatOption } from "Settings/settings";
+import { ExternalLinkTooltip } from "./ExternalLinkTooltip";
 
 export class pluginUtils {
     private plugin: DrawioPlugin
@@ -54,5 +55,4 @@ export class pluginUtils {
             default: return ""
         }
     }
-
 }
