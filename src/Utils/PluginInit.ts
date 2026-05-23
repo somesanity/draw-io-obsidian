@@ -4,6 +4,7 @@ import { DeleteResizeBlockEditorExtension } from "EditorExtensions/DeleteResizeB
 import { PercentSizeEditorExtension } from "EditorExtensions/PercentSizeEditorExtension";
 import DrawioPlugin from "main";
 import { CenteringDiagrams } from "MarkdownPostProcessors/CenteringDiagram";
+import { interactiveDiagramss } from "MarkdownPostProcessors/interactiveDiagrams";
 import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Notice } from "obsidian";
 import { SettingTab } from "Settings/settings";
@@ -62,6 +63,10 @@ export class PluginInit {
             : ""
 
         PercentSize(this.plugin)
+
+        this.plugin.settings.interactiveDiagrams
+            ? interactiveDiagramss(this.plugin)
+            : ""
     }
 
     registerEditorExtensions() {

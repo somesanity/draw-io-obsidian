@@ -1,4 +1,3 @@
-import { PERCENT_SIZE_REGEX } from "consts";
 import DrawioPlugin from "main";
 
 export async function CenteringDiagrams(plugin: DrawioPlugin) {

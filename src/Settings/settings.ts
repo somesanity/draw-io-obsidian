@@ -12,6 +12,7 @@ export interface DrawioSettings {
 	folder: string;
 	savingNameFileFormat: savingNameFileFormatOption
 	centeringDiagrams: boolean
+	interactiveDiagrams: boolean
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -20,6 +21,7 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	folder: "drawio",
 	savingNameFileFormat: "date",
 	centeringDiagrams: true,
+	interactiveDiagrams: true,
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -80,6 +82,18 @@ export class SettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.centeringDiagrams)
 				.onChange(async (value) => {
 					this.plugin.settings.centeringDiagrams = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('interactive diagrams')
+			.setDesc("if enable, do diagram interactive")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.interactiveDiagrams)
+				.onChange(async (value) => {
+					this.plugin.settings.interactiveDiagrams = value;
 					await this.plugin.saveSettings();
 					this.display();
 				})

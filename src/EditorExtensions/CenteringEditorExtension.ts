@@ -4,10 +4,12 @@ export const CenteringEditorExtension = () => {
     return ViewPlugin.fromClass(
         class {
             observer: MutationObserver;
+            view: EditorView;
 
             constructor(view: EditorView) {
-                this.applyCentering(view);
+                this.view = view;
 
+                this.applyCentering(view);
                 this.observer = new MutationObserver(() => {
                     this.applyCentering(view);
                 });
@@ -29,6 +31,11 @@ export const CenteringEditorExtension = () => {
                 if (this.observer) {
                     this.observer.disconnect();
                 }
+
+                const addedClasses = this.view.dom.querySelectorAll(".drawio-centering-diagrams--editmode");
+                addedClasses.forEach((element) => {
+                    element.classList.remove("drawio-centering-diagrams--editmode");
+                });
             }
 
             applyCentering(view: EditorView) {
