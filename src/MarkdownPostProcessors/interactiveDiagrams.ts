@@ -67,6 +67,10 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
 
                             if (!href) return;
 
+                            const isExternal = /^(https?|mailto|ftp):/i.test(href.trim());
+
+                            if (!isExternal) return;
+
                             linkItem.addEventListener("mouseenter", (event: MouseEvent) => {
                                 externalLinkTooltip.show(href, event);
                             });
