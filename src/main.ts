@@ -4,6 +4,7 @@ import { PluginInit } from 'Utils/PluginInit';
 import { Server } from 'http';
 import { ServerManager } from 'Utils/ServerManager';
 import { DrawioClientManager } from 'Utils/DrawioClientManager';
+import { ExternalLinkTooltip } from 'Utils/ExternalLinkTooltip';
 
 export default class DrawioPlugin extends Plugin {
 	settings!: DrawioSettings;
@@ -39,6 +40,9 @@ export default class DrawioPlugin extends Plugin {
 
 	onunload() {
 		this.serverManager.stopServer();
+
+		const tooltip = ExternalLinkTooltip.getInstance();
+		tooltip.destroy();
 	}
 
 	async activateView(ViewType: string) {

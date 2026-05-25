@@ -1,3 +1,4 @@
+import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK } from "consts";
 import DrawioPlugin from "main";
 import { TFile } from "obsidian";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
@@ -67,27 +68,64 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
 
                             if (!href) return;
 
-                            const isExternal = /^(https?|mailto|ftp):/i.test(href.trim());
+                            const isExternal = EXTERNAL_LINK_CHECK.test(href.trim());
+                            const isInternal = INTERNAL_LINK_CHECK.test(href.trim())
 
-                            if (!isExternal) return;
+                            if (isExternal) {
+                                linkItem.addEventListener("mouseenter", (event: MouseEvent) => {
+                                    externalLinkTooltip.show(href, event);
+                                });
 
-                            linkItem.addEventListener("mouseenter", (event: MouseEvent) => {
-                                externalLinkTooltip.show(href, event);
-                            });
+                                linkItem.addEventListener("mousemove", (event: MouseEvent) => {
+                                    externalLinkTooltip.updatePosition(event);
+                                });
 
-                            linkItem.addEventListener("mousemove", (event: MouseEvent) => {
-                                externalLinkTooltip.updatePosition(event);
-                            });
+                                linkItem.addEventListener("mouseleave", () => {
+                                    externalLinkTooltip.hide();
+                                });
+                            }
 
-                            linkItem.addEventListener("mouseleave", () => {
-                                externalLinkTooltip.hide();
-                            });
+                            if (isInternal) {
+                                let cleanpath = decodeURIComponent(href.trim().replace(CLEAR_INTERNAL_LINK, "").trim());
+
+                                linkItem.setAttribute("data-href", cleanpath);
+                                linkItem.setAttribute("href", cleanpath);
+                                linkItem.classList.add("internal-link");
+
+                                let top: number | null = null;
+
+                                let popoverTop: number | null = null;
+
+                                const observerPopover = new MutationObserver((mutationsList, observer) => {
+                                    const isPopoverLoaded = document.body.querySelector(".hover-popover > .markdown-embed.is-loaded") as HTMLElement | null;
+                                    const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
+
+                                    if (!isPopoverLoaded) {
+                                        console.log("рано")
+                                        return
+                                    }
+
+                                    if (popover && isPopoverLoaded && popoverTop) {
+                                        popover.style.setProperty("top", `${popoverTop}px`, "important");
+                                        popover.style.setProperty("height", "var(--popover-height)", "important");
+                                        observer.disconnect();
+                                    }
+                                });
+
+                                linkItem.addEventListener("mouseenter", (event: MouseEvent) => {
+                                    popoverTop = event.clientY + window.scrollY;
+                                    observerPopover.observe(document.body, observerPopoverCfg);
+                                });
+
+                                linkItem.addEventListener("mouseleave", () => {
+                                    observerPopover.disconnect();
+                                    popoverTop = null;
+                                });
+                            }
                         });
                     }
 
                 });
-
-                // ---
 
                 observer.disconnect();
             }
@@ -97,6 +135,13 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
             childList: true,
             subtree: true,
         }
+
+        const observerPopoverCfg = {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style']
+        };
 
         observer.observe(element, observerCfg)
     })

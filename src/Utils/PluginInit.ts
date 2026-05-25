@@ -9,6 +9,7 @@ import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Notice } from "obsidian";
 import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
+import { ExternalLinkTooltip } from "./ExternalLinkTooltip";
 
 export class PluginInit {
     private plugin: DrawioPlugin;

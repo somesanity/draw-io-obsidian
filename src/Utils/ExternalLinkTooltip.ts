@@ -82,4 +82,12 @@ export class ExternalLinkTooltip {
         this.tooltipElement.style.left = `${newLeft}px`;
         this.tooltipElement.style.top = `${newTop}px`;
     }
+
+    public destroy() {
+        const tooltip = document.querySelector(".drawio-external-link-tooltip");
+
+        if (tooltip) {
+            tooltip.remove();
+        }
+    }
 }
