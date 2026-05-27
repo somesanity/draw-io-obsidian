@@ -2,6 +2,7 @@ import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK } from "c
 import DrawioPlugin from "main";
 import { TFile } from "obsidian";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
+import { MxGraphParser } from "Utils/MxGraphParser";
 
 export async function interactiveDiagramss(plugin: DrawioPlugin) {
     return plugin.registerMarkdownPostProcessor((element, context) => {
@@ -51,12 +52,15 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                             }
                         }
                     }
-
                     // ---
 
                     // extend links
 
-                    console.log(svgelement)
+                    const parser = new MxGraphParser();
+
+                    const parsedmx = parser.parse(svgelement!);
+
+                    console.log(parsedmx)
 
                     const externalLinkTooltip = ExternalLinkTooltip.getInstance();
 
@@ -92,8 +96,6 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                 linkItem.setAttribute("href", cleanpath);
                                 linkItem.classList.add("internal-link");
 
-                                let top: number | null = null;
-
                                 let popoverTop: number | null = null;
 
                                 const observerPopover = new MutationObserver((mutationsList, observer) => {
@@ -101,7 +103,6 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                     const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
 
                                     if (!isPopoverLoaded) {
-                                        console.log("рано")
                                         return
                                     }
 

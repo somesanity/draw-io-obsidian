@@ -17,6 +17,7 @@
 		"@octokit/types": "^16.0.0",
 		"@types/express": "^5.0.6",
 		"@types/node": "^16.18.126",
+		"@types/pako": "^2.0.4",
 		"esbuild": "0.25.5",
 		"eslint-plugin-obsidianmd": "0.1.9",
 		"globals": "14.0.0",
@@ -30,6 +31,7 @@
 		"express": "^5.2.1",
 		"jszip": "^3.10.1",
 		"obsidian": "latest",
-		"octokit": "^5.0.5"
+		"octokit": "^5.0.5",
+		"pako": "^2.1.0"
 	}
 }
