@@ -1,6 +1,7 @@
-import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK } from "consts";
+import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, MARKDOWN_FRAGMENT_SEARCH } from "consts";
 import DrawioPlugin from "main";
 import { TFile } from "obsidian";
+import { MarkdownFragmentsObject } from "Types/MarkdownFragmentsObject";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
 import { MxGraphParser } from "Utils/MxGraphParser";
 
@@ -54,13 +55,43 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                     }
                     // ---
 
+                    // // md fragmnets
+
+                    // const fragments: MarkdownFragmentsObject[] = [];
+
+                    // const parser = new MxGraphParser();
+                    // const parsedmx = parser.parse(svgelement!);
+                    // console.log(parsedmx)
+
+                    // const objects = parsedmx?.querySelectorAll("object");
+
+                    // objects?.forEach(object => {
+                    //     const objectId = object?.getAttribute("id");
+                    //     const markdownFragmentId = Array.from(object.attributes).find(attr => MARKDOWN_FRAGMENT_SEARCH.test(attr.name));
+
+                    //     console.log(markdownFragmentId);
+
+                    //     const obs = object.getAttribute(markdownFragmentId!);
+
+                    //     if (markdownFragmentId) {
+                    //         fragments.push({
+                    //             mdid: markdownFragmentId!,
+                    //             id: objectId!,
+                    //             markdownContent: "### Какой-то контент 1"
+                    //         });
+                    //     }
+
+                    // });
+
+
+                    // cells?.forEach((cell) => {
+                    //     const cellid = cell.getAttribute("data-cell-id");
+
+                    // })
+
+                    // ---
+
                     // extend links
-
-                    const parser = new MxGraphParser();
-
-                    const parsedmx = parser.parse(svgelement!);
-
-                    console.log(parsedmx)
 
                     const externalLinkTooltip = ExternalLinkTooltip.getInstance();
 

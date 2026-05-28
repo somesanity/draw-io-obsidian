@@ -1,6 +1,6 @@
 import { DRAWIO_EDITOR_VIEW } from 'consts';
 import DrawioPlugin from 'main';
-import { ItemView, WorkspaceLeaf } from 'obsidian';
+import { ItemView, TFile, ViewStateResult, WorkspaceLeaf } from 'obsidian';
 import { DrawioAppController } from 'Utils/DrawioAppController';
 import { pluginUtils } from 'Utils/PluginUtils';
 
@@ -8,14 +8,37 @@ export class DrawioEditorView extends ItemView {
   plugin: DrawioPlugin
   Utils: pluginUtils
   drawioAppController!: DrawioAppController
-  
+  states: any = {};
+
   private iframe!: HTMLIFrameElement
   private MessageListener!: Promise<(event: MessageEvent) => Promise<void>>;
 
   constructor(leaf: WorkspaceLeaf, plugin: DrawioPlugin) {
     super(leaf);
-	  this.plugin = plugin
-	  this.Utils = new pluginUtils(this.plugin)
+    this.plugin = plugin
+    this.Utils = new pluginUtils(this.plugin)
+  }
+
+  async setState(state: any, result: ViewStateResult): Promise<void> {
+    await super.setState(state, result);
+
+    this.states = state;
+
+    if (this.drawioAppController && this.states?.file) {
+      this.drawioAppController.file = this.states.file as TFile;
+    }
+
+    if (this.iframe) {
+      this.applyOptions();
+    }
+  }
+
+  private applyOptions() {
+    if (!this.states) return;
+  }
+
+  public getState() {
+    return this.states;
   }
 
   getViewType() {
@@ -23,6 +46,11 @@ export class DrawioEditorView extends ItemView {
   }
 
   getDisplayText() {
+
+    if (this.states.file) {
+      return this.states.file.name;
+    }
+
     return "редактор draw.io";
   }
 
@@ -32,6 +60,10 @@ export class DrawioEditorView extends ItemView {
 
 
   async onOpen() {
+    if (!this.plugin.server) {
+      this.plugin.serverManager.startServer();
+    }
+
     const container = this.contentEl;
 
     this.iframe = container.createEl("iframe", {
@@ -42,6 +74,7 @@ export class DrawioEditorView extends ItemView {
     })
 
     this.drawioAppController = new DrawioAppController(this.plugin, this.iframe, this.Utils.getServerUrl("baseurl"))
+
     this.MessageListener = this.drawioAppController.handleDrawIoMessage();
   }
 

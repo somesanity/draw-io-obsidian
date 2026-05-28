@@ -1,5 +1,7 @@
 import DrawioPlugin from "main";
 import { pluginUtils } from "./PluginUtils";
+import { normalizePath, TFile } from "obsidian";
+import { get } from "http";
 
 export class DrawioAppController {
 
@@ -8,6 +10,7 @@ export class DrawioAppController {
   private url: string
   private Utils: pluginUtils
 
+  public file: TFile | null = null
   public fileName: string | null = null
 
   constructor(plugin: DrawioPlugin, iframe: HTMLIFrameElement, url: string) {
@@ -24,7 +27,7 @@ export class DrawioAppController {
       const data = JSON.parse(event.data);
 
       switch (data.event) {
-        case "init": this.onInit(data)
+        case "init": this.onInit()
           break
         case "save": this.onSaveData(data)
           break
@@ -38,13 +41,26 @@ export class DrawioAppController {
     return listener;
   }
 
-  onInit(data: any) {
+  async onInit() {
     const messageToDrawIo = {
       action: 'load',
       xml: ""
     };
 
-    this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), this.Utils.getServerUrl("baseurl"));
+    if (this.file) {
+      const data = await this.plugin.app.vault.read(this.file);
+
+      const messageToEditDrawIo = {
+        action: 'load',
+        xml: data
+      };
+
+      this.fileName = normalizePath(this.file.path);
+
+      return this.iframe.contentWindow?.postMessage(JSON.stringify(messageToEditDrawIo), this.Utils.getServerUrl("baseurl"));
+    }
+
+    return this.iframe.contentWindow?.postMessage(JSON.stringify(messageToDrawIo), this.Utils.getServerUrl("baseurl"));
   }
 
   onSaveData(data: any) {
@@ -58,15 +74,27 @@ export class DrawioAppController {
     const svgString = data.data.split(',')[1];
     const svg = decodeURIComponent(escape(atob(svgString)));
 
-    const folder = this.plugin.settings.folder;
-
-    if (this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
+    if (this.file && this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
       const file = this.plugin.app.vault.getFileByPath(this.fileName)
+
+      this.Utils.refreshLeaves();
       return await this.plugin.app.vault.modify(file!, svg);
     }
 
     this.fileName = await this.Utils.getFileNameForSave()
 
     await this.plugin.app.vault.create(this.fileName, svg);
+  }
+
+  public set setFiletoEdit(file: TFile) {
+    this.file = file;
+  }
+
+  public get setFiletoEdit(): TFile | null {
+    if (this.file) {
+      return this.file;
+    }
+
+    return null;
   }
 }

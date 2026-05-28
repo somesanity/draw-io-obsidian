@@ -26,7 +26,7 @@ export default class DrawioPlugin extends Plugin {
 		initter.addRibbonIcon();
 		initter.registerPostProcessings();
 		initter.registerEditorExtensions();
-
+		initter.registerEvents();
 		await this.drawioClientManager.checkAndUpdate();
 
 	}
@@ -46,19 +46,36 @@ export default class DrawioPlugin extends Plugin {
 		tooltip.destroy();
 	}
 
-	async activateView(ViewType: string) {
+	async activateView(ViewType: string, options?: { file?: { path: string };[key: string]: any }) {
 		const { workspace } = this.app;
-
 		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(ViewType);
 
-		if (leaves.length > 0) {
-			leaf = leaves[0] as WorkspaceLeaf | null;
-		} else {
-			leaf = workspace.getLeaf(false);
-			await leaf.setViewState({ type: ViewType, active: true });
+		if (options?.file?.path) {
+			const existingLeaves = workspace.getLeavesOfType(ViewType);
+			for (const l of existingLeaves) {
+				const currentLeafState = l.getViewState();
+				if (currentLeafState.state?.file?.path === options.file.path) {
+					leaf = l;
+					break;
+				}
+			}
 		}
 
-		workspace.revealLeaf(leaf!);
+		if (leaf) {
+			workspace.revealLeaf(leaf);
+			return;
+		}
+
+		leaf = workspace.getLeaf('tab');
+
+		if (leaf) {
+			await leaf.setViewState({
+				type: ViewType,
+				active: true,
+				state: options
+			});
+
+			workspace.revealLeaf(leaf);
+		}
 	}
 }

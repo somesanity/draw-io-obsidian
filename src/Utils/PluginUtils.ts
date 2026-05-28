@@ -1,5 +1,5 @@
 import DrawioPlugin from "main";
-import { normalizePath } from "obsidian";
+import { App, Editor, MarkdownView, normalizePath, TFile, WorkspaceLeaf } from "obsidian";
 import { savingNameFileFormatOption } from "Settings/settings";
 
 export class pluginUtils {
@@ -53,5 +53,65 @@ export class pluginUtils {
 
             default: return ""
         }
+    }
+
+    findDiagramFileUnderCursor(app: App, editor: Editor, view: MarkdownView) {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+
+        const linkRegex = /!\[\[([^|\]]+\.(?:drawio(?:\.svg)?))[^\]]*\]\]|!\[[^\]]*\]\(([^)\s]+?\.(?:drawio(?:\.svg)?))\)/g;
+
+        let match: RegExpExecArray | null;
+
+        while ((match = linkRegex.exec(line)) !== null) {
+            const fullMatchText = match[0];
+
+            let linkText = match[1] || match[2];
+            if (!linkText) continue;
+
+            linkText = linkText.trim().replace(/^<|>$/g, "");
+            linkText = linkText.replace(/^\.?\//, "");
+            try { linkText = decodeURIComponent(linkText); } catch (e) { console.log(e) }
+
+            const startIndex = match.index;
+            const endIndex = startIndex + fullMatchText.length;
+
+            if (cursor.ch >= startIndex && cursor.ch <= endIndex) {
+                const linkedFile = app.metadataCache.getFirstLinkpathDest(linkText, view.file?.path ?? "");
+                if (linkedFile instanceof TFile) return linkedFile;
+
+                const byPath = app.vault.getAbstractFileByPath(linkText);
+                if (byPath instanceof TFile) return byPath;
+
+                if (linkText.endsWith(".drawio")) {
+                    const alt = linkText + ".svg";
+                    const altFile = app.vault.getAbstractFileByPath(alt);
+                    if (altFile instanceof TFile) return altFile;
+                } else if (linkText.endsWith(".drawio.svg")) {
+                    const alt = linkText.replace(/\.svg$/, "");
+                    const altFile = app.vault.getAbstractFileByPath(alt);
+                    if (altFile instanceof TFile) return altFile;
+                }
+
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    refreshLeaves() {
+        this.plugin.app.workspace.getLeavesOfType('markdown').forEach(async (leaf) => {
+            const state = leaf.getViewState();
+
+            const ephemeralState = leaf.getEphemeralState();
+
+            await leaf.setViewState({ type: 'empty' });
+            await leaf.setViewState(state);
+
+            setTimeout(() => {
+                leaf.setEphemeralState(ephemeralState);
+            }, 0);
+        });
     }
 }
