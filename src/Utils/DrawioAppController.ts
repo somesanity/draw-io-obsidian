@@ -24,6 +24,8 @@ export class DrawioAppController {
     const listener = async (event: MessageEvent) => {
       if (event.origin !== this.url) { return; }
 
+      if (!this.iframe || event.source !== this.iframe.contentWindow) { return; }
+
       const data = JSON.parse(event.data);
 
       switch (data.event) {
