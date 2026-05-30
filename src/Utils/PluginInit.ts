@@ -9,8 +9,8 @@ import { PercentSize } from "MarkdownPostProcessors/PercentSize";
 import { Editor, MarkdownView, Menu, Notice, TFile } from "obsidian";
 import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
-import { ExternalLinkTooltip } from "./ExternalLinkTooltip";
 import { pluginUtils } from "./PluginUtils";
+import { SizeInHoverWindow } from "MarkdownPostProcessors/SizeInhoverWindow";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -63,15 +63,12 @@ export class PluginInit {
         this.plugin.addCommand({
             id: 'open-drawio-under-cursor',
             name: 'Открыть Draw.io диаграмму под курсором',
-            hotkeys: [{ modifiers: ["Mod", "Alt"], key: "e" }], // По умолчанию Ctrl+Alt+E (или Cmd+Alt+E)
+            hotkeys: [{ modifiers: ["Mod", "Alt"], key: "e" }],
 
-            // editorCallback работает только тогда, когда фокус находится в текстовом редакторе
-            editorCallback: (editor: Editor, view: MarkdownView) => {
-                // Используем вашу утилиту для поиска файла под курсором
+            callback: (editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
-                    // Триггерим активацию вашей вьюшки
                     this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: fileToEdit });
                 }
             }
@@ -88,6 +85,8 @@ export class PluginInit {
         this.plugin.settings.interactiveDiagrams
             ? interactiveDiagramss(this.plugin)
             : ""
+
+        SizeInHoverWindow(this.plugin);
     }
 
     registerEditorExtensions() {

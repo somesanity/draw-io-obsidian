@@ -13,6 +13,7 @@ export interface DrawioSettings {
 	savingNameFileFormat: savingNameFileFormatOption
 	centeringDiagrams: boolean
 	interactiveDiagrams: boolean
+	diagramSizeInPopupHover: string
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -22,6 +23,7 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	savingNameFileFormat: "date",
 	centeringDiagrams: true,
 	interactiveDiagrams: true,
+	diagramSizeInPopupHover: "100%",
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -98,5 +100,16 @@ export class SettingTab extends PluginSettingTab {
 					this.display();
 				})
 			);
+
+		new Setting(containerEl)
+			.setName('diagram size in hover window')
+			.setDesc('Set the diagram size in the hover window')
+			.addText(text => text
+				.setPlaceholder('e.c: 75% or 450')
+				.setValue(this.plugin.settings.diagramSizeInPopupHover)
+				.onChange(async (value) => {
+					this.plugin.settings.diagramSizeInPopupHover = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 }
