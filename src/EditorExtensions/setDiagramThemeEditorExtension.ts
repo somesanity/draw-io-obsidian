@@ -36,9 +36,10 @@ export const setDiagramThemeEditorExtension = (plugin: DrawioPlugin) => {
                     this.observer.disconnect();
                 }
 
-                const addedClasses = this.view.dom.querySelectorAll("img[class*='drawio-diagrams--']");
+                const addedClasses = this.view.dom.querySelectorAll("img[class*='drawio-diagram--editmode--']");
+
                 addedClasses.forEach((element) => {
-                    element.classList.remove("drawio-diagrams--lightTheme", "drawio-diagrams--darkTheme");
+                    element.classList.remove("drawio-diagram--editmode--lightTheme", "drawio-diagram--editmode--darkTheme");
                 });
             }
 
