@@ -85,7 +85,9 @@ export class DrawioAppController {
 
     this.fileName = await this.Utils.getFileNameForSave()
 
-    await this.plugin.app.vault.create(this.fileName, svg);
+    const file = await this.plugin.app.vault.create(this.fileName, svg);
+
+    this.file = file;
   }
 
   public set setFiletoEdit(file: TFile) {
