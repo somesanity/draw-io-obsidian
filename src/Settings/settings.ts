@@ -5,6 +5,11 @@ export type savingNameFileFormatOption =
 	"date" |
 	"number"
 
+export type diagramTheme =
+	"auto" |
+	"dark" |
+	"light"
+
 
 export interface DrawioSettings {
 	port: string;
@@ -14,6 +19,8 @@ export interface DrawioSettings {
 	centeringDiagrams: boolean
 	interactiveDiagrams: boolean
 	diagramSizeInPopupHover: string
+	diagramThemeInPreviewMode: diagramTheme
+	diagramThemeInEditMode: diagramTheme
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -24,6 +31,8 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	centeringDiagrams: true,
 	interactiveDiagrams: true,
 	diagramSizeInPopupHover: "100%",
+	diagramThemeInPreviewMode: "auto",
+	diagramThemeInEditMode: "auto"
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -111,5 +120,39 @@ export class SettingTab extends PluginSettingTab {
 					this.plugin.settings.diagramSizeInPopupHover = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('diagram theme in preview mode')
+			.setDesc('Set theme for diagrams in the obsidian preview mode')
+			.addDropdown(DropdownComponent => {
+
+				DropdownComponent.addOption("auto" as diagramTheme, "auto")
+				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
+				DropdownComponent.addOption("light" as diagramTheme, "light theme")
+
+				DropdownComponent.setValue(this.plugin.settings.diagramThemeInPreviewMode || "auto");
+
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.diagramThemeInPreviewMode = value as diagramTheme;
+					await this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('diagram theme in edit mode')
+			.setDesc('Set theme for diagrams in the obsidian edit mode')
+			.addDropdown(DropdownComponent => {
+
+				DropdownComponent.addOption("auto" as diagramTheme, "auto")
+				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
+				DropdownComponent.addOption("light" as diagramTheme, "light theme")
+
+				DropdownComponent.setValue(this.plugin.settings.diagramThemeInEditMode || "auto");
+
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.diagramThemeInEditMode = value as diagramTheme;
+					await this.plugin.saveSettings()
+				})
+			})
 	}
 }

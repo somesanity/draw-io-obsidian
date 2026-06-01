@@ -41,7 +41,7 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                         svgElement.setAttribute("height", "auto");
                                     }
 
-                                    svgElement.classList.add("drawio-svg");
+                                    svgElement.classList.add("drawio-interactive-diagram");
 
                                     img.replaceWith(svgElement);
 

@@ -11,6 +11,10 @@ import { SettingTab } from "Settings/settings";
 import { DrawioEditorView } from "Views/DrawioEditorView";
 import { pluginUtils } from "./PluginUtils";
 import { SizeInHoverWindow } from "MarkdownPostProcessors/SizeInhoverWindow";
+import { setClassToDiagrams } from "MarkdownPostProcessors/setClassToDiagrams";
+import { setDiagramsTheme } from "MarkdownPostProcessors/setDiagramTheme";
+import { SetClassToDiagramsEditorExtension } from "EditorExtensions/setClassToDiagramsEditorExtension";
+import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramThemeEditorExtension";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -76,6 +80,9 @@ export class PluginInit {
     }
 
     registerPostProcessings() {
+        setClassToDiagrams(this.plugin);
+        setDiagramsTheme(this.plugin);
+
         this.plugin.settings.centeringDiagrams
             ? CenteringDiagrams(this.plugin)
             : ""
@@ -90,11 +97,16 @@ export class PluginInit {
     }
 
     registerEditorExtensions() {
+        this.plugin.registerEditorExtension(SetClassToDiagramsEditorExtension());
+        this.plugin.registerEditorExtension(setDiagramThemeEditorExtension(this.plugin));
+
+
         this.plugin.settings.centeringDiagrams
             ? this.plugin.registerEditorExtension(CenteringEditorExtension())
             : ""
 
         this.plugin.registerEditorExtension(DeleteResizeBlockEditorExtension())
+
         this.plugin.registerEditorExtension(PercentSizeEditorExtension())
     }
 

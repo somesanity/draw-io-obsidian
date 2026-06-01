@@ -46,3 +46,25 @@
     --drawio-external-link-tooltip-offset-x: 15px;
     --drawio-external-link-tooltip-offset-y: 15px;
 }
+
+.drawio-diagram {}
+
+.drawio-diagrams--darkTheme {
+    color-scheme: dark !important;
+}
+
+.drawio-diagrams--lightTheme {
+    color-scheme: light !important;
+}
+
+.drawio-diagram--editmode {}
+
+.drawio-diagram--editmode--darkTheme {
+    color-scheme: dark !important;
+}
+
+.drawio-diagram--editmode--lightTheme {
+    color-scheme: light !important;
+}
+
+.drawio-interactive-diagram {}

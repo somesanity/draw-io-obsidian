@@ -114,4 +114,29 @@ export class pluginUtils {
             }, 0);
         });
     }
+
+    setDiagramsTheme(mode: "editMode" | "previewMode") {
+
+        if (mode === "previewMode") {
+            switch (this.plugin.settings.diagramThemeInPreviewMode) {
+                case "auto": {
+                    if (document.body.hasClass("theme-light")) return "drawio-diagrams--lightTheme";
+                    if (document.body.hasClass("theme-dark")) return "drawio-diagrams--darkTheme";
+                };
+                case "light": return "drawio-diagrams--lightTheme";
+                case "dark": return "drawio-diagrams--darkTheme";
+            }
+        }
+
+        if (mode === "editMode") {
+            switch (this.plugin.settings.diagramThemeInEditMode) {
+                case "auto": {
+                    if (document.body.hasClass("theme-light")) return "drawio-diagram--editmode--lightTheme";
+                    if (document.body.hasClass("theme-dark")) return "drawio-diagram--editmode--darkTheme";
+                };
+                case "light": return "drawio-diagram--editmode--lightTheme";
+                case "dark": return "drawio-diagram--editmode--darkTheme";
+            }
+        }
+    }
 }
