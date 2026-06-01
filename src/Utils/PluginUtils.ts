@@ -12,11 +12,26 @@ export class pluginUtils {
     getServerUrl(option: "baseurl" | "fullUrl"): string {
         const baseUrl = `http://localhost:${this.plugin.settings.port}`
 
-        const embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1&ui=white`
+        let embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1`;
+
+        switch (this.plugin.settings.EditorTheme) {
+            case "auto": {
+                if (document.body.hasClass("theme-light")) embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1&ui=white`;
+                if (document.body.hasClass("theme-dark")) embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1&ui=dark`;
+                break;
+            }
+
+            case "light": embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1&ui=white`
+                break;
+            case "dark": embedmode = `${baseUrl}/?embed=1&proto=json&libraries=1&spin=1&ui=dark`;
+                break;
+        }
 
         switch (option) {
             case "baseurl": return baseUrl
-            case "fullUrl": return embedmode
+            case "fullUrl": {
+                return embedmode
+            }
 
             default: return baseUrl
         }

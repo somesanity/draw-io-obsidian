@@ -10,6 +10,10 @@ export type diagramTheme =
 	"dark" |
 	"light"
 
+export type editorTheme =
+	"auto" |
+	"dark" |
+	"light"
 
 export interface DrawioSettings {
 	port: string;
@@ -21,6 +25,7 @@ export interface DrawioSettings {
 	diagramSizeInPopupHover: string
 	diagramThemeInPreviewMode: diagramTheme
 	diagramThemeInEditMode: diagramTheme
+	EditorTheme: editorTheme
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -32,7 +37,8 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	interactiveDiagrams: true,
 	diagramSizeInPopupHover: "100%",
 	diagramThemeInPreviewMode: "auto",
-	diagramThemeInEditMode: "auto"
+	diagramThemeInEditMode: "auto",
+	EditorTheme: "auto"
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -151,6 +157,23 @@ export class SettingTab extends PluginSettingTab {
 
 				DropdownComponent.onChange(async (value) => {
 					this.plugin.settings.diagramThemeInEditMode = value as diagramTheme;
+					await this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('draw.io editor theme')
+			.setDesc('Set theme for the draw.io editor')
+			.addDropdown(DropdownComponent => {
+
+				DropdownComponent.addOption("auto" as editorTheme, "auto")
+				DropdownComponent.addOption("dark" as editorTheme, "dark theme")
+				DropdownComponent.addOption("light" as editorTheme, "light theme")
+
+				DropdownComponent.setValue(this.plugin.settings.EditorTheme || "auto");
+
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.EditorTheme = value as editorTheme;
 					await this.plugin.saveSettings()
 				})
 			})
