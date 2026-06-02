@@ -73,7 +73,7 @@ export class DrawioEditorView extends ItemView {
       }
     })
 
-    this.drawioAppController = new DrawioAppController(this.plugin, this.iframe, this.Utils.getServerUrl("baseurl"))
+    this.drawioAppController = new DrawioAppController(this.plugin, this.iframe, this.Utils.getServerUrl("baseurl"), this.leaf)
 
     this.MessageListener = this.drawioAppController.handleDrawIoMessage();
   }

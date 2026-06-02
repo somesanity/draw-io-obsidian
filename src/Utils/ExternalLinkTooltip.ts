@@ -84,10 +84,12 @@ export class ExternalLinkTooltip {
     }
 
     public destroy() {
-        const tooltip = document.querySelector(".drawio-external-link-tooltip");
-
-        if (tooltip) {
-            tooltip.remove();
+        if (this.tooltipElement && this.tooltipElement.isConnected) {
+            this.tooltipElement.remove();
         }
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
+        ExternalLinkTooltip.instance = null; // Освобождаем ссылку для синглтона
     }
 }
