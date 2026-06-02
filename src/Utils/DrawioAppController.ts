@@ -88,6 +88,8 @@ export class DrawioAppController {
 
     this.fileName = await this.Utils.getFileNameForSave()
 
+    console.log(this.fileName)
+
     const file = await this.plugin.app.vault.create(this.fileName, svg);
 
     this.file = file;

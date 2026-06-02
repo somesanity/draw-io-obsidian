@@ -2,8 +2,9 @@ import { App, DropdownComponent, PluginSettingTab, Setting, TFolder } from "obsi
 import DrawioPlugin from "../main";
 
 export type savingNameFileFormatOption =
-	"date" |
-	"number"
+	"timestamp" |
+	"uuid" |
+	"iso-date-8601"
 
 export type diagramTheme =
 	"auto" |
@@ -32,7 +33,7 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	port: "4444",
 	currentlyDrawioClientVersion: "",
 	folder: "drawio",
-	savingNameFileFormat: "date",
+	savingNameFileFormat: "timestamp",
 	centeringDiagrams: true,
 	interactiveDiagrams: true,
 	diagramSizeInPopupHover: "100%",
@@ -74,6 +75,8 @@ export class SettingTab extends PluginSettingTab {
 					DropdownComponent.addOption(folder.path, folder.path)
 				});
 
+				DropdownComponent.setValue(this.plugin.settings.folder || "drawio");
+
 				DropdownComponent.onChange(async (value) => {
 					this.plugin.settings.folder = value;
 					await this.plugin.saveSettings()
@@ -84,10 +87,14 @@ export class SettingTab extends PluginSettingTab {
 			.setName('diagram name')
 			.setDesc('Select the format what save diagram')
 			.addDropdown(DropdownComponent => {
-				DropdownComponent.addOption("date" as savingNameFileFormatOption, "date: 2025.05.12.svg.drawio")
+				DropdownComponent.addOption("timestamp" as savingNameFileFormatOption, `timestamp: ${Date.now().toString()}.drawio.svg`)
+				DropdownComponent.addOption("uuid" as savingNameFileFormatOption, `uuid: ${crypto.randomUUID()}.drawio.svg`)
+				DropdownComponent.addOption("iso-date-8601" as savingNameFileFormatOption, `iso-date-8601: 2026-06-02_12-30-45.drawio.svg`)
+
+				DropdownComponent.setValue(this.plugin.settings.savingNameFileFormat || "timestamp");
 
 				DropdownComponent.onChange(async (value) => {
-					this.plugin.settings.folder = value;
+					this.plugin.settings.savingNameFileFormat = value as savingNameFileFormatOption;
 					await this.plugin.saveSettings()
 				})
 			})

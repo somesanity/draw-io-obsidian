@@ -41,32 +41,52 @@ export class pluginUtils {
         const option: savingNameFileFormatOption = this.plugin.settings.savingNameFileFormat
 
         switch (option) {
-            case "date": {
+            case "timestamp": {
+                const folder = this.plugin.settings.folder;
+                const timestamp = Date.now().toString();
+                const extension = '.drawio.svg';
+                const fullpath = normalizePath(`${folder}/${timestamp}${extension}`);
+
+                if (!await this.plugin.app.vault.adapter.exists(folder)) {
+                    await this.plugin.app.vault.createFolder(folder);
+                }
+                return fullpath;
+            }
+
+            case "uuid": {
+                const folder = this.plugin.settings.folder;
+                const uuid = crypto.randomUUID();
+                const extension = '.drawio.svg';
+                const fullpath = normalizePath(`${folder}/${uuid}${extension}`);
+
+                if (!await this.plugin.app.vault.adapter.exists(folder)) {
+                    await this.plugin.app.vault.createFolder(folder);
+                }
+                return fullpath;
+            }
+
+            case "iso-date-8601": {
                 const folder = this.plugin.settings.folder;
                 const date = new Date();
+
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
                 const hours = String(date.getHours()).padStart(2, '0');
                 const minutes = String(date.getMinutes()).padStart(2, '0');
                 const seconds = String(date.getSeconds()).padStart(2, '0');
-                const ms = String(date.getMilliseconds()).padStart(3, '0');
 
-                const fulldate = `${year}${month}${day}${hours}${minutes}${seconds}${ms}`;
-                const extension = '.drawio.svg'
-
-                const fullpath = normalizePath(`${folder}/${fulldate}${extension}`)
+                const fulldate = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+                const extension = '.drawio.svg';
+                const fullpath = normalizePath(`${folder}/${fulldate}${extension}`);
 
                 if (!await this.plugin.app.vault.adapter.exists(folder)) {
-                    this.plugin.app.vault.createFolder(folder)
-                    return fullpath;
+                    await this.plugin.app.vault.createFolder(folder);
                 }
-
-
                 return fullpath;
             }
 
-            default: return ""
+            default: return `${Date.now().toString()}.drawio.svg`;
         }
     }
 
