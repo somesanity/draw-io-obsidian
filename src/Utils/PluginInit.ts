@@ -124,6 +124,13 @@ export class PluginInit {
         );
 
         this.plugin.registerEvent(
+            this.plugin.app.workspace.on('drawio:copy-diagram-as-image', (file: TFile) => {
+
+                this.utils.copySvgAsPng(file)
+            })
+        );
+
+        this.plugin.registerEvent(
             this.plugin.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
 
@@ -134,6 +141,23 @@ export class PluginInit {
                             .setIcon("shapes")
                             .onClick(() => {
                                 this.plugin.app.workspace.trigger('drawio:edit-diagram', fileToEdit);
+                            });
+                    });
+                }
+            })
+        );
+
+        this.plugin.registerEvent(
+            this.plugin.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
+                const file = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
+
+                if (file && file.name.endsWith('.drawio.svg')) {
+                    menu.addItem((item) => {
+                        item
+                            .setTitle("скопировать диаграмму как изображение")
+                            .setIcon("copy")
+                            .onClick(() => {
+                                this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', file);
                             });
                     });
                 }

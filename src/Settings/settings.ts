@@ -33,6 +33,7 @@ export interface DrawioSettings {
 	HiddenBorderInFocusMode: boolean;
 	TransparentDiagramBackgroundInCanavas: boolean;
 	diagramThemeInCanvas: diagramTheme
+	scaleCopyDiagramAsImage: string;
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -51,7 +52,8 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	AlwaysFocusedInCanvas: false,
 	HiddenBorderInFocusMode: false,
 	TransparentDiagramBackgroundInCanavas: false,
-	diagramThemeInCanvas: "auto"
+	diagramThemeInCanvas: "auto",
+	scaleCopyDiagramAsImage: "4"
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -273,5 +275,17 @@ export class SettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings()
 				})
 			})
+
+		new Setting(containerEl)
+			.setName('scale copied diagram')
+			.setDesc('Set the scale size for copied diagram')
+			.addText(text => text
+				.setPlaceholder('e.c: 2 or 5')
+				.setValue(this.plugin.settings.scaleCopyDiagramAsImage)
+				.onChange(async (value) => {
+					this.plugin.settings.scaleCopyDiagramAsImage = value;
+					await this.plugin.saveSettings();
+				}));
+
 	}
 }

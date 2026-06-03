@@ -286,5 +286,21 @@ export class CanvasManager {
                 }
             })
         );
+
+        this.plugin.registerEvent(
+            // @ts-ignore
+            this.plugin.app.workspace.on("canvas:node-menu", (menu: Menu, node: any) => {
+                if (node.file instanceof TFile && node.file.extension === "svg" && node.file.name.endsWith(".drawio.svg")) {
+
+                    menu.addItem((item) => {
+                        item.setTitle("Копировать диаграмму как изображение")
+                            .setIcon("copy")
+                            .onClick(async () => {
+                                this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', node.file);
+                            });
+                    });
+                }
+            })
+        );
     }
 }

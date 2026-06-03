@@ -1,5 +1,5 @@
 import DrawioPlugin from "main";
-import { App, Editor, MarkdownView, normalizePath, TFile, WorkspaceLeaf } from "obsidian";
+import { App, Editor, MarkdownView, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { savingNameFileFormatOption } from "Settings/settings";
 
 export class pluginUtils {
@@ -186,6 +186,81 @@ export class pluginUtils {
                 case "light": return "drawio-diagram--canvasMode--lightTheme";
                 case "dark": return "drawio-diagram--canvasMode--darkTheme";
             }
+        }
+    }
+
+    async copySvgAsPng(file: TFile): Promise<void> {
+        try {
+            let svgContent = await this.plugin.app.vault.read(file);
+
+            svgContent = svgContent.replace(/<rect[^>]*fill\s*=\s*["'](?:#ffffff|rgb\(255,\s*255,\s*255\)|white)["'][^>]*\/>/gi, '');
+            svgContent = svgContent.replace(/(style=[^>]*background-color:\s*)(?:#ffffff|white|rgb\(255,\s*255,\s*255\))/gi, '$1transparent');
+
+            const base64Svg = btoa(unescape(encodeURIComponent(svgContent)));
+            const url = `data:image/svg+xml;base64,${base64Svg}`;
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+
+                        const scaleFactor = Number(this.plugin.settings.scaleCopyDiagramAsImage);
+
+                        const originalWidth = img.naturalWidth || 800;
+                        const originalHeight = img.naturalHeight || 600;
+
+                        canvas.width = originalWidth * scaleFactor;
+                        canvas.height = originalHeight * scaleFactor;
+
+                        img.width = canvas.width;
+                        img.height = canvas.height;
+
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) {
+                            throw new Error('Не удалось получить контекст canvas 2d');
+                        }
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        ctx.scale(scaleFactor, scaleFactor);
+
+                        ctx.drawImage(img, 0, 0, originalWidth, originalHeight);
+
+                        canvas.toBlob(async (pngBlob) => {
+                            if (!pngBlob) {
+                                reject(new Error('Не удалось сконвертировать canvas в Blob'));
+                                return;
+                            }
+
+                            try {
+                                await navigator.clipboard.write([
+                                    new ClipboardItem({ [pngBlob.type]: pngBlob })
+                                ]);
+                                new Notice(`Диаграмма скопирована в 6x качестве!`);
+                                resolve();
+                            } catch (clipboardError) {
+                                reject(clipboardError);
+                            }
+                        }, 'image/png');
+
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+
+                img.onerror = (err) => reject(new Error('Ошибка загрузки SVG'));
+                img.src = url;
+            });
+
+        } catch (error) {
+            console.error('Ошибка при экспорте диаграммы в PNG:', error);
+            new Notice('Не удалось скопировать диаграмму');
         }
     }
 }
