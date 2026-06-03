@@ -15,14 +15,17 @@ import { setClassToDiagrams } from "MarkdownPostProcessors/setClassToDiagrams";
 import { setDiagramsTheme } from "MarkdownPostProcessors/setDiagramTheme";
 import { SetClassToDiagramsEditorExtension } from "EditorExtensions/setClassToDiagramsEditorExtension";
 import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramThemeEditorExtension";
+import { CanvasManager } from "./CanvasManager";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
     private utils: pluginUtils;
+    public canvasManager: CanvasManager
 
     constructor(plugin: DrawioPlugin) {
         this.plugin = plugin
         this.utils = new pluginUtils(this.plugin)
+        this.canvasManager = new CanvasManager(this.plugin);
     };
 
     async loadSettings(): Promise<void> {
@@ -94,6 +97,7 @@ export class PluginInit {
             : ""
 
         SizeInHoverWindow(this.plugin);
+        this.canvasManager.init();
     }
 
     registerEditorExtensions() {

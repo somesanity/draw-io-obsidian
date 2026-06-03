@@ -27,6 +27,12 @@ export interface DrawioSettings {
 	diagramThemeInPreviewMode: diagramTheme
 	diagramThemeInEditMode: diagramTheme
 	EditorTheme: editorTheme
+	HiddenBorderInCanvas: boolean;
+	HiddenLabelInCanvas: boolean;
+	AlwaysFocusedInCanvas: boolean;
+	HiddenBorderInFocusMode: boolean;
+	TransparentDiagramBackgroundInCanavas: boolean;
+	diagramThemeInCanvas: diagramTheme
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -39,7 +45,13 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	diagramSizeInPopupHover: "100%",
 	diagramThemeInPreviewMode: "auto",
 	diagramThemeInEditMode: "auto",
-	EditorTheme: "auto"
+	EditorTheme: "auto",
+	HiddenBorderInCanvas: false,
+	HiddenLabelInCanvas: false,
+	AlwaysFocusedInCanvas: false,
+	HiddenBorderInFocusMode: false,
+	TransparentDiagramBackgroundInCanavas: false,
+	diagramThemeInCanvas: "auto"
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -181,6 +193,83 @@ export class SettingTab extends PluginSettingTab {
 
 				DropdownComponent.onChange(async (value) => {
 					this.plugin.settings.EditorTheme = value as editorTheme;
+					await this.plugin.saveSettings()
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('Hidden border')
+			.setDesc("if enable, the border in canvas will hidden")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.HiddenBorderInCanvas)
+				.onChange(async (value) => {
+					this.plugin.settings.HiddenBorderInCanvas = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('Hidden label')
+			.setDesc("if enable, the label text in canvas will hidden")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.HiddenLabelInCanvas)
+				.onChange(async (value) => {
+					this.plugin.settings.HiddenLabelInCanvas = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('always focus')
+			.setDesc("if enable, the diagram in the canvas will be always to focuse")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.AlwaysFocusedInCanvas)
+				.onChange(async (value) => {
+					this.plugin.settings.AlwaysFocusedInCanvas = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('Hiden border in focus')
+			.setDesc("if enable, the diagram in the focus will be hidden")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.HiddenBorderInFocusMode)
+				.onChange(async (value) => {
+					this.plugin.settings.HiddenBorderInFocusMode = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('transparent background')
+			.setDesc("if enable, diagram's background in the canvas will be trransparent")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.TransparentDiagramBackgroundInCanavas)
+				.onChange(async (value) => {
+					this.plugin.settings.TransparentDiagramBackgroundInCanavas = value;
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('Diagram theme in canvas')
+			.setDesc('Set theme for diagrams in the canvas')
+			.addDropdown(DropdownComponent => {
+
+				DropdownComponent.addOption("auto" as diagramTheme, "auto")
+				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
+				DropdownComponent.addOption("light" as diagramTheme, "light theme")
+
+				DropdownComponent.setValue(this.plugin.settings.diagramThemeInCanvas || "auto");
+
+				DropdownComponent.onChange(async (value) => {
+					this.plugin.settings.diagramThemeInCanvas = value as diagramTheme;
 					await this.plugin.saveSettings()
 				})
 			})

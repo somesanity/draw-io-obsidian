@@ -68,3 +68,34 @@
 }
 
 .drawio-interactive-diagram {}
+
+.canvas-node-container-drawio--backgroundTransparent {
+    background-color: transparent;
+}
+
+.canvas-node-container-drawio--hiddenBorder {
+    border: none !important;
+}
+
+.canvas-node-label-drawio--hidden {
+    display: none !important;
+}
+
+.canvas-node-drawio--focusedBorderHidden {
+    --shadow-border-accent: none !important;
+}
+
+.drawio-diagram-Canvas {
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.drawio-diagram--canvasMode--lightTheme {
+    color-scheme: light !important;
+}
+
+.drawio-diagram--canvasMode--darkTheme {
+    color-scheme: dark !important;
+}

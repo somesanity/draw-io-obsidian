@@ -136,21 +136,24 @@ export class pluginUtils {
     }
 
     refreshLeaves() {
-        this.plugin.app.workspace.getLeavesOfType('markdown').forEach(async (leaf) => {
-            const state = leaf.getViewState();
+        const leafTypes = ['markdown', 'canvas'];
 
-            const ephemeralState = leaf.getEphemeralState();
+        leafTypes.forEach(type => {
+            this.plugin.app.workspace.getLeavesOfType(type).forEach(async (leaf) => {
+                const state = leaf.getViewState();
+                const ephemeralState = leaf.getEphemeralState();
 
-            await leaf.setViewState({ type: 'empty' });
-            await leaf.setViewState(state);
+                await leaf.setViewState({ type: 'empty' });
+                await leaf.setViewState(state);
 
-            setTimeout(() => {
-                leaf.setEphemeralState(ephemeralState);
-            }, 0);
+                setTimeout(() => {
+                    leaf.setEphemeralState(ephemeralState);
+                }, 0);
+            });
         });
     }
 
-    setDiagramsTheme(mode: "editMode" | "previewMode") {
+    setDiagramsTheme(mode: "editMode" | "previewMode" | "canvasMode") {
 
         if (mode === "previewMode") {
             switch (this.plugin.settings.diagramThemeInPreviewMode) {
@@ -171,6 +174,17 @@ export class pluginUtils {
                 };
                 case "light": return "drawio-diagram--editmode--lightTheme";
                 case "dark": return "drawio-diagram--editmode--darkTheme";
+            }
+        }
+
+        if (mode === "canvasMode") {
+            switch (this.plugin.settings.diagramThemeInCanvas) {
+                case "auto": {
+                    if (document.body.hasClass("theme-light")) return "drawio-diagram--canvasMode--lightTheme";
+                    if (document.body.hasClass("theme-dark")) return "drawio-diagram--canvasMode--darkTheme";
+                };
+                case "light": return "drawio-diagram--canvasMode--lightTheme";
+                case "dark": return "drawio-diagram--canvasMode--darkTheme";
             }
         }
     }

@@ -8,14 +8,17 @@ import { ExternalLinkTooltip } from 'Utils/ExternalLinkTooltip';
 
 export default class DrawioPlugin extends Plugin {
 	settings!: DrawioSettings;
+	initter!: PluginInit;
 	server!: Server
 	serverManager!: ServerManager;
 	drawioClientManager!: DrawioClientManager
+
 
 	async onload() {
 
 		// init classes
 		const initter = new PluginInit(this);
+		this.initter = initter;
 		this.drawioClientManager = new DrawioClientManager(this);
 		this.serverManager = new ServerManager(this);
 
@@ -44,6 +47,8 @@ export default class DrawioPlugin extends Plugin {
 
 		const tooltip = ExternalLinkTooltip.getInstance();
 		tooltip.destroy();
+
+		this.initter.canvasManager.destroy();
 	}
 
 	async activateView(ViewType: string, options?: { file?: { path: string };[key: string]: any }) {

@@ -13,7 +13,6 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
 
     const applyResize = (el: HTMLElement) => {
         if (!el.closest('.hover-popover')) return;
-
         if (el.getAttribute("width") !== desired) el.setAttribute("width", desired);
         if (el.style.width !== desired) el.style.width = desired;
 

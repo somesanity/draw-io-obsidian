@@ -1,25 +1,9 @@
 export class ExternalLinkTooltip {
     private static instance: ExternalLinkTooltip | null = null;
-    private tooltipElement: HTMLElement;
+    private tooltipElement: HTMLElement | null = null;
     private hideTimeout: NodeJS.Timeout | null = null;
 
-    private constructor() {
-        this.tooltipElement = document.createElement('div');
-        this.tooltipElement.classList.add('drawio-external-link-tooltip');
-        this.tooltipElement.classList.add('drawio-external-link-tooltip--position');
-
-        this.tooltipElement.addEventListener('mouseenter', () => {
-            if (this.hideTimeout) {
-                clearTimeout(this.hideTimeout);
-                this.hideTimeout = null;
-            }
-        });
-        this.tooltipElement.addEventListener('mouseleave', () => {
-            this.hide();
-        });
-
-        document.body.appendChild(this.tooltipElement);
-    }
+    private constructor() { }
 
     public static getInstance(): ExternalLinkTooltip {
         if (!ExternalLinkTooltip.instance) {
@@ -28,20 +12,46 @@ export class ExternalLinkTooltip {
         return ExternalLinkTooltip.instance;
     }
 
+    private getTooltipElement(targetDocument: Document): HTMLElement {
+        let el = targetDocument.getElementById('drawio-external-link-tooltip');
+
+        if (!el) {
+            el = targetDocument.createElement('div');
+            el.id = 'drawio-external-link-tooltip';
+            el.classList.add('drawio-external-link-tooltip');
+            el.classList.add('drawio-external-link-tooltip--position');
+
+            el.addEventListener('mouseenter', () => {
+                if (this.hideTimeout) {
+                    clearTimeout(this.hideTimeout);
+                    this.hideTimeout = null;
+                }
+            });
+            el.addEventListener('mouseleave', () => {
+                this.hide();
+            });
+
+            targetDocument.body.appendChild(el);
+        }
+
+        this.tooltipElement = el;
+        return el;
+    }
+
     public show(text: string, event: MouseEvent): void {
         if (this.hideTimeout) {
             clearTimeout(this.hideTimeout);
             this.hideTimeout = null;
         }
 
-        if (!document.body.contains(this.tooltipElement)) {
-            document.body.appendChild(this.tooltipElement);
-        }
+        const currentDocument = (event.target as HTMLElement).ownerDocument || document;
+        const el = this.getTooltipElement(currentDocument);
 
-        this.tooltipElement.textContent = text;
-        this.tooltipElement.classList.add('drawio-external-link-tooltip--show');
-        this.tooltipElement.classList.remove('drawio-external-link-tooltip--hidden');
-        this.updatePosition(event);
+        el.textContent = text;
+        el.classList.add('drawio-external-link-tooltip--show');
+        el.classList.remove('drawio-external-link-tooltip--hidden');
+
+        this.updatePosition(event, el);
     }
 
     public hide(delay = 50) {
@@ -50,46 +60,66 @@ export class ExternalLinkTooltip {
         }
 
         this.hideTimeout = setTimeout(() => {
-            this.tooltipElement.classList.remove('drawio-external-link-tooltip--show');
-            this.tooltipElement.classList.add('drawio-external-link-tooltip--hidden');
+            if (this.tooltipElement) {
+                this.tooltipElement.classList.remove('drawio-external-link-tooltip--show');
+                this.tooltipElement.classList.add('drawio-external-link-tooltip--hidden');
+            }
         }, delay);
     }
 
-    public updatePosition(event: MouseEvent) {
-        const styles = getComputedStyle(this.tooltipElement);
+    public updatePosition(event: MouseEvent, element?: HTMLElement) {
+        const el = element || this.tooltipElement;
+        if (!el) return;
+
+        const currentWindow = el.ownerDocument?.defaultView || window;
+        const styles = currentWindow.getComputedStyle(el);
 
         const offsetX = parseInt(styles.getPropertyValue('--drawio-external-link-tooltip-offset-x'), 10) || 0;
         const offsetY = parseInt(styles.getPropertyValue('--drawio-external-link-tooltip-offset-y'), 10) || 0;
 
-        let newLeft = event.clientX + window.scrollX + offsetX;
-        let newTop = event.clientY + window.scrollY + offsetY;
+        let newLeft = event.clientX + currentWindow.scrollX + offsetX;
+        let newTop = event.clientY + currentWindow.scrollY + offsetY;
 
-        const tooltipWidth = this.tooltipElement.offsetWidth;
-        const tooltipHeight = this.tooltipElement.offsetHeight;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        const tooltipWidth = el.offsetWidth;
+        const tooltipHeight = el.offsetHeight;
+        const viewportWidth = currentWindow.innerWidth;
+        const viewportHeight = currentWindow.innerHeight;
 
-        if (newLeft + tooltipWidth > viewportWidth + window.scrollX) {
-            newLeft = event.clientX + window.scrollX - tooltipWidth - offsetX;
+        if (newLeft + tooltipWidth > viewportWidth + currentWindow.scrollX) {
+            newLeft = event.clientX + currentWindow.scrollX - tooltipWidth - offsetX;
         }
-        if (newTop + tooltipHeight > viewportHeight + window.scrollY) {
-            newTop = event.clientY + window.scrollY - tooltipHeight - offsetY;
+        if (newTop + tooltipHeight > viewportHeight + currentWindow.scrollY) {
+            newTop = event.clientY + currentWindow.scrollY - tooltipHeight - offsetY;
         }
 
-        newLeft = Math.max(newLeft, window.scrollX + offsetX);
-        newTop = Math.max(newTop, window.scrollY + offsetY);
+        newLeft = Math.max(newLeft, currentWindow.scrollX + offsetX);
+        newTop = Math.max(newTop, currentWindow.scrollY + offsetY);
 
-        this.tooltipElement.style.left = `${newLeft}px`;
-        this.tooltipElement.style.top = `${newTop}px`;
+        el.style.left = `${newLeft}px`;
+        el.style.top = `${newTop}px`;
     }
 
     public destroy() {
-        if (this.tooltipElement && this.tooltipElement.isConnected) {
-            this.tooltipElement.remove();
+        this.hideTimeout && clearTimeout(this.hideTimeout);
+
+        // Поиск по ID гарантирует удаление элемента везде, где он мог создаться
+        const activeWindows = [document, ...this.getPopoutWindows()];
+        activeWindows.forEach(doc => {
+            const el = doc.getElementById('drawio-external-link-tooltip');
+            if (el) el.remove();
+        });
+
+        this.tooltipElement = null;
+        ExternalLinkTooltip.instance = null;
+    }
+
+    private getPopoutWindows(): Document[] {
+        const docs: Document[] = [];
+        // @ts-ignore
+        const floatingLeaves = app.workspace.floatingSplit?.children || [];
+        for (const leaf of floatingLeaves) {
+            if (leaf.doc) docs.push(leaf.doc);
         }
-        if (this.hideTimeout) {
-            clearTimeout(this.hideTimeout);
-        }
-        ExternalLinkTooltip.instance = null; // Освобождаем ссылку для синглтона
+        return docs;
     }
 }
