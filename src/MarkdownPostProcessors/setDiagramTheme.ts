@@ -17,17 +17,21 @@ export async function setDiagramsTheme(plugin: DrawioPlugin) {
                         const isDrawio = srcString?.endsWith(".drawio.svg");
 
                         if (isDrawio) {
-                            const diagramSvg = embedEl.find("svg");
+                            const diagramSvg = embedEl.querySelectorAll("svg");
 
-                            if (diagramSvg) {
-                                const themeClass = utils.setDiagramsTheme("previewMode");
+                            if (diagramSvg && diagramSvg.length > 0) {
 
-                                if (themeClass) {
-                                    diagramSvg.removeClass("drawio-diagrams--lightTheme", "drawio-diagrams--darkTheme");
-                                    diagramSvg.addClass(themeClass);
-                                }
+                                diagramSvg.forEach(svg => {
+                                    if (svg.classList.contains("drawio-theme-applied")) return;
 
-                                observer.disconnect();
+                                    const themeClass = utils.setDiagramsTheme("previewMode");
+                                    console.log("Красим SVG:", svg);
+
+                                    if (themeClass) {
+                                        svg.removeClass("drawio-diagrams--lightTheme", "drawio-diagrams--darkTheme");
+                                        svg.addClass(themeClass);
+                                    }
+                                });
                             }
                         }
                     });
