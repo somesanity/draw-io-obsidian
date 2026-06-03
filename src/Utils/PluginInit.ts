@@ -78,6 +78,8 @@ export class PluginInit {
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
                     this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: fileToEdit });
+                } else {
+                    this.plugin.activateView(DRAWIO_EDITOR_VIEW);
                 }
             }
         });
