@@ -1,7 +1,6 @@
 import DrawioPlugin from "main";
 import { pluginUtils } from "./PluginUtils";
 import { normalizePath, TFile, WorkspaceLeaf } from "obsidian";
-import { get } from "http";
 
 export class DrawioAppController {
 
@@ -13,14 +12,14 @@ export class DrawioAppController {
   public file: TFile | null = null
   public fileName: string | null = null
 
-  private leaf: WorkspaceLeaf
+  private leaf?: WorkspaceLeaf | null;
 
-  constructor(plugin: DrawioPlugin, iframe: HTMLIFrameElement, url: string, leaf: WorkspaceLeaf) {
+  constructor(plugin: DrawioPlugin, iframe: HTMLIFrameElement, url: string, leaf?: WorkspaceLeaf) {
     this.plugin = plugin
     this.iframe = iframe
     this.url = url;
     this.Utils = new pluginUtils(this.plugin)
-    this.leaf = leaf
+    this.leaf = leaf ? leaf : null;
   }
 
   async handleDrawIoMessage() {
@@ -94,15 +93,17 @@ export class DrawioAppController {
 
     this.file = file;
 
-    const currentStatus = this.leaf.getViewState();
+    if (this.leaf) {
+      const currentStatus = this.leaf.getViewState();
 
-    await this.leaf.setViewState({
-      ...currentStatus,
-      state: {
-        ...currentStatus.state,
-        file: file
-      }
-    }, { history: false });
+      await this.leaf.setViewState({
+        ...currentStatus,
+        state: {
+          ...currentStatus.state,
+          file: file
+        }
+      }, { history: false });
+    }
   }
 
   public set setFiletoEdit(file: TFile) {

@@ -16,6 +16,7 @@ import { setDiagramsTheme } from "MarkdownPostProcessors/setDiagramTheme";
 import { SetClassToDiagramsEditorExtension } from "EditorExtensions/setClassToDiagramsEditorExtension";
 import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramThemeEditorExtension";
 import { CanvasManager } from "./CanvasManager";
+import { DrawioEditorModal } from "Views/DrawioEditorModal";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -77,6 +78,29 @@ export class PluginInit {
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
                     this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: fileToEdit });
+                }
+            }
+        });
+
+        this.plugin.addCommand({
+            id: 'open-editor-in-modal',
+            name: 'Open editor in modal',
+            callback: () => {
+                new DrawioEditorModal(this.plugin.app, this.plugin).open();
+            },
+        });
+
+        this.plugin.addCommand({
+            id: 'open-drawio-under-cursor-in-modal',
+            name: 'Открыть Draw.io диаграмму под курсором в модальном окне',
+            hotkeys: [{ modifiers: ["Mod", "Alt"], key: "m" }],
+
+            editorCallback: (editor: Editor, view: MarkdownView) => {
+                const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
+
+                if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
+                    const modal = new DrawioEditorModal(this.plugin.app, this.plugin, fileToEdit)
+                    modal.open();
                 }
             }
         });
@@ -163,7 +187,5 @@ export class PluginInit {
                 }
             })
         );
-
     }
-
 }

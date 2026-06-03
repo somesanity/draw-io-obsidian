@@ -99,3 +99,13 @@
 .drawio-diagram--canvasMode--darkTheme {
     color-scheme: dark !important;
 }
+
+.drawioModalEditor {
+    width: 100%;
+    height: 100%;
+}
+
+.drawioModalEditorIframe {
+    width: 100%;
+    height: 100%;
+}
