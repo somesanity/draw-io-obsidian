@@ -72,7 +72,7 @@ export class PluginInit {
             name: 'Открыть Draw.io диаграмму под курсором',
             hotkeys: [{ modifiers: ["Mod", "Alt"], key: "e" }],
 
-            callback: (editor: Editor, view: MarkdownView) => {
+            editorCallback: (editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
