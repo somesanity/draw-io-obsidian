@@ -78,19 +78,28 @@ export class DrawioAppController {
     const svgString = data.data.split(',')[1];
     const svg = decodeURIComponent(escape(atob(svgString)));
 
-    if (this.file && this.fileName && await this.plugin.app.vault.adapter.exists(this.fileName)) {
-      const file = this.plugin.app.vault.getFileByPath(this.fileName)
+    if (this.file && await this.plugin.app.vault.adapter.exists(this.file.path)) {
+      let file = this.plugin.app.vault.getFileByPath(this.file.path);
 
-      this.Utils.refreshLeaves();
-      return await this.plugin.app.vault.modify(file!, svg);
+      if (file) {
+        if (file.path.endsWith('.drawio')) {
+          const newPath = file.path.substring(0, file.path.lastIndexOf('.drawio')) + '.drawio.svg';
+          await this.plugin.app.vault.rename(file, newPath);
+
+          this.file = file;
+        }
+
+        await this.plugin.app.vault.modify(file, svg);
+
+        this.Utils.refreshLeaves();
+        return;
+      }
     }
 
-    this.fileName = await this.Utils.getFileNameForSave()
+    const newFileName = await this.Utils.getFileNameForSave();
+    if (!newFileName) return;
 
-    console.log(this.fileName)
-
-    const file = await this.plugin.app.vault.create(this.fileName, svg);
-
+    const file = await this.plugin.app.vault.create(newFileName, svg);
     this.file = file;
 
     if (this.leaf) {
@@ -100,7 +109,7 @@ export class DrawioAppController {
         ...currentStatus,
         state: {
           ...currentStatus.state,
-          file: file
+          file: file.path
         }
       }, { history: false });
     }

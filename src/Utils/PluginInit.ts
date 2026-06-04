@@ -1,4 +1,4 @@
-import { DRAWIO_EDITOR_VIEW } from "consts";
+import { DRAWIO_EDITOR_VIEW, DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE } from "consts";
 import { CenteringEditorExtension } from "EditorExtensions/CenteringEditorExtension";
 import { DeleteResizeBlockEditorExtension } from "EditorExtensions/DeleteResizeBlockEditorExtension";
 import { PercentSizeEditorExtension } from "EditorExtensions/PercentSizeEditorExtension";
@@ -17,6 +17,7 @@ import { SetClassToDiagramsEditorExtension } from "EditorExtensions/setClassToDi
 import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramThemeEditorExtension";
 import { CanvasManager } from "./CanvasManager";
 import { DrawioEditorModal } from "Views/DrawioEditorModal";
+import { drawioEditorFileItemView } from "Views/drawioEditorFileItemView";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -46,6 +47,11 @@ export class PluginInit {
         this.plugin.registerView(
             DRAWIO_EDITOR_VIEW,
             (leaf) => new DrawioEditorView(leaf, this.plugin)
+        );
+
+        this.plugin.registerView(
+            DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE,
+            (leaf) => new drawioEditorFileItemView(leaf, this.plugin)
         );
     }
 
@@ -189,5 +195,26 @@ export class PluginInit {
                 }
             })
         );
+
+        this.plugin.registerEvent(
+            this.plugin.app.workspace.on('file-menu', (menu, file) => {
+                if (file instanceof TFile && file.extension === "drawio") {
+
+                    menu.addItem((item) => {
+                        item
+                            .setTitle("Обработать этот файл")
+                            .setIcon("document")
+                            .onClick(async () => {
+                                await this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: file });
+                            });
+                    });
+
+                }
+            })
+        );
+    }
+
+    registerExtensions() {
+        this.plugin.registerExtensions(["drawio"], DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE);
     }
 }

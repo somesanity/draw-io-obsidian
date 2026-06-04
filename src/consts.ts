@@ -6,6 +6,7 @@ export const DRAWIO_CLIENT_DOWNLOADING_LINK = "https://api.github.com/repos/jgra
 // VIEWS
 
 export const DRAWIO_EDITOR_VIEW = "drawio-editor-view"
+export const DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE = "drawio-editor-view-file-item"
 
 // REGEX
 
@@ -14,3 +15,4 @@ export const EXTERNAL_LINK_CHECK = /^(https?|mailto|ftp):/i;
 export const INTERNAL_LINK_CHECK = /^!?\[\[([^\]|]+)(?:\|[^\]]+)?\]\]$|^!?\[[^\]]+\]\(([^)]+)\)$/;
 export const CLEAR_INTERNAL_LINK = /^!?\[\[|^!?\[.*?\]\(|\]\]$|\)$|\|.*/g;
 export const MARKDOWN_FRAGMENT_SEARCH = /^md-\d+$/;
+export const DRAWIO_EXTENSION = /\.drawio(\.svg)?$/

@@ -1,4 +1,4 @@
-import { DRAWIO_EDITOR_VIEW } from 'consts';
+import { DRAWIO_EDITOR_VIEW, DRAWIO_EXTENSION } from 'consts';
 import DrawioPlugin from 'main';
 import { ItemView, TFile, ViewStateResult, WorkspaceLeaf } from 'obsidian';
 import { DrawioAppController } from 'Utils/DrawioAppController';
@@ -48,7 +48,7 @@ export class DrawioEditorView extends ItemView {
   getDisplayText() {
 
     if (this.states.file) {
-      return this.states.file.name;
+      return this.states.file.name.replace(DRAWIO_EXTENSION, '');
     }
 
     return "редактор draw.io";
