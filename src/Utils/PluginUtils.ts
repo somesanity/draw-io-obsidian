@@ -148,7 +148,7 @@ export class pluginUtils {
     }
 
     refreshLeaves() {
-        const leafTypes = ['markdown', 'canvas'];
+        const leafTypes = ['markdown', 'canvas', "image"];
 
         leafTypes.forEach(type => {
             this.plugin.app.workspace.getLeavesOfType(type).forEach(async (leaf) => {
