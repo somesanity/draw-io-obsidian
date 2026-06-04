@@ -46,7 +46,7 @@ export class SetFileNameModal extends Modal {
 
         this.errorEl = contentEl.createEl("div", {
             text: "Файл с таким именем уже существует!",
-            cls: "setting-item-description"
+            cls: "setting-item-description Drawio-set-file-name-error"
         });
 
         new Setting(contentEl)

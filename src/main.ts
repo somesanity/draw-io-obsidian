@@ -32,7 +32,6 @@ export default class DrawioPlugin extends Plugin {
 		initter.registerEditorExtensions();
 		initter.registerEvents();
 		await this.drawioClientManager.checkAndUpdate();
-
 	}
 
 	async loadSettings() {
