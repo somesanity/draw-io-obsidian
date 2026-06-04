@@ -109,7 +109,7 @@ export class DrawioAppController {
         ...currentStatus,
         state: {
           ...currentStatus.state,
-          file: file.path
+          file: file
         }
       }, { history: false });
     }

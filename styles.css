@@ -138,3 +138,10 @@
         color-scheme: light !important;
     }
 }
+
+.setting-item-description {
+    color: var(--text-error);
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: none;
+}

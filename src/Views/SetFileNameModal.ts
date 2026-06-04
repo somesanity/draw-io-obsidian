@@ -8,7 +8,6 @@ export class SetFileNameModal extends Modal {
     private errorEl!: HTMLElement;
     private isSubmitted: boolean = false;
 
-    // Статический метод для удобного вызова через await
     static openAndGetPath(app: App, folderPath: string): Promise<string | null> {
         return new Promise((resolve) => {
             const modal = new SetFileNameModal(app, folderPath, (result) => {
@@ -18,7 +17,6 @@ export class SetFileNameModal extends Modal {
         });
     }
 
-    // Конструктор теперь приватный, чтобы модалку вызывали только через красивый статический метод
     private constructor(app: App, folderPath: string, onSubmit: (result: string | null) => void) {
         super(app);
         this.folderPath = folderPath;
@@ -31,7 +29,6 @@ export class SetFileNameModal extends Modal {
 
         this.setTitle("Задать имя файла");
 
-        // Блокируем закрытие по клику на оверлей или Esc, если вам это всё ещё нужно
         const modalBg = this.containerEl.querySelector('.modal-bg');
         if (modalBg) {
             this.scope.register([], "Escape", () => false);
@@ -47,15 +44,10 @@ export class SetFileNameModal extends Modal {
                     this.validateName(this.fileName);
                 }));
 
-        // Элемент для вывода ошибки
         this.errorEl = contentEl.createEl("div", {
             text: "Файл с таким именем уже существует!",
             cls: "setting-item-description"
         });
-        this.errorEl.style.color = "var(--text-error)";
-        this.errorEl.style.marginTop = "-10px";
-        this.errorEl.style.marginBottom = "10px";
-        this.errorEl.style.display = "none";
 
         new Setting(contentEl)
             .addButton((btn) => {
@@ -68,7 +60,6 @@ export class SetFileNameModal extends Modal {
                             this.isSubmitted = true;
                             this.close();
 
-                            // Формируем финальный путь и отдаем в Promise
                             const fullPath = normalizePath(`${this.folderPath}/${this.fileName}.drawio.svg`);
                             this.onSubmit(fullPath);
                         }
@@ -98,7 +89,6 @@ export class SetFileNameModal extends Modal {
     }
 
     onClose() {
-        // Если окно закрыли крестиком или иным образом БЕЗ нажатия на кнопку отправки
         if (!this.isSubmitted) {
             this.onSubmit(null);
         }
