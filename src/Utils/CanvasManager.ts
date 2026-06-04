@@ -1,8 +1,10 @@
 import DrawioPlugin from "main";
-import { EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, CLEAR_INTERNAL_LINK, DRAWIO_EDITOR_VIEW } from "../consts";
+import { EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, CLEAR_INTERNAL_LINK, DRAWIO_EDITOR_VIEW, MARKDOWN_FRAGMENT_SEARCH } from "../consts";
 import { ExternalLinkTooltip } from "./ExternalLinkTooltip";
 import { pluginUtils } from "./PluginUtils";
 import { Menu, TFile } from "obsidian";
+import { MarkdownTooltip } from "./markdownTooltip";
+import { MxGraphParser } from "./MxGraphParser";
 
 export class CanvasManager {
     plugin: DrawioPlugin;
@@ -18,6 +20,7 @@ export class CanvasManager {
         this.plugin.app.workspace.onLayoutReady(() => {
             this.startObserving();
             this.registerCanvasContextMenu();
+
         });
     }
 
@@ -110,6 +113,7 @@ export class CanvasManager {
                         this.processSvgLinks(svgElement);
 
                         this.attachTooltipListeners(svgElement);
+                        this.attachMarkdownTooltipListeners(svgElement);
 
                         const canvasNode = img.closest(".canvas-node") as HTMLElement;
 
@@ -246,6 +250,44 @@ export class CanvasManager {
                 const relatedTarget = event.relatedTarget as HTMLElement;
                 if (!relatedTarget || !anchor.contains(relatedTarget)) {
                     tooltip.hide();
+                }
+            }
+        });
+    }
+
+    private attachMarkdownTooltipListeners(svgElement: SVGSVGElement) {
+        const parser = new MxGraphParser();
+        const parsedmx = parser.parse(svgElement);
+
+        if (!parsedmx) return;
+
+        const objects = parsedmx.querySelectorAll("object");
+        const markdownTooltip = MarkdownTooltip.getInstance();
+
+        // Получаем путь текущего активного файла на Canvas для корректной работы ссылок внутри поповера
+        const activeFile = this.plugin.app.workspace.getActiveFile();
+        const sourcePath = activeFile ? activeFile.path : "";
+
+        objects.forEach((object) => {
+            const objectId = object.getAttribute("id");
+            if (!objectId) return;
+
+            const markdownAttr = Array.from(object.attributes).find((attr) =>
+                MARKDOWN_FRAGMENT_SEARCH.test(attr.name)
+            );
+
+            if (markdownAttr) {
+                const markdownContent = markdownAttr.value;
+                const cell = svgElement.querySelector(`[data-cell-id="${objectId}"]`);
+
+                if (cell) {
+                    cell.addEventListener("mouseenter", (event: MouseEvent) => {
+                        markdownTooltip.show(this.plugin.app, markdownContent, event, sourcePath, this.plugin);
+                    });
+
+                    cell.addEventListener("mouseleave", () => {
+                        markdownTooltip.hide();
+                    });
                 }
             }
         });

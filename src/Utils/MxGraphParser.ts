@@ -13,12 +13,13 @@ export class MxGraphParser {
                 contentString = doc.querySelector("svg")?.getAttribute("content") || "";
             }
 
-            if (!contentString) throw new Error("Атрибут 'content' не найден в SVG");
+            if (!contentString) return null;
 
             const wrapperDoc = this.domParser.parseFromString(contentString, "application/xml");
             const diagramNode = wrapperDoc.querySelector("diagram");
+
             if (!diagramNode || !diagramNode.textContent) {
-                throw new Error("Тег <diagram> пуст или отсутствует");
+                return null;
             }
 
             const base64Text = diagramNode.textContent.trim();

@@ -109,3 +109,17 @@
     width: 100%;
     height: 100%;
 }
+
+.drawioMarkdownTooltip {
+    position: fixed;
+    z-index: 100;
+    padding: 15px;
+    max-width: var(--popover-width);
+    max-height: var(--popover-height);
+    background-color: var(--background-primary);
+    border: var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-s);
+    user-select: text;
+    overflow: auto;
+}

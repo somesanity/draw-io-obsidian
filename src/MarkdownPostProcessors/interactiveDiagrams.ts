@@ -3,6 +3,7 @@ import DrawioPlugin from "main";
 import { TFile } from "obsidian";
 import { MarkdownFragmentsObject } from "Types/MarkdownFragmentsObject";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
+import { MarkdownTooltip } from "Utils/markdownTooltip";
 import { MxGraphParser } from "Utils/MxGraphParser";
 
 export async function interactiveDiagramss(plugin: DrawioPlugin) {
@@ -57,39 +58,36 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
 
                     // // md fragmnets
 
-                    // const fragments: MarkdownFragmentsObject[] = [];
+                    const parser = new MxGraphParser();
+                    const parsedmx = parser.parse(svgelement!);
 
-                    // const parser = new MxGraphParser();
-                    // const parsedmx = parser.parse(svgelement!);
-                    // console.log(parsedmx)
+                    if (parsedmx) {
+                        const objects = parsedmx.querySelectorAll("object");
+                        const markdownTooltip = MarkdownTooltip.getInstance();
 
-                    // const objects = parsedmx?.querySelectorAll("object");
+                        objects.forEach(object => {
+                            const objectId = object.getAttribute("id");
+                            if (!objectId) return;
 
-                    // objects?.forEach(object => {
-                    //     const objectId = object?.getAttribute("id");
-                    //     const markdownFragmentId = Array.from(object.attributes).find(attr => MARKDOWN_FRAGMENT_SEARCH.test(attr.name));
+                            const markdownAttr = Array.from(object.attributes).find(attr => MARKDOWN_FRAGMENT_SEARCH.test(attr.name));
 
-                    //     console.log(markdownFragmentId);
+                            if (markdownAttr) {
+                                const markdownContent = markdownAttr.value;
 
-                    //     const obs = object.getAttribute(markdownFragmentId!);
+                                const cell = svgelement!.querySelector(`[data-cell-id="${objectId}"]`);
 
-                    //     if (markdownFragmentId) {
-                    //         fragments.push({
-                    //             mdid: markdownFragmentId!,
-                    //             id: objectId!,
-                    //             markdownContent: "### Какой-то контент 1"
-                    //         });
-                    //     }
+                                if (cell) {
+                                    cell.addEventListener("mouseenter", (event: MouseEvent) => {
+                                        markdownTooltip.show(plugin.app, markdownContent, event, context.sourcePath, plugin);
+                                    });
 
-                    // });
-
-
-                    // cells?.forEach((cell) => {
-                    //     const cellid = cell.getAttribute("data-cell-id");
-
-                    // })
-
-                    // ---
+                                    cell.addEventListener("mouseleave", () => {
+                                        markdownTooltip.hide();
+                                    });
+                                }
+                            }
+                        });
+                    }
 
                     // extend links
 
