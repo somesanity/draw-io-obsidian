@@ -195,23 +195,6 @@ export class PluginInit {
                 }
             })
         );
-
-        this.plugin.registerEvent(
-            this.plugin.app.workspace.on('file-menu', (menu, file) => {
-                if (file instanceof TFile && file.extension === "drawio") {
-
-                    menu.addItem((item) => {
-                        item
-                            .setTitle("Обработать этот файл")
-                            .setIcon("document")
-                            .onClick(async () => {
-                                await this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: file });
-                            });
-                    });
-
-                }
-            })
-        );
     }
 
     registerExtensions() {
