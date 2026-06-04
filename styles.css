@@ -128,3 +128,13 @@
     user-select: text;
     overflow: auto;
 }
+
+@media print {
+    .drawio-interactive-diagram {
+        color-scheme: light !important;
+    }
+
+    .drawio-diagram {
+        color-scheme: light !important;
+    }
+}
