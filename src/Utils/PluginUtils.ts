@@ -40,6 +40,7 @@ export class pluginUtils {
 
     async getFileNameForSave(): Promise<string> {
         const option: savingNameFileFormatOption = this.plugin.settings.savingNameFileFormat
+        let defaultPath: string = "";
 
         switch (option) {
             case "timestamp": {
@@ -98,7 +99,13 @@ export class pluginUtils {
                 }
             }
 
-            default: return `${Date.now().toString()}.drawio.svg`;
+                const folder = this.plugin.settings.folder;
+                const date = Date.now().toString()
+                const extension = '.drawio.svg';
+
+                defaultPath = normalizePath(`${folder}/${date}${extension}`);
+
+            default: return defaultPath;
         }
     }
 
