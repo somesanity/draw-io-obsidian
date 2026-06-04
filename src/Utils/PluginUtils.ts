@@ -1,6 +1,7 @@
 import DrawioPlugin from "main";
 import { App, Editor, MarkdownView, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { savingNameFileFormatOption } from "Settings/settings";
+import { SetFileNameModal } from "Views/SetFileNameModal";
 
 export class pluginUtils {
     private plugin: DrawioPlugin
@@ -84,6 +85,17 @@ export class pluginUtils {
                     await this.plugin.app.vault.createFolder(folder);
                 }
                 return fullpath;
+            }
+
+            case "set name": {
+                const fullPath = await SetFileNameModal.openAndGetPath(
+                    this.plugin.app,
+                    this.plugin.settings.folder
+                );
+
+                if (fullPath) {
+                    return fullPath;
+                }
             }
 
             default: return `${Date.now().toString()}.drawio.svg`;

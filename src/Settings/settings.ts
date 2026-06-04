@@ -4,7 +4,8 @@ import DrawioPlugin from "../main";
 export type savingNameFileFormatOption =
 	"timestamp" |
 	"uuid" |
-	"iso-date-8601"
+	"iso-date-8601" |
+	"set name"
 
 export type diagramTheme =
 	"auto" |
@@ -104,6 +105,7 @@ export class SettingTab extends PluginSettingTab {
 				DropdownComponent.addOption("timestamp" as savingNameFileFormatOption, `timestamp: ${Date.now().toString()}.drawio.svg`)
 				DropdownComponent.addOption("uuid" as savingNameFileFormatOption, `uuid: ${crypto.randomUUID()}.drawio.svg`)
 				DropdownComponent.addOption("iso-date-8601" as savingNameFileFormatOption, `iso-date-8601: 2026-06-02_12-30-45.drawio.svg`)
+				DropdownComponent.addOption("set name" as savingNameFileFormatOption, `any name that you can set`)
 
 				DropdownComponent.setValue(this.plugin.settings.savingNameFileFormat || "timestamp");
 

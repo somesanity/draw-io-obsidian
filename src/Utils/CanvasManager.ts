@@ -264,7 +264,6 @@ export class CanvasManager {
         const objects = parsedmx.querySelectorAll("object");
         const markdownTooltip = MarkdownTooltip.getInstance();
 
-        // Получаем путь текущего активного файла на Canvas для корректной работы ссылок внутри поповера
         const activeFile = this.plugin.app.workspace.getActiveFile();
         const sourcePath = activeFile ? activeFile.path : "";
 

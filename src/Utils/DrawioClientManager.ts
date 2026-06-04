@@ -13,16 +13,20 @@ export class DrawioClientManager {
     }
 
     public async checkAndUpdate() {
-        const isUpdate = await this.compareVersions();
-        const folderIsExist = await this.plugin.app.vault.adapter.exists(`${this.plugin.manifest.dir}/webapp`)
-        if (!isUpdate || !folderIsExist) {
-            await this.runInstallationProcess();
-            await this.unzipDrawioClient();
-            const LastVersion = await this.getLastVersion();
-            if (LastVersion) {
-                this.plugin.settings.currentlyDrawioClientVersion = LastVersion
-                await this.plugin.saveSettings()
+        try {
+            const isUpdate = await this.compareVersions();
+            const folderIsExist = await this.plugin.app.vault.adapter.exists(`${this.plugin.manifest.dir}/webapp`)
+            if (!isUpdate || !folderIsExist) {
+                await this.runInstallationProcess();
+                await this.unzipDrawioClient();
+                const LastVersion = await this.getLastVersion();
+                if (LastVersion) {
+                    this.plugin.settings.currentlyDrawioClientVersion = LastVersion
+                    await this.plugin.saveSettings()
+                }
             }
+        } catch (error) {
+            console.log(error)
         }
     }
 
