@@ -129,6 +129,11 @@
     overflow: auto;
 }
 
+.drawio-fixed-popover {
+    top: var(--popover-custom-top) !important;
+    height: var(--popover-height) !important;
+}
+
 @media print {
     .drawio-interactive-diagram {
         color-scheme: light !important;

@@ -240,7 +240,7 @@ export class pluginUtils {
 
                         const ctx = canvas.getContext('2d');
                         if (!ctx) {
-                            throw new Error('Не удалось получить контекст canvas 2d');
+                            throw new Error(t("CANVAS_MANAGER__FAILED_GET_CONTEXT"));
                         }
 
                         ctx.imageSmoothingEnabled = true;

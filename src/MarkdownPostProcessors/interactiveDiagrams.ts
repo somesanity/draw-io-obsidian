@@ -125,31 +125,62 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                 linkItem.setAttribute("href", cleanpath);
                                 linkItem.classList.add("internal-link");
 
-                                let popoverTop: number | null = null;
+                                let mouseX: number | null = null;
+                                let mouseY: number | null = null;
 
-                                const observerPopover = new MutationObserver((mutationsList, observer) => {
-                                    const isPopoverLoaded = document.body.querySelector(".hover-popover > .markdown-embed.is-loaded") as HTMLElement | null;
+                                const observerPopover = new MutationObserver((mutationsList) => {
                                     const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
 
-                                    if (!isPopoverLoaded) {
-                                        return
+                                    if (!popover || mouseX === null || mouseY === null) return;
+
+                                    const popoverWidth = popover.offsetWidth || 400;
+                                    const popoverHeight = popover.offsetHeight || 300;
+
+                                    const windowWidth = window.innerWidth;
+                                    const windowHeight = window.innerHeight;
+                                    const scrollX = window.scrollX;
+                                    const scrollY = window.scrollY;
+
+                                    let targetLeft = mouseX + 15;
+                                    let targetTop = mouseY + 15;
+
+                                    if (targetLeft + popoverWidth > scrollX + windowWidth) {
+                                        targetLeft = mouseX - popoverWidth - 15;
                                     }
 
-                                    if (popover && isPopoverLoaded && popoverTop) {
-                                        popover.style.setProperty("top", `${popoverTop}px`, "important");
+                                    if (targetTop + popoverHeight > scrollY + windowHeight) {
+                                        targetTop = mouseY - popoverHeight - 15;
+                                    }
+
+                                    if (targetLeft < scrollX) targetLeft = scrollX + 10;
+                                    if (targetTop < scrollY) targetTop = scrollY + 10;
+
+                                    const strTop = `${targetTop}px`;
+                                    const strLeft = `${targetLeft}px`;
+
+                                    if (
+                                        popover.style.top !== strTop ||
+                                        popover.style.left !== strLeft ||
+                                        popover.style.right !== "auto"
+                                    ) {
+                                        popover.style.setProperty("top", strTop, "important");
+                                        popover.style.setProperty("left", strLeft, "important");
+                                        popover.style.setProperty("right", "auto", "important");
                                         popover.style.setProperty("height", "var(--popover-height)", "important");
-                                        observer.disconnect();
                                     }
                                 });
 
                                 linkItem.addEventListener("mouseenter", (event: MouseEvent) => {
-                                    popoverTop = event.clientY + window.scrollY;
+                                    mouseX = event.pageX;
+                                    mouseY = event.pageY;
+
                                     observerPopover.observe(document.body, observerPopoverCfg);
                                 });
 
                                 linkItem.addEventListener("mouseleave", () => {
                                     observerPopover.disconnect();
-                                    popoverTop = null;
+                                    mouseX = null;
+                                    mouseY = null;
                                 });
                             }
                         });

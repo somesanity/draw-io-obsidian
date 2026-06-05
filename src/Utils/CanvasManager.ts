@@ -181,6 +181,8 @@ export class CanvasManager {
         const activeFile = this.plugin.app.workspace.getActiveFile();
         const sourcePath = activeFile ? activeFile.path : "";
 
+        const observerCfg = { attributes: true, childList: true, subtree: true };
+
         anchors.forEach((anchor) => {
             const href = anchor.getAttribute("href") || anchor.getAttribute("xlink:href") || "";
 
@@ -192,7 +194,56 @@ export class CanvasManager {
                 anchor.setAttribute("xlink:href", cleanPath);
                 anchor.classList.add("internal-link");
 
+                let popoverTop: number | null = null;
+                let popoverLeft: number | null = null;
+
+                const observerPopover = new MutationObserver(() => {
+                    const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
+
+                    if (!popover || !popoverTop || !popoverLeft) return;
+
+                    const popoverWidth = popover.offsetWidth || 400;
+                    const popoverHeight = popover.offsetHeight || 300;
+
+                    const windowWidth = window.innerWidth;
+                    const windowHeight = window.innerHeight;
+                    const scrollX = window.scrollX;
+                    const scrollY = window.scrollY;
+
+                    let targetLeft = popoverLeft + 20;
+                    let targetTop = popoverTop + 20;
+
+                    if (targetLeft + popoverWidth > scrollX + windowWidth) {
+                        targetLeft = popoverLeft - popoverWidth - 20;
+                    }
+                    if (targetTop + popoverHeight > scrollY + windowHeight) {
+                        targetTop = popoverTop - popoverHeight - 20;
+                    }
+
+                    if (targetLeft < scrollX) targetLeft = scrollX + 10;
+                    if (targetTop < scrollY) targetTop = scrollY + 10;
+
+                    const strTop = `${targetTop}px`;
+                    const strLeft = `${targetLeft}px`;
+
+                    if (
+                        popover.style.top !== strTop ||
+                        popover.style.left !== strLeft ||
+                        popover.style.right !== "auto"
+                    ) {
+                        popover.style.setProperty("top", strTop, "important");
+                        popover.style.setProperty("left", strLeft, "important");
+                        popover.style.setProperty("right", "auto", "important");
+                        popover.style.setProperty("height", "var(--popover-height)", "important");
+                    }
+                });
+
                 anchor.addEventListener("mouseover", (event: MouseEvent) => {
+                    popoverTop = event.pageY;
+                    popoverLeft = event.pageX;
+
+                    observerPopover.observe(document.body, observerCfg);
+
                     this.plugin.app.workspace.trigger("hover-link", {
                         event,
                         source: "canvas-drawio-plugin",
@@ -201,6 +252,12 @@ export class CanvasManager {
                         linktext: cleanPath,
                         sourcePath: sourcePath
                     });
+                });
+
+                anchor.addEventListener("mouseout", () => {
+                    observerPopover.disconnect();
+                    popoverTop = null;
+                    popoverLeft = null;
                 });
 
                 anchor.addEventListener("click", (event: MouseEvent) => {
