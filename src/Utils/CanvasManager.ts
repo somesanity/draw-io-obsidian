@@ -319,7 +319,7 @@ export class CanvasManager {
                 if (node.file instanceof TFile && node.file.extension === "svg" && node.file.name.endsWith(".drawio.svg")) {
 
                     menu.addItem((item) => {
-                        item.setTitle("Открыть в редакторе Draw.io")
+                        item.setTitle(t("DRAWIO_MENU__EDIT_DIAGRAM"))
                             .setIcon("shapes")
                             .onClick(async () => {
                                 this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: node.file as TFile })
@@ -335,7 +335,7 @@ export class CanvasManager {
                 if (node.file instanceof TFile && node.file.extension === "svg" && node.file.name.endsWith(".drawio.svg")) {
 
                     menu.addItem((item) => {
-                        item.setTitle("Копировать диаграмму как изображение")
+                        item.setTitle(t("DRAWIO_MENU__COPY_AS_IMAGE"))
                             .setIcon("copy")
                             .onClick(async () => {
                                 this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', node.file);
