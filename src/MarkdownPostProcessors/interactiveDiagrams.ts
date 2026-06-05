@@ -1,7 +1,6 @@
 import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, MARKDOWN_FRAGMENT_SEARCH } from "consts";
 import DrawioPlugin from "main";
 import { TFile } from "obsidian";
-import { MarkdownFragmentsObject } from "Types/MarkdownFragmentsObject";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
 import { MarkdownTooltip } from "Utils/markdownTooltip";
 import { MxGraphParser } from "Utils/MxGraphParser";
@@ -128,45 +127,34 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                 let mouseX: number | null = null;
                                 let mouseY: number | null = null;
 
-                                const observerPopover = new MutationObserver((mutationsList) => {
+                                const observerPopover = new MutationObserver(() => {
                                     const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
 
                                     if (!popover || mouseX === null || mouseY === null) return;
 
+                                    if (!popover.classList.contains("drawio-hover-position")) {
+                                        popover.classList.add("drawio-hover-position");
+                                    }
+
                                     const popoverWidth = popover.offsetWidth || 400;
                                     const popoverHeight = popover.offsetHeight || 300;
-
-                                    const windowWidth = window.innerWidth;
-                                    const windowHeight = window.innerHeight;
                                     const scrollX = window.scrollX;
                                     const scrollY = window.scrollY;
 
                                     let targetLeft = mouseX + 15;
                                     let targetTop = mouseY + 15;
 
-                                    if (targetLeft + popoverWidth > scrollX + windowWidth) {
-                                        targetLeft = mouseX - popoverWidth - 15;
-                                    }
-
-                                    if (targetTop + popoverHeight > scrollY + windowHeight) {
-                                        targetTop = mouseY - popoverHeight - 15;
-                                    }
-
+                                    if (targetLeft + popoverWidth > scrollX + window.innerWidth) targetLeft = mouseX - popoverWidth - 15;
+                                    if (targetTop + popoverHeight > scrollY + window.innerHeight) targetTop = mouseY - popoverHeight - 15;
                                     if (targetLeft < scrollX) targetLeft = scrollX + 10;
                                     if (targetTop < scrollY) targetTop = scrollY + 10;
 
-                                    const strTop = `${targetTop}px`;
-                                    const strLeft = `${targetLeft}px`;
-
-                                    if (
-                                        popover.style.top !== strTop ||
-                                        popover.style.left !== strLeft ||
-                                        popover.style.right !== "auto"
-                                    ) {
-                                        popover.style.setProperty("top", strTop, "important");
-                                        popover.style.setProperty("left", strLeft, "important");
-                                        popover.style.setProperty("right", "auto", "important");
-                                        popover.style.setProperty("height", "var(--popover-height)", "important");
+                                    if ((popover as HTMLElement).setCssProps) {
+                                        (popover).setCssProps({
+                                            "--drawio-hover-position-top": `${targetTop}px`,
+                                            "--drawio-hover-position-left": `${targetLeft}px`,
+                                            "--drawio-hover-position-hight": "var(--popover-height)" // или твое фиксированное значение
+                                        });
                                     }
                                 });
 

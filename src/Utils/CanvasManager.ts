@@ -108,8 +108,7 @@ export class CanvasManager {
 
                     if (svgElement) {
                         svgElement.setAttribute("class", img.className);
-                        svgElement.style.width = "100%";
-                        svgElement.style.height = "100%";
+                        svgElement.addClass("drawio-canvas-diagram")
 
                         this.processSvgLinks(svgElement);
 
@@ -200,11 +199,14 @@ export class CanvasManager {
                 const observerPopover = new MutationObserver(() => {
                     const popover = document.body.querySelector(".hover-popover") as HTMLElement | null;
 
-                    if (!popover || !popoverTop || !popoverLeft) return;
+                    if (!popover || popoverTop === null || popoverLeft === null) return;
+
+                    if (!popover.classList.contains("drawio-hover-position")) {
+                        popover.classList.add("drawio-hover-position");
+                    }
 
                     const popoverWidth = popover.offsetWidth || 400;
                     const popoverHeight = popover.offsetHeight || 300;
-
                     const windowWidth = window.innerWidth;
                     const windowHeight = window.innerHeight;
                     const scrollX = window.scrollX;
@@ -223,18 +225,12 @@ export class CanvasManager {
                     if (targetLeft < scrollX) targetLeft = scrollX + 10;
                     if (targetTop < scrollY) targetTop = scrollY + 10;
 
-                    const strTop = `${targetTop}px`;
-                    const strLeft = `${targetLeft}px`;
-
-                    if (
-                        popover.style.top !== strTop ||
-                        popover.style.left !== strLeft ||
-                        popover.style.right !== "auto"
-                    ) {
-                        popover.style.setProperty("top", strTop, "important");
-                        popover.style.setProperty("left", strLeft, "important");
-                        popover.style.setProperty("right", "auto", "important");
-                        popover.style.setProperty("height", "var(--popover-height)", "important");
+                    if ((popover as any).setCssProps) {
+                        (popover as any).setCssProps({
+                            "--drawio-hover-position-top": `${targetTop}px`,
+                            "--drawio-hover-position-left": `${targetLeft}px`,
+                            "--drawio-hover-position-hight": "var(--popover-height)"
+                        });
                     }
                 });
 

@@ -129,9 +129,11 @@
     overflow: auto;
 }
 
-.drawio-fixed-popover {
-    top: var(--popover-custom-top) !important;
-    height: var(--popover-height) !important;
+.drawio-hover-position {
+    right: auto !important;
+    top: var(--drawio-hover-position-top) !important;
+    left: var(--drawio-hover-position-left) !important;
+    height: var(--drawio-hover-position-hight) !important;
 }
 
 @media print {
@@ -149,4 +151,9 @@
     margin-top: -10px;
     margin-bottom: 10px;
     display: none;
+}
+
+.drawio-canvas-diagram {
+    width: 100% !important;
+    height: 100% !important;
 }
