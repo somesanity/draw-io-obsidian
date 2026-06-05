@@ -202,7 +202,7 @@ export class DrawioClientManager {
                             onProgress(percentage, `${t("DRAWIO_UPDATE__PROCESSING").replace("...", "")}: ${percentage}%`);
                         } else if (onProgress) {
                             const mb = (receivedBytes / (1024 * 1024)).toFixed(2);
-                            onProgress(0, `MB: ${mb}`);
+                            onProgress(0, `${t("DRAWIO_UPDATE__DOWNLOADED_MB")} ${mb} MB`);
                         }
                     });
 

@@ -53,6 +53,7 @@
     "DRAWIO_UPDATE__UPGRADE": "Upgrade",
     "DRAWIO_UPDATE__DOWNLOADING": "Downloading... {progress}%",
     "DRAWIO_UPDATE__PROCESSING": "Processing...",
+    "DRAWIO_UPDATE__DOWNLOADED_MB": "Downloaded: ",
     "DRAWIO_UPDATE__SUCCESS": " Completed successfully!",
     "DRAWIO_UPDATE__ERROR": " Download error. See console.",
     "DRAWIO_UPDATE__RETRY": "Retry",

@@ -53,6 +53,7 @@
     "DRAWIO_UPDATE__UPGRADE": "Обновить",
     "DRAWIO_UPDATE__DOWNLOADING": "Скачивание... {progress}%",
     "DRAWIO_UPDATE__PROCESSING": "Обработка...",
+    "DRAWIO_UPDATE__DOWNLOADED_MB": "Скачано:",
     "DRAWIO_UPDATE__SUCCESS": " Выполнено успешно!",
     "DRAWIO_UPDATE__ERROR": " Ошибка скачивания. См. консоль.",
     "DRAWIO_UPDATE__RETRY": "Повторить попытку",

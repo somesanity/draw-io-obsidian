@@ -320,7 +320,7 @@ export class CanvasManager {
 
                     menu.addItem((item) => {
                         item.setTitle("Открыть в редакторе Draw.io")
-                            .setIcon("create-new")
+                            .setIcon("shapes")
                             .onClick(async () => {
                                 this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: node.file as TFile })
                             });
