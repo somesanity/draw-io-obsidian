@@ -123,9 +123,9 @@ export class PluginInit {
 
         PercentSize(this.plugin)
 
-        this.plugin.settings.interactiveDiagrams
-            ? interactiveDiagramss(this.plugin)
-            : ""
+        // this.plugin.settings.interactiveDiagrams
+        //     ? interactiveDiagramss(this.plugin)
+        //     : ""
 
         SizeInHoverWindow(this.plugin);
         this.canvasManager.init();
