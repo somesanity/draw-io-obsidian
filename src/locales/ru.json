@@ -93,5 +93,5 @@
     "DRAWIO_MODAL__SUBMIT_BTN": "Задать имя",
     "DRAWIO_NOTICE__DIAGRAM_SAVED": "Диаграмма {name} обновленна",
     "DRAWIO_NOTICE__DIAGRAM_CREATED": "Диаграмма успешно создана: {name}",
-    "CONTEXT_MENU__COPY_DIAGRAM_AS_IMAGE": "Скопировать диаграмму как изображения"
+    "CANVAS_MANAGER__FAILED_GET_CONTEXT": "Не удалось получить контекст canvas 2d"
 }

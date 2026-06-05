@@ -92,5 +92,6 @@
     "DRAWIO_MODAL__ERROR_EXISTS": "A file with this name already exists!",
     "DRAWIO_MODAL__SUBMIT_BTN": "Set name",
     "DRAWIO_NOTICE__DIAGRAM_SAVED": "Diagram {name} updated",
-    "DRAWIO_NOTICE__DIAGRAM_CREATED": "Diagram successfully created: {name}"
+    "DRAWIO_NOTICE__DIAGRAM_CREATED": "Diagram successfully created: {name}",
+    "CANVAS_MANAGER__FAILED_GET_CONTEXT": "Failed to get canvas 2d context"
 }
