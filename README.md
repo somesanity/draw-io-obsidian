@@ -62,21 +62,11 @@ This plugin launches a **local web server** that serves the [Draw.io web app](ht
 
 there are 2 ways: 
 
-1. using plugin for obsidian - [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+1. install from the [plugin page](https://community.obsidian.md/plugins/drawio)
+  > after downloading enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
 2. manually install
 
-![initial-plugin-demo](./docs/initial-plugin-demo.gif)
-
-> This only needs to be done once.
-
-### 🕗 Install with using BRAT
-
-![install-BRAT-demo](./docs/installWithBRAT.gif)
-
-1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
-2. open BRAT plugin `settings` > click `Add beta-plugin`
-3. paste in input `https://github.com/Muhazerin/draw-io-obsidian-tam` select version and click to `Add plugin`.
-4. enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
+2. after downloadingб 
 
 ### 🙌 manually install
 
@@ -100,3 +90,7 @@ there are 2 ways:
 3. enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
 
 ![installation-drawio-client-demo.gif](docs/installation-drawio-client-demo.gif)
+
+### License
+
+This software is licensed under the [GNU GPLv3](./LICENSE).
