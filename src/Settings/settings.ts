@@ -1,4 +1,4 @@
-import { App, DropdownComponent, PluginSettingTab, Setting, TFolder } from "obsidian";
+import { App, ButtonComponent, DropdownComponent, PluginSettingTab, Setting, TFolder, ToggleComponent } from "obsidian";
 import DrawioPlugin from "../main";
 
 export type savingNameFileFormatOption =
@@ -35,6 +35,7 @@ export interface DrawioSettings {
 	TransparentDiagramBackgroundInCanavas: boolean;
 	diagramThemeInCanvas: diagramTheme
 	scaleCopyDiagramAsImage: string;
+	clientAutoUpdate: boolean;
 }
 
 export const DEFAULT_SETTINGS: DrawioSettings = {
@@ -54,7 +55,8 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	HiddenBorderInFocusMode: false,
 	TransparentDiagramBackgroundInCanavas: false,
 	diagramThemeInCanvas: "auto",
-	scaleCopyDiagramAsImage: "4"
+	scaleCopyDiagramAsImage: "4",
+	clientAutoUpdate: false
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -289,5 +291,18 @@ export class SettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		new Setting(containerEl)
+			.setName("Автоматическое обновление")
+			.setDesc("Автоматически проверять и скачивать актуальную версию draw.io при запуске Obsidian.")
+			.addToggle((toggle: ToggleComponent) => {
+				toggle
+					.setValue(this.plugin.settings.clientAutoUpdate)
+					.onChange(async (value) => {
+						this.plugin.settings.clientAutoUpdate = value;
+						await this.plugin.saveSettings();
+					});
+			});
+
+		this.plugin.drawioClientManager.createUpdateSetting(containerEl);
 	}
 }
