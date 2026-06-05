@@ -190,3 +190,11 @@
 .drawio-update-status--error {
     color: var(--text-error);
 }
+
+.modal-setfilename-errorValidateText--visible {
+    display: block;
+}
+
+.modal-setfilename-errorValidateText--invisible {
+    display: none;
+}

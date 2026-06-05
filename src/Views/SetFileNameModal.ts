@@ -73,7 +73,8 @@ export class SetFileNameModal extends Modal {
     private validateName(name: string) {
         if (!name || name === "") {
             this.submitBtn.setDisabled(true);
-            this.errorEl.style.display = "none";
+            this.errorEl.addClass("modal-setfilename-errorValidateText--visible");
+            this.errorEl.removeClass("modal-setfilename-errorValidateText--invisible");
             return;
         }
 
@@ -81,10 +82,12 @@ export class SetFileNameModal extends Modal {
         const fileExists = this.app.vault.getAbstractFileByPath(fullPath);
 
         if (fileExists) {
-            this.errorEl.style.display = "block";
+            this.errorEl.addClass("modal-setfilename-errorValidateText--visible");
+            this.errorEl.removeClass("modal-setfilename-errorValidateText--invisible");
             this.submitBtn.setDisabled(true);
         } else {
-            this.errorEl.style.display = "none";
+            this.errorEl.removeClass("modal-setfilename-errorValidateText--visible");
+            this.errorEl.addClass("modal-setfilename-errorValidateText--invisible");
             this.submitBtn.setDisabled(false);
         }
     }

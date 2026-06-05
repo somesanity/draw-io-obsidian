@@ -7,10 +7,8 @@ interface ObsidianElement extends Element {
 }
 
 export function SizeInHoverWindow(plugin: DrawioPlugin) {
-    // Получаем значение из настроек
     let desired = String(plugin.settings.diagramSizeInPopupHover).trim();
 
-    // Если это просто число (например, "800"), добавляем "px" для валидного CSS
     if (!isNaN(Number(desired)) && desired !== "") {
         desired += "px";
     }
@@ -26,11 +24,9 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         const popover = el.closest('.hover-popover');
         if (!popover) return;
 
-        // Применяем стили и переменную К САМОМУ ПОПОВЕРУ, чтобы он мог растянуться
         popover.classList.add("drawio-popover-container");
-        (popover as unknown as ObsidianElement).setCssProps({ "--drawio-popup-width": desired });
+        (popover as ObsidianElement).setCssProps({ "--drawio-popup-width": desired });
 
-        // Добавляем классы к самому элементу (span/img)
         el.classList.add("drawio-embed-resized");
 
         const svg = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
