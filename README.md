@@ -1,90 +1,102 @@
-# Obsidian Sample Plugin
+# 🔶 Plugin draw.io for obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+![demo](./docs/demo.gif)
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 🚀 Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+  * 🧩 **Interactivity** – bind your note links to shapes, add external links, and insert markdown fragments!  
+  * 🛜 **Works 100% offline** – No internet required!
+  * 🔐 **Privacy-first** – Runs a local server on your machine.
+  * 📐 **Mermaid & LaTeX** - the draw.io native support Mermaid and LaTeX.
+  * 🖼️ **Support Canvas** - Use diagram in Canvas, linking notes, add external links!
 
-## First time developing plugins?
 
-Quick starting guide for new plugin devs:
+## ✨ Interactive diagrams
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+![docs/demo.gif](docs/interactiveDiagram-demo.gif)
 
-## Releasing new releases
+### 🖇️ Linking shapes with notes & external links
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+To link your notes or external resources to shapes, right-click on a shape in the editor and select `Add link`. Then, insert the link to your note or external resource.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+🔗 linking notes demo:
 
-## Adding your plugin to the community plugin list
+![docs/demo.gif](docs/linkingnotedemo.gif)
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+🌐 creating an external link demo:
 
-## How to use
+![docs/demo.gif](docs/linking-external-resources.gif)
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+### 📄 Markdown fragments
 
-## Manually installing the plugin
+**Markdown fragments** are pieces of markdown that you can add to diagrams.
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+Right-click on the shape or element you want to bind a markdown fragment to, then select `Add data...`.  
+The data name should follow the pattern `md-number`, for example: `md-1`, `md-2`.  
+Next, insert the markdown text into the property.
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+📜 Adding a markdown fragment demo:
 
-## Funding URL
+![docs/demo.gif](/docs/markdown-fragment-demo.gif)
 
-You can include funding URLs where people who use your plugin can financially support it.
+### 📐 Mermaid & LaTeX
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+You can use mermaid, plumt and LaTeX (native support draw.io)
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+![docs/LaTeX&mermaid.gif](docs/LaTeX&mermaid.gif)
 
-If you have multiple URLs, you can also do:
+### 🖼️ Canvas support
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+Use the diagrams in canvas! Link your notes, add external/internal links and markdown-fragments!
 
-## API Documentation
+![canvas-demo.gif](docs/canvas-demo.gif)
 
-See https://docs.obsidian.md
+## ❓ How It Works
+
+This plugin launches a **local web server** that serves the [Draw.io web app](https://github.com/jgraph/drawio) directly from your machine.
+
+  * When you open your Obsidian vault and enable the plugin, it spins up the server automatically.
+  * You can then create, edit, and save diagrams directly within Obsidian — **completely offline**.
+
+## 📦 Installation Guide
+
+there are 2 ways: 
+
+1. using plugin for obsidian - [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+2. manually install
+
+![initial-plugin-demo](./docs/initial-plugin-demo.gif)
+
+> This only needs to be done once.
+
+### 🕗 Install with using BRAT
+
+![install-BRAT-demo](./docs/installWithBRAT.gif)
+
+1. install [BRAT from repository](https://github.com/TfTHacker/obsidian42-brat) or from [obsidian plugin list](obsidian://show-plugin?id=obsidian42-brat)
+2. open BRAT plugin `settings` > click `Add beta-plugin`
+3. paste in input `https://github.com/Muhazerin/draw-io-obsidian-tam` select version and click to `Add plugin`.
+4. enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
+
+### 🙌 manually install
+
+1. downlaod from Releases
+
+    - `main.js` 
+    - `manifest.json`
+    - `style.css`
+
+2. create Folder in the .obsidian folder (where other plugin) and then move the file to the folder.
+
+    > ```bash
+    > .obsidian/
+    > └── plugins/
+    >     └── draw-io/
+    >         ├── manifest.json
+    >         ├── main.js
+    >         ├── styles.css
+    > ```
+
+3. enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
+
+![installation-drawio-client-demo.gif](docs/installation-drawio-client-demo.gif)
