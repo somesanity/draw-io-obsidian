@@ -13,17 +13,18 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
 
     const applyResize = (el: HTMLElement) => {
         if (!el.closest('.hover-popover')) return;
-        if (el.getAttribute("width") !== desired) el.setAttribute("width", desired);
-        if (el.style.width !== desired) el.style.width = desired;
+
+        el.classList.add("drawio-embed-resized");
+        (el as any).setCssProps({ "--drawio-popup-width": desired });
+
+        el.setAttribute("width", desired);
 
         const svg = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
         if (svg) {
-            if (svg.getAttribute("width") !== desired) {
-                svg.setAttribute("width", desired);
-            }
-            if (svg.style.width !== desired) {
-                svg.style.width = desired;
-            }
+            svg.classList.add("drawio-embed-resized");
+            (svg as any).setCssProps({ "--drawio-popup-width": desired });
+
+            svg.setAttribute("width", desired);
             if (!svg.getAttribute("preserveAspectRatio")) {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
             }
@@ -53,9 +54,7 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
             for (const m of mutations) {
                 if (m.type === "childList") {
                     m.addedNodes.forEach(node => {
-                        if (node instanceof HTMLElement) {
-                            processContainer(node);
-                        }
+                        if (node instanceof HTMLElement) processContainer(node);
                     });
                 } else if (m.type === "attributes") {
                     const el = m.target as HTMLElement;
@@ -70,7 +69,7 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: ["src", "class", "width", "style"]
+            attributeFilter: ["src", "class", "width"]
         });
 
         plugin.register(() => observer.disconnect());
@@ -80,7 +79,6 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         for (const m of mutations) {
             m.addedNodes.forEach(node => {
                 if (!(node instanceof HTMLElement)) return;
-
                 if (node.classList?.contains('hover-popover')) {
                     setupPopoverObserver(node);
                 } else {

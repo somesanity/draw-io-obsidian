@@ -150,11 +150,16 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                     if (targetTop < scrollY) targetTop = scrollY + 10;
 
                                     if ((popover as HTMLElement).setCssProps) {
+
+                                        observerPopover.disconnect();
+
                                         (popover).setCssProps({
                                             "--drawio-hover-position-top": `${targetTop}px`,
                                             "--drawio-hover-position-left": `${targetLeft}px`,
                                             "--drawio-hover-position-hight": "var(--popover-height)" // или твое фиксированное значение
                                         });
+
+                                        observerPopover.observe(document.body, observerPopoverCfg);
                                     }
                                 });
 
