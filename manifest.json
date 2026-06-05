@@ -2,7 +2,7 @@
 	"id": "drawio",
 	"name": "draw.io",
 	"version": "3.0.0",
-	"minAppVersion": "1.6.6",
+	"minAppVersion": "1.7.2",
 	"description": "Create and edit diagrams with draw.io (diagrams.net), locally and offline.",
 	"author": "somesanity",
 	"authorUrl": "https://github.com/somesanity",
