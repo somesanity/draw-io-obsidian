@@ -72,16 +72,15 @@ export class SettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
+		const addThemeOptions = (dropdown: DropdownComponent) => {
+			dropdown.addOption("auto", t("THEME_AUTO"));
+			dropdown.addOption("dark", t("THEME_DARK"));
+			dropdown.addOption("light", t("THEME_LIGHT"));
+		};
+
 		new Setting(containerEl)
-			.setName(t("SETTINGS_PORT__NAME"))
-			.setDesc(t("SETTINGS_PORT__DESCRIPTION"))
-			.addText(text => text
-				.setPlaceholder(t("SETTINGS_PORT__PLACEHOLDER"))
-				.setValue(this.plugin.settings.port)
-				.onChange(async (value) => {
-					this.plugin.settings.port = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName(t("SETTINGS_GENERAL_SECTION_TITLE"))
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName(t("SETTINGS_FOLDER__NAME"))
@@ -116,6 +115,21 @@ export class SettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName(t("SETTINGS_PORT__NAME"))
+			.setDesc(t("SETTINGS_PORT__DESCRIPTION"))
+			.addText(text => text
+				.setPlaceholder(t("SETTINGS_PORT__PLACEHOLDER"))
+				.setValue(this.plugin.settings.port)
+				.onChange(async (value) => {
+					this.plugin.settings.port = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_DISPLAY_SECTION_TITLE"))
+			.setHeading();
+
+		new Setting(containerEl)
 			.setName(t("SETTINGS_CENTERING__NAME"))
 			.setDesc(t("SETTINGS_CENTERING__DESCRIPTION"))
 			.addToggle(toggle => toggle
@@ -148,11 +162,32 @@ export class SettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		const addThemeOptions = (dropdown: DropdownComponent) => {
-			dropdown.addOption("auto", t("THEME_AUTO"));
-			dropdown.addOption("dark", t("THEME_DARK"));
-			dropdown.addOption("light", t("THEME_LIGHT"));
-		};
+		new Setting(containerEl)
+			.setName(t("SETTINGS_SCALE_COPY__NAME"))
+			.setDesc(t("SETTINGS_SCALE_COPY__DESCRIPTION"))
+			.addText(text => text
+				.setPlaceholder(t("SETTINGS_SCALE_COPY__PLACEHOLDER"))
+				.setValue(this.plugin.settings.scaleCopyDiagramAsImage)
+				.onChange(async (value) => {
+					this.plugin.settings.scaleCopyDiagramAsImage = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_THEME_SECTION_TITLE"))
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_EDITOR_THEME__NAME"))
+			.setDesc(t("SETTINGS_EDITOR_THEME__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				addThemeOptions(dropdown);
+				dropdown.setValue(this.plugin.settings.EditorTheme || "auto");
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.EditorTheme = value as editorTheme;
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
 			.setName(t("SETTINGS_THEME_PREVIEW__NAME"))
@@ -179,16 +214,31 @@ export class SettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName(t("SETTINGS_EDITOR_THEME__NAME"))
-			.setDesc(t("SETTINGS_EDITOR_THEME__DESCRIPTION"))
+			.setName(t("SETTINGS_CANVAS_SECTION_TITLE"))
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_THEME_CANVAS__NAME"))
+			.setDesc(t("SETTINGS_THEME_CANVAS__DESCRIPTION"))
 			.addDropdown(dropdown => {
 				addThemeOptions(dropdown);
-				dropdown.setValue(this.plugin.settings.EditorTheme || "auto");
+				dropdown.setValue(this.plugin.settings.diagramThemeInCanvas || "auto");
 				dropdown.onChange(async (value) => {
-					this.plugin.settings.EditorTheme = value as editorTheme;
+					this.plugin.settings.diagramThemeInCanvas = value as diagramTheme;
 					await this.plugin.saveSettings();
 				});
 			});
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_CANVAS_TRANSPARENT__NAME"))
+			.setDesc(t("SETTINGS_CANVEL_TRANSPARENT__DESCRIPTION"))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.TransparentDiagramBackgroundInCanavas)
+				.onChange(async (value) => {
+					this.plugin.settings.TransparentDiagramBackgroundInCanavas = value;
+					await this.plugin.saveSettings();
+					this.display();
+				}));
 
 		new Setting(containerEl)
 			.setName(t("SETTINGS_CANVAS_BORDER__NAME"))
@@ -235,38 +285,8 @@ export class SettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName(t("SETTINGS_CANVAS_TRANSPARENT__NAME"))
-			.setDesc(t("SETTINGS_CANVEL_TRANSPARENT__DESCRIPTION"))
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.TransparentDiagramBackgroundInCanavas)
-				.onChange(async (value) => {
-					this.plugin.settings.TransparentDiagramBackgroundInCanavas = value;
-					await this.plugin.saveSettings();
-					this.display();
-				}));
-
-		new Setting(containerEl)
-			.setName(t("SETTINGS_THEME_CANVAS__NAME"))
-			.setDesc(t("SETTINGS_THEME_CANVAS__DESCRIPTION"))
-			.addDropdown(dropdown => {
-				addThemeOptions(dropdown);
-				dropdown.setValue(this.plugin.settings.diagramThemeInCanvas || "auto");
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.diagramThemeInCanvas = value as diagramTheme;
-					await this.plugin.saveSettings();
-				});
-			});
-
-		new Setting(containerEl)
-			.setName(t("SETTINGS_SCALE_COPY__NAME"))
-			.setDesc(t("SETTINGS_SCALE_COPY__DESCRIPTION"))
-			.addText(text => text
-				.setPlaceholder(t("SETTINGS_SCALE_COPY__PLACEHOLDER"))
-				.setValue(this.plugin.settings.scaleCopyDiagramAsImage)
-				.onChange(async (value) => {
-					this.plugin.settings.scaleCopyDiagramAsImage = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName(t("SETTINGS_UPDATES_SECTION_TITLE"))
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName(t("SETTINGS_AUTO_UPDATE__NAME"))

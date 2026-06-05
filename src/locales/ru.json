@@ -1,4 +1,9 @@
 {
+    "SETTINGS_GENERAL_SECTION_TITLE": "Основные",
+    "SETTINGS_DISPLAY_SECTION_TITLE": "Отображение",
+    "SETTINGS_THEME_SECTION_TITLE": "Темы",
+    "SETTINGS_CANVAS_SECTION_TITLE": "Холст (canvas)",
+    "SETTINGS_UPDATES_SECTION_TITLE": "Обновления",
     "SETTINGS_PORT__NAME": "Порт для клиента draw.io",
     "SETTINGS_PORT__DESCRIPTION": "Установка порта для клиента draw.io (Допустимое значение от 0 до 65535)",
     "SETTINGS_PORT__PLACEHOLDER": "К примеру: 8081",

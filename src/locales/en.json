@@ -1,4 +1,9 @@
 {
+    "SETTINGS_GENERAL_SECTION_TITLE": "General",
+    "SETTINGS_DISPLAY_SECTION_TITLE": "Display",
+    "SETTINGS_THEME_SECTION_TITLE": "Theme",
+    "SETTINGS_CANVAS_SECTION_TITLE": "Сanvas",
+    "SETTINGS_UPDATES_SECTION_TITLE": "Updates",
     "SETTINGS_PORT__NAME": "Draw.io client port",
     "SETTINGS_PORT__DESCRIPTION": "Set the port for the draw.io client (Valid range: 0 to 65535)",
     "SETTINGS_PORT__PLACEHOLDER": "e.g., 8081",
