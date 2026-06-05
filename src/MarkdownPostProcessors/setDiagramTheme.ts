@@ -25,7 +25,6 @@ export async function setDiagramsTheme(plugin: DrawioPlugin) {
                                     if (svg.classList.contains("drawio-theme-applied")) return;
 
                                     const themeClass = utils.setDiagramsTheme("previewMode");
-                                    console.log("Красим SVG:", svg);
 
                                     if (themeClass) {
                                         svg.removeClass("drawio-diagrams--lightTheme", "drawio-diagrams--darkTheme");

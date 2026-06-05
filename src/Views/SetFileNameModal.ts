@@ -1,4 +1,5 @@
 import { App, Modal, Setting, normalizePath, ButtonComponent } from 'obsidian';
+import { t } from "locales/I18n";
 
 export class SetFileNameModal extends Modal {
     private fileName: string = '';
@@ -27,7 +28,7 @@ export class SetFileNameModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
 
-        this.setTitle("Задать имя файла");
+        this.setTitle(t("DRAWIO_MODAL__TITLE"));
 
         const modalBg = this.containerEl.querySelector('.modal-bg');
         if (modalBg) {
@@ -36,8 +37,8 @@ export class SetFileNameModal extends Modal {
         }
 
         new Setting(contentEl)
-            .setName("Имя файла")
-            .setDesc("Введите название для вашего drawio диаграммы")
+            .setName(t("DRAWIO_MODAL__NAME_FIELD"))
+            .setDesc(t("DRAWIO_MODAL__DESC_FIELD"))
             .addText((text) =>
                 text.onChange((value) => {
                     this.fileName = value.trim();
@@ -45,7 +46,7 @@ export class SetFileNameModal extends Modal {
                 }));
 
         this.errorEl = contentEl.createEl("div", {
-            text: "Файл с таким именем уже существует!",
+            text: t("DRAWIO_MODAL__ERROR_EXISTS"),
             cls: "setting-item-description Drawio-set-file-name-error"
         });
 
@@ -53,7 +54,7 @@ export class SetFileNameModal extends Modal {
             .addButton((btn) => {
                 this.submitBtn = btn;
                 btn
-                    .setButtonText("Задать имя")
+                    .setButtonText(t("DRAWIO_MODAL__SUBMIT_BTN"))
                     .setCta()
                     .onClick(() => {
                         if (!this.submitBtn.buttonEl.disabled) {

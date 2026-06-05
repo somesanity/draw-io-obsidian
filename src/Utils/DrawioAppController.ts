@@ -1,6 +1,7 @@
 import DrawioPlugin from "main";
 import { pluginUtils } from "./PluginUtils";
-import { normalizePath, TFile, WorkspaceLeaf } from "obsidian";
+import { normalizePath, TFile, WorkspaceLeaf, Notice } from "obsidian";
+import { t } from "locales/I18n";
 
 export class DrawioAppController {
 
@@ -91,6 +92,7 @@ export class DrawioAppController {
 
         await this.plugin.app.vault.modify(file, svg);
 
+        new Notice(t("DRAWIO_NOTICE__DIAGRAM_SAVED").replace("{name}", file.name));
         this.Utils.refreshLeaves();
         return;
       }
@@ -101,6 +103,8 @@ export class DrawioAppController {
 
     const file = await this.plugin.app.vault.create(newFileName, svg);
     this.file = file;
+
+    new Notice(t("DRAWIO_NOTICE__DIAGRAM_CREATED").replace("{name}", file.name));
 
     if (this.leaf) {
       const currentStatus = this.leaf.getViewState();

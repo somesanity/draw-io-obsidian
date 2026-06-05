@@ -1,5 +1,6 @@
-import { App, ButtonComponent, DropdownComponent, PluginSettingTab, Setting, TFolder, ToggleComponent } from "obsidian";
+import { App, DropdownComponent, PluginSettingTab, Setting, TFolder, ToggleComponent } from "obsidian";
 import DrawioPlugin from "../main";
+import { t } from "locales/I18n";
 
 export type savingNameFileFormatOption =
 	"timestamp" |
@@ -69,14 +70,13 @@ export class SettingTab extends PluginSettingTab {
 
 	display(): void {
 		const { containerEl } = this;
-
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Port')
-			.setDesc('Set port for draw.io client')
+			.setName(t("SETTINGS_PORT__NAME"))
+			.setDesc(t("SETTINGS_PORT__DESCRIPTION"))
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder(t("SETTINGS_PORT__PLACEHOLDER"))
 				.setValue(this.plugin.settings.port)
 				.onChange(async (value) => {
 					this.plugin.settings.port = value;
@@ -84,207 +84,184 @@ export class SettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Folder')
-			.setDesc('Set Folder for saving diagrams')
-			.addDropdown(DropdownComponent => {
+			.setName(t("SETTINGS_FOLDER__NAME"))
+			.setDesc(t("SETTINGS_FOLDER__DESCRIPTION"))
+			.addDropdown(dropdown => {
 				const folders = this.app.vault.getAllFolders();
 				folders.forEach((folder: TFolder) => {
-					DropdownComponent.addOption(folder.path, folder.path)
+					dropdown.addOption(folder.path, folder.path);
 				});
 
-				DropdownComponent.setValue(this.plugin.settings.folder || "drawio");
-
-				DropdownComponent.onChange(async (value) => {
+				dropdown.setValue(this.plugin.settings.folder || "drawio");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.folder = value;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('diagram name')
-			.setDesc('Select the format what save diagram')
-			.addDropdown(DropdownComponent => {
-				DropdownComponent.addOption("timestamp" as savingNameFileFormatOption, `timestamp: ${Date.now().toString()}.drawio.svg`)
-				DropdownComponent.addOption("uuid" as savingNameFileFormatOption, `uuid: ${crypto.randomUUID()}.drawio.svg`)
-				DropdownComponent.addOption("iso-date-8601" as savingNameFileFormatOption, `iso-date-8601: 2026-06-02_12-30-45.drawio.svg`)
-				DropdownComponent.addOption("set name" as savingNameFileFormatOption, `any name that you can set`)
+			.setName(t("SETTINGS_FILE_FORMAT__NAME"))
+			.setDesc(t("SETTINGS_FILE_FORMAT__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				dropdown.addOption("timestamp", `timestamp: ${Date.now().toString()}.drawio.svg`);
+				dropdown.addOption("uuid", `uuid: ${crypto.randomUUID()}.drawio.svg`);
+				dropdown.addOption("iso-date-8601", `iso-date-8601: 2026-06-02_12-30-45.drawio.svg`);
+				dropdown.addOption("set name", t("FORMAT_SET_NAME"));
 
-				DropdownComponent.setValue(this.plugin.settings.savingNameFileFormat || "timestamp");
-
-				DropdownComponent.onChange(async (value) => {
+				dropdown.setValue(this.plugin.settings.savingNameFileFormat || "timestamp");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.savingNameFileFormat = value as savingNameFileFormatOption;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('centering diagrams')
-			.setDesc("if enable, diagram will be center")
+			.setName(t("SETTINGS_CENTERING__NAME"))
+			.setDesc(t("SETTINGS_CENTERING__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.centeringDiagrams)
 				.onChange(async (value) => {
 					this.plugin.settings.centeringDiagrams = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('interactive diagrams')
-			.setDesc("if enable, do diagram interactive")
+			.setName(t("SETTINGS_INTERACTIVE__NAME"))
+			.setDesc(t("SETTINGS_INTERACTIVE__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.interactiveDiagrams)
 				.onChange(async (value) => {
 					this.plugin.settings.interactiveDiagrams = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('diagram size in hover window')
-			.setDesc('Set the diagram size in the hover window')
+			.setName(t("SETTINGS_HOVER_SIZE__NAME"))
+			.setDesc(t("SETTINGS_HOVER_SIZE__DESCRIPTION"))
 			.addText(text => text
-				.setPlaceholder('e.c: 75% or 450')
+				.setPlaceholder(t("SETTINGS_HOVER_SIZE__PLACEHOLDER"))
 				.setValue(this.plugin.settings.diagramSizeInPopupHover)
 				.onChange(async (value) => {
 					this.plugin.settings.diagramSizeInPopupHover = value;
 					await this.plugin.saveSettings();
 				}));
 
+		const addThemeOptions = (dropdown: DropdownComponent) => {
+			dropdown.addOption("auto", t("THEME_AUTO"));
+			dropdown.addOption("dark", t("THEME_DARK"));
+			dropdown.addOption("light", t("THEME_LIGHT"));
+		};
+
 		new Setting(containerEl)
-			.setName('diagram theme in preview mode')
-			.setDesc('Set theme for diagrams in the obsidian preview mode')
-			.addDropdown(DropdownComponent => {
-
-				DropdownComponent.addOption("auto" as diagramTheme, "auto")
-				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
-				DropdownComponent.addOption("light" as diagramTheme, "light theme")
-
-				DropdownComponent.setValue(this.plugin.settings.diagramThemeInPreviewMode || "auto");
-
-				DropdownComponent.onChange(async (value) => {
+			.setName(t("SETTINGS_THEME_PREVIEW__NAME"))
+			.setDesc(t("SETTINGS_THEME_PREVIEW__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				addThemeOptions(dropdown);
+				dropdown.setValue(this.plugin.settings.diagramThemeInPreviewMode || "auto");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.diagramThemeInPreviewMode = value as diagramTheme;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('diagram theme in edit mode')
-			.setDesc('Set theme for diagrams in the obsidian edit mode')
-			.addDropdown(DropdownComponent => {
-
-				DropdownComponent.addOption("auto" as diagramTheme, "auto")
-				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
-				DropdownComponent.addOption("light" as diagramTheme, "light theme")
-
-				DropdownComponent.setValue(this.plugin.settings.diagramThemeInEditMode || "auto");
-
-				DropdownComponent.onChange(async (value) => {
+			.setName(t("SETTINGS_THEME_EDIT__NAME"))
+			.setDesc(t("SETTINGS_THEME_EDIT__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				addThemeOptions(dropdown);
+				dropdown.setValue(this.plugin.settings.diagramThemeInEditMode || "auto");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.diagramThemeInEditMode = value as diagramTheme;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('draw.io editor theme')
-			.setDesc('Set theme for the draw.io editor')
-			.addDropdown(DropdownComponent => {
-
-				DropdownComponent.addOption("auto" as editorTheme, "auto")
-				DropdownComponent.addOption("dark" as editorTheme, "dark theme")
-				DropdownComponent.addOption("light" as editorTheme, "light theme")
-
-				DropdownComponent.setValue(this.plugin.settings.EditorTheme || "auto");
-
-				DropdownComponent.onChange(async (value) => {
+			.setName(t("SETTINGS_EDITOR_THEME__NAME"))
+			.setDesc(t("SETTINGS_EDITOR_THEME__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				addThemeOptions(dropdown);
+				dropdown.setValue(this.plugin.settings.EditorTheme || "auto");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.EditorTheme = value as editorTheme;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('Hidden border')
-			.setDesc("if enable, the border in canvas will hidden")
+			.setName(t("SETTINGS_CANVAS_BORDER__NAME"))
+			.setDesc(t("SETTINGS_CANVAS_BORDER__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.HiddenBorderInCanvas)
 				.onChange(async (value) => {
 					this.plugin.settings.HiddenBorderInCanvas = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('Hidden label')
-			.setDesc("if enable, the label text in canvas will hidden")
+			.setName(t("SETTINGS_CANVAS_LABEL__NAME"))
+			.setDesc(t("SETTINGS_CANVAS_LABEL__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.HiddenLabelInCanvas)
 				.onChange(async (value) => {
 					this.plugin.settings.HiddenLabelInCanvas = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('always focus')
-			.setDesc("if enable, the diagram in the canvas will be always to focuse")
+			.setName(t("SETTINGS_CANVAS_FOCUS__NAME"))
+			.setDesc(t("SETTINGS_CANVAS_FOCUS__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.AlwaysFocusedInCanvas)
 				.onChange(async (value) => {
 					this.plugin.settings.AlwaysFocusedInCanvas = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('Hiden border in focus')
-			.setDesc("if enable, the diagram in the focus will be hidden")
+			.setName(t("SETTINGS_FOCUS_BORDER__NAME"))
+			.setDesc(t("SETTINGS_FOCUS_BORDER__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.HiddenBorderInFocusMode)
 				.onChange(async (value) => {
 					this.plugin.settings.HiddenBorderInFocusMode = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('transparent background')
-			.setDesc("if enable, diagram's background in the canvas will be trransparent")
+			.setName(t("SETTINGS_CANVAS_TRANSPARENT__NAME"))
+			.setDesc(t("SETTINGS_CANVEL_TRANSPARENT__DESCRIPTION"))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.TransparentDiagramBackgroundInCanavas)
 				.onChange(async (value) => {
 					this.plugin.settings.TransparentDiagramBackgroundInCanavas = value;
 					await this.plugin.saveSettings();
 					this.display();
-				})
-			);
+				}));
 
 		new Setting(containerEl)
-			.setName('Diagram theme in canvas')
-			.setDesc('Set theme for diagrams in the canvas')
-			.addDropdown(DropdownComponent => {
-
-				DropdownComponent.addOption("auto" as diagramTheme, "auto")
-				DropdownComponent.addOption("dark" as diagramTheme, "dark theme")
-				DropdownComponent.addOption("light" as diagramTheme, "light theme")
-
-				DropdownComponent.setValue(this.plugin.settings.diagramThemeInCanvas || "auto");
-
-				DropdownComponent.onChange(async (value) => {
+			.setName(t("SETTINGS_THEME_CANVAS__NAME"))
+			.setDesc(t("SETTINGS_THEME_CANVAS__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				addThemeOptions(dropdown);
+				dropdown.setValue(this.plugin.settings.diagramThemeInCanvas || "auto");
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.diagramThemeInCanvas = value as diagramTheme;
-					await this.plugin.saveSettings()
-				})
-			})
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
-			.setName('scale copied diagram')
-			.setDesc('Set the scale size for copied diagram')
+			.setName(t("SETTINGS_SCALE_COPY__NAME"))
+			.setDesc(t("SETTINGS_SCALE_COPY__DESCRIPTION"))
 			.addText(text => text
-				.setPlaceholder('e.c: 2 or 5')
+				.setPlaceholder(t("SETTINGS_SCALE_COPY__PLACEHOLDER"))
 				.setValue(this.plugin.settings.scaleCopyDiagramAsImage)
 				.onChange(async (value) => {
 					this.plugin.settings.scaleCopyDiagramAsImage = value;
@@ -292,8 +269,8 @@ export class SettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName("Автоматическое обновление")
-			.setDesc("Автоматически проверять и скачивать актуальную версию draw.io при запуске Obsidian.")
+			.setName(t("SETTINGS_AUTO_UPDATE__NAME"))
+			.setDesc(t("SETTINGS_AUTO_UPDATE__DESCRIPTION"))
 			.addToggle((toggle: ToggleComponent) => {
 				toggle
 					.setValue(this.plugin.settings.clientAutoUpdate)

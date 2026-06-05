@@ -18,6 +18,7 @@ import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramTheme
 import { CanvasManager } from "./CanvasManager";
 import { DrawioEditorModal } from "Views/DrawioEditorModal";
 import { drawioEditorFileItemView } from "Views/drawioEditorFileItemView";
+import { setLocale, t } from "locales/I18n";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -36,10 +37,8 @@ export class PluginInit {
     }
 
     async addRibbonIcon(): Promise<any> {
-        this.plugin.addRibbonIcon('dice', 'Sample', async (evt: MouseEvent) => {
-            new Notice('This is a notice!');
-            await this.plugin.drawioClientManager.checkAndUpdate();
-            this.plugin.serverManager.startServer();
+        this.plugin.addRibbonIcon('shapes', t("DRAWIO_RIBBON__TOOLTIP"), async (evt: MouseEvent) => {
+            this.plugin.activateView(DRAWIO_EDITOR_VIEW);
         })
     }
 
@@ -59,7 +58,7 @@ export class PluginInit {
 
         this.plugin.addCommand({
             id: "start-server",
-            name: "Запустить сервер",
+            name: t("DRAWIO_COMMAND__START_SERVER"),
             callback: () => {
                 this.plugin.serverManager.startServer();
             }
@@ -67,7 +66,7 @@ export class PluginInit {
 
         this.plugin.addCommand({
             id: "open-drawio-editor-view",
-            name: "Запустить редактор draw.io",
+            name: t("DRAWIO_COMMAND__OPEN_DRAWIO_EDITOR"),
             callback: async () => {
                 this.plugin.serverManager.startServer();
                 await this.plugin.activateView(DRAWIO_EDITOR_VIEW)
@@ -76,7 +75,7 @@ export class PluginInit {
 
         this.plugin.addCommand({
             id: 'open-drawio-under-cursor',
-            name: 'Открыть Draw.io диаграмму под курсором',
+            name: t("DRAWIO_COMMAND__OPEN_DIAGRAM_UNDER_CURSOR"),
             hotkeys: [{ modifiers: ["Mod", "Alt"], key: "e" }],
 
             editorCallback: (editor: Editor, view: MarkdownView) => {
@@ -92,7 +91,7 @@ export class PluginInit {
 
         this.plugin.addCommand({
             id: 'open-editor-in-modal',
-            name: 'Open editor in modal',
+            name: t("DRAWIO_COMMAND__OPEN_MODAL_DRAWIO_EDITOR"),
             callback: () => {
                 new DrawioEditorModal(this.plugin.app, this.plugin).open();
             },
@@ -100,7 +99,7 @@ export class PluginInit {
 
         this.plugin.addCommand({
             id: 'open-drawio-under-cursor-in-modal',
-            name: 'Открыть Draw.io диаграмму под курсором в модальном окне',
+            name: t("DRAWIO_COMMAND__OPEN_DIAGRAM_UNDER_CURSOR_IN_MODAL"),
             hotkeys: [{ modifiers: ["Mod", "Alt"], key: "m" }],
 
             editorCallback: (editor: Editor, view: MarkdownView) => {
@@ -169,7 +168,7 @@ export class PluginInit {
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
                     menu.addItem((item) => {
                         item
-                            .setTitle("Редактировать Draw.io диаграмму")
+                            .setTitle(t("DRAWIO_MENU__EDIT_DIAGRAM"))
                             .setIcon("shapes")
                             .onClick(() => {
                                 this.plugin.app.workspace.trigger('drawio:edit-diagram', fileToEdit);
@@ -186,7 +185,7 @@ export class PluginInit {
                 if (file && file.name.endsWith('.drawio.svg')) {
                     menu.addItem((item) => {
                         item
-                            .setTitle("скопировать диаграмму как изображение")
+                            .setTitle(t("DRAWIO_MENU__COPY_AS_IMAGE"))
                             .setIcon("copy")
                             .onClick(() => {
                                 this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', file);
@@ -199,5 +198,10 @@ export class PluginInit {
 
     registerExtensions() {
         this.plugin.registerExtensions(["drawio"], DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE);
+    }
+
+    setPluginLanguage() {
+        const userLang = (window.localStorage.getItem('language') || 'en').split('-')[0];
+        setLocale(userLang ? userLang : "en");
     }
 }

@@ -24,6 +24,7 @@ export default class DrawioPlugin extends Plugin {
 
 		// init plugin
 		await initter.loadSettings();
+		initter.setPluginLanguage();
 		await initter.registerCommands();
 		await initter.registerViews();
 		initter.registerExtensions();
@@ -33,7 +34,7 @@ export default class DrawioPlugin extends Plugin {
 		initter.registerEvents();
 		await this.drawioClientManager.checkAndUpdate();
 
-		this.drawioClientManager.initDelayedCheck(5000);
+		this.drawioClientManager.initDelayedCheck();
 	}
 
 	async loadSettings() {

@@ -1,3 +1,4 @@
+import { t } from "locales/I18n";
 import DrawioPlugin from "main";
 import { App, Editor, MarkdownView, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { savingNameFileFormatOption } from "Settings/settings";
@@ -261,7 +262,7 @@ export class pluginUtils {
                                 await navigator.clipboard.write([
                                     new ClipboardItem({ [pngBlob.type]: pngBlob })
                                 ]);
-                                new Notice(`Диаграмма скопирована в 6x качестве!`);
+                                new Notice(t("COPY_AS_IMAGE__COPY_SUCCES_NOTICE"));
                                 resolve();
                             } catch (clipboardError) {
                                 reject(clipboardError);
@@ -278,8 +279,8 @@ export class pluginUtils {
             });
 
         } catch (error) {
-            console.error('Ошибка при экспорте диаграммы в PNG:', error);
-            new Notice('Не удалось скопировать диаграмму');
+            console.error(t("COPY_AS_IMAGE__EXPORT_ERROR"), error);
+            new Notice(t("COPY_AS_IMAGE__COPY_FAILED"));
         }
     }
 }

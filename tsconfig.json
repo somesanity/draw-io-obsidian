@@ -10,7 +10,10 @@
 		"noImplicitThis": true,
 		"noImplicitReturns": true,
 		"moduleResolution": "node",
-		"types": ["node"],
+		"resolveJsonModule": true,
+		"types": [
+			"node"
+		],
 		"importHelpers": true,
 		"noUncheckedIndexedAccess": true,
 		"isolatedModules": true,

@@ -3,6 +3,7 @@ import DrawioPlugin from "main";
 import { Notice, requestUrl, Setting, ButtonComponent } from 'obsidian';
 import JSZip from "jszip";
 import * as http from 'https';
+import { t } from "locales/I18n";
 
 export class DrawioClientManager {
     private plugin: DrawioPlugin;
@@ -14,7 +15,6 @@ export class DrawioClientManager {
 
     public initDelayedCheck(delayMs: number = 5000) {
         if (this.plugin.settings.clientAutoUpdate === false) {
-            console.log("[Drawio] Фоновая проверка обновлений пропущена (отключено в настройках).");
             return;
         }
         setTimeout(async () => {
@@ -39,18 +39,18 @@ export class DrawioClientManager {
             let lastLoggedPercentage = -1;
             await this.executeUpgrade((progress) => {
                 if (progress % 10 === 0 && progress !== lastLoggedPercentage) {
-                    console.log(`[Drawio Auto-Update] Загрузка: ${progress}%`);
+                    console.log(`[Drawio Auto-Update] ${t("DRAWIO_UPDATE__PROCESSING").replace("...", "")}: ${progress}%`);
                     lastLoggedPercentage = progress;
                 }
             });
         } catch (error) {
-            console.error("[Drawio] Ошибка авто-обновления:", error);
+            console.error(t("DRAWIO_LOG__AUTO_UPDATE_ERROR"), error);
         }
     }
 
     public async forceUpdateManual(onProgress: (percentage: number, status: string) => void): Promise<boolean> {
         if (this.isUpdating) {
-            new Notice("Процесс обновления уже запущен!");
+            new Notice(t("DRAWIO_NOTICE__ALREADY_RUNNING"));
             return false;
         }
         try {
@@ -64,8 +64,8 @@ export class DrawioClientManager {
 
     public async createUpdateSetting(containerEl: HTMLElement): Promise<void> {
         const updateSetting = new Setting(containerEl)
-            .setName("Обновление клиента draw.io вручную")
-            .setDesc("Получение информации о версиях...");
+            .setName(t("DRAWIO_UPDATE__SETTING_NAME"))
+            .setDesc(t("DRAWIO_UPDATE__GETTING_INFO"));
 
         const statusSpan = updateSetting.descEl.createSpan({
             text: "",
@@ -79,12 +79,12 @@ export class DrawioClientManager {
         updateSetting.addButton((button: ButtonComponent) => {
             updateButton = button;
             updateButton
-                .setButtonText("Проверка...")
+                .setButtonText(t("DRAWIO_UPDATE__CHECKING"))
                 .setCta()
                 .setDisabled(true);
         });
 
-        const currentVersion = this.plugin.settings.currentlyDrawioClientVersion || "Не установлена";
+        const currentVersion = this.plugin.settings.currentlyDrawioClientVersion || t("DRAWIO_VERSION__NOT_INSTALLED");
         let targetVersion: string | null = null;
 
         try {
@@ -95,14 +95,18 @@ export class DrawioClientManager {
 
         const refreshUiText = (versionInstalled: string, versionAvailable: string | null) => {
             if (!versionAvailable) {
-                updateSetting.setDesc(`Текущая версия: ${versionInstalled}. Не удалось проверить обновления.`);
-                updateButton?.setButtonText("Обновить принудительно");
+                updateSetting.setDesc(t("DRAWIO_VERSION__FAILED_CHECK").replace("{installed}", versionInstalled));
+                updateButton?.setButtonText(t("DRAWIO_UPDATE__FORCE"));
             } else if (versionInstalled === versionAvailable) {
-                updateSetting.setDesc(`У вас установлена актуальная версия: ${versionInstalled}. Обновление не требуется.`);
-                updateButton?.setButtonText("Переустановить");
+                updateSetting.setDesc(t("DRAWIO_VERSION__ACTUAL").replace("{installed}", versionInstalled));
+                updateButton?.setButtonText(t("DRAWIO_UPDATE__REINSTALL"));
             } else {
-                updateSetting.setDesc(`Доступно обновление! Текущая версия: ${versionInstalled} ➔ Будет установлена: ${versionAvailable}`);
-                updateButton?.setButtonText("Обновить");
+                updateSetting.setDesc(
+                    t("DRAWIO_VERSION__AVAILABLE")
+                        .replace("{installed}", versionInstalled)
+                        .replace("{available}", versionAvailable)
+                );
+                updateButton?.setButtonText(t("DRAWIO_UPDATE__UPGRADE"));
             }
             updateSetting.descEl.appendChild(statusSpan);
         };
@@ -114,22 +118,25 @@ export class DrawioClientManager {
             updateButton!.setDisabled(true);
 
             const success = await this.forceUpdateManual((percentage, status) => {
-                updateButton!.setButtonText(percentage > 0 && percentage < 100 ? `Скачивание... ${percentage}%` : "Обработка...");
+                const btnText = percentage > 0 && percentage < 100
+                    ? t("DRAWIO_UPDATE__DOWNLOADING").replace("{progress}", percentage.toString())
+                    : t("DRAWIO_UPDATE__PROCESSING");
+                updateButton!.setButtonText(btnText);
                 statusSpan.setText(` [${status}]`);
             });
 
             updateButton!.setDisabled(false);
 
             if (success) {
-                statusSpan.setText(" Выполнено успешно!");
+                statusSpan.setText(t("DRAWIO_UPDATE__SUCCESS"));
                 statusSpan.style.color = "var(--text-success)";
 
                 const newVersion = targetVersion || currentVersion;
                 refreshUiText(newVersion, targetVersion);
             } else {
-                statusSpan.setText(" Ошибка скачивания. См. консоль.");
+                statusSpan.setText(t("DRAWIO_UPDATE__ERROR"));
                 statusSpan.style.color = "var(--text-error)";
-                updateButton!.setButtonText("Повторить попытку");
+                updateButton!.setButtonText(t("DRAWIO_UPDATE__RETRY"));
             }
 
             setTimeout(() => { statusSpan.setText(""); }, 5000);
@@ -140,7 +147,7 @@ export class DrawioClientManager {
         this.isUpdating = true;
         try {
             await this.downloadWithSystemStream(onProgress);
-            if (onProgress) onProgress(100, "Распаковка...");
+            if (onProgress) onProgress(100, t("DRAWIO_UPDATE__UNPACKING"));
             await this.unzipDrawioClient();
 
             const lastVersion = await this.getLastVersion();
@@ -164,7 +171,7 @@ export class DrawioClientManager {
             const fs = require('fs');
             const fileStream = fs.createWriteStream(absoluteZipPath);
 
-            if (onProgress) onProgress(0, "Подключение...");
+            if (onProgress) onProgress(0, t("DRAWIO_UPDATE__CONNECTING"));
 
             const makeRequest = (url: string) => {
                 http.get(url, {
@@ -181,7 +188,7 @@ export class DrawioClientManager {
                     }
 
                     if (response.statusCode !== 200) {
-                        reject(new Error(`Сервер вернул ошибку: ${response.statusCode}`));
+                        reject(new Error(`${t("DRAWIO_ERROR__SERVER_STATUS")} ${response.statusCode}`));
                         return;
                     }
 
@@ -192,10 +199,10 @@ export class DrawioClientManager {
                         receivedBytes += chunk.length;
                         if (totalBytes > 0 && onProgress) {
                             const percentage = Math.round((receivedBytes / totalBytes) * 100);
-                            onProgress(percentage, `Скачивание: ${percentage}%`);
+                            onProgress(percentage, `${t("DRAWIO_UPDATE__PROCESSING").replace("...", "")}: ${percentage}%`);
                         } else if (onProgress) {
                             const mb = (receivedBytes / (1024 * 1024)).toFixed(2);
-                            onProgress(0, `Скачано: ${mb} MB`);
+                            onProgress(0, `MB: ${mb}`);
                         }
                     });
 
@@ -230,7 +237,7 @@ export class DrawioClientManager {
             });
             return response.json.tag_name;
         } catch (error) {
-            console.error("Не удалось узнать версию", error);
+            console.error(t("DRAWIO_ERROR__FETCH_VERSION_FAILED"), error);
         }
     }
 
@@ -253,7 +260,7 @@ export class DrawioClientManager {
             const adapter = this.plugin.app.vault.adapter;
 
             if (!(await adapter.exists(drawioClientZipPath))) {
-                throw new Error(`Файл ${drawioClientZipPath} не найден!`);
+                throw new Error(t("DRAWIO_ERROR__ZIP_NOT_FOUND").replace("{path}", drawioClientZipPath));
             }
 
             const zipBuffer = await adapter.readBinary(drawioClientZipPath);
@@ -282,8 +289,8 @@ export class DrawioClientManager {
             }
             if (await adapter.exists(drawioClientZipPath)) await adapter.remove(drawioClientZipPath);
         } catch (error) {
-            console.error(`[Drawio КРИТИЧЕСКАЯ ОШИБКА]:`, error);
-            new Notice(`Критическая ошибка при распаковке.`);
+            console.error(t("DRAWIO_LOG__CRITICAL_ERROR"), error);
+            new Notice(t("DRAWIO_NOTICE__UNZIP_ERROR"));
             throw error;
         }
     }

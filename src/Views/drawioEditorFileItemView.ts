@@ -1,4 +1,5 @@
 import { DRAWIO_EDITOR_VIEW, DRAWIO_EDITOR_VIEW_FILE_ITEM_TYPE, DRAWIO_EXTENSION } from 'consts';
+import { t } from 'locales/I18n';
 import DrawioPlugin from 'main';
 import { FileView, TFile, ViewStateResult, WorkspaceLeaf } from 'obsidian';
 import { DrawioAppController } from 'Utils/DrawioAppController';
@@ -44,7 +45,7 @@ export class drawioEditorFileItemView extends FileView {
         if (this.file) {
             return this.file.name.replace(DRAWIO_EXTENSION, '');
         }
-        return "редактор draw.io";
+        return t("DRAWIOEDITOR_VIEW_NAME");
     }
 
     getIcon() {
@@ -59,7 +60,6 @@ export class drawioEditorFileItemView extends FileView {
         }
 
         this.iframe.addEventListener('load', () => {
-            console.log(`Файл ${file.name} отправлен в Draw.io контроллер`);
             this.drawioAppController.file = file;
         }, { once: true });
     }

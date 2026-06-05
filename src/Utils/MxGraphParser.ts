@@ -1,3 +1,4 @@
+import { t } from "locales/I18n";
 import pako from "pako";
 
 export class MxGraphParser {
@@ -40,7 +41,7 @@ export class MxGraphParser {
             return this.domParser.parseFromString(cleanXmlText, "application/xml");
 
         } catch (error) {
-            console.error("[MxGraphParser] Ошибка парсинга структуры:", error);
+            console.error(t("MXGRAPH_PARSER__FAILEDPARSE"), error);
             return null;
         }
     }

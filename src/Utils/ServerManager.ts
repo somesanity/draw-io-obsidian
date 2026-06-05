@@ -5,6 +5,7 @@ import http, { Server } from "http"
 import path from "path";
 import fs from 'fs';
 import { App } from "obsidian";
+import { t } from "locales/I18n";
 
 export class ServerManager {
     private plugin: DrawioPlugin;
@@ -17,13 +18,13 @@ export class ServerManager {
         const paths = this.getDrawioPaths(this.plugin.app, this.plugin.manifest.dir!);
         const baseDir = paths.webAppPath;
 
-        const server = http.createServer((req, res) => {  
+        const server = http.createServer((req, res) => {
             const cleanUrl = (req.url || '/').split('?')[0];
-            
+
             const relativePath = cleanUrl === '/' ? 'index.html' : cleanUrl;
-            
+
             const filePath = path.join(baseDir, relativePath!);
-            
+
             const extname = String(path.extname(filePath)).toLowerCase();
             const contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
@@ -31,13 +32,13 @@ export class ServerManager {
                 if (error) {
                     if (error.code === 'ENOENT') {
                         res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-                        res.end(`404: Файл не найден: ${relativePath}`);
+                        res.end(`${t("SERVER_MESSAGE_FILE_NOT_FOUND")} ${relativePath}`);
                     } else {
                         res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-                        res.end(`500: Ошибка сервера (${error.code})`);
+                        res.end(t("SERVER_MESSAGE_ERROR") + error.code);
                     }
                 } else {
-                    res.writeHead(200, { 
+                    res.writeHead(200, {
                         'Content-Type': contentType,
                         'Access-Control-Allow-Origin': '*',
                         'Content-Security-Policy': "default-src 'self' 'unsafe-inline' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
@@ -50,20 +51,20 @@ export class ServerManager {
         const port = this.plugin.settings.port || 4444;
         server.listen(port, () => {
 
-        });        
+        });
 
         return server;
     }
 
     startServer() {
-        if(this.plugin.server) return;
+        if (this.plugin.server) return;
 
         const server = this.createServer();
         this.plugin.server = server;
     }
 
     stopServer() {
-        if(this.plugin.server) {
+        if (this.plugin.server) {
             this.plugin.server.close();
         }
     }

@@ -5,6 +5,7 @@ import { pluginUtils } from "./PluginUtils";
 import { Menu, TFile } from "obsidian";
 import { MarkdownTooltip } from "./markdownTooltip";
 import { MxGraphParser } from "./MxGraphParser";
+import { t } from "locales/I18n";
 
 export class CanvasManager {
     plugin: DrawioPlugin;
@@ -124,7 +125,7 @@ export class CanvasManager {
                         }
                     }
                 } catch (error) {
-                    console.error("Ошибка при замене Drawio-картинки на SVG на Canvas:", error);
+                    console.error(t("CANVAS__REPLACEIMAGETOSVG_ERROR"), error);
                 }
             }
         });

@@ -102,7 +102,6 @@ export class ExternalLinkTooltip {
     public destroy() {
         this.hideTimeout && clearTimeout(this.hideTimeout);
 
-        // Поиск по ID гарантирует удаление элемента везде, где он мог создаться
         const activeWindows = [document, ...this.getPopoutWindows()];
         activeWindows.forEach(doc => {
             const el = doc.getElementById('drawio-external-link-tooltip');
