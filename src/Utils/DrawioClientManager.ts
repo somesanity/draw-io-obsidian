@@ -71,9 +71,6 @@ export class DrawioClientManager {
             text: "",
             cls: "drawio-update-status"
         });
-        statusSpan.style.marginLeft = "10px";
-        statusSpan.style.fontWeight = "bold";
-        statusSpan.style.color = "var(--text-accent)";
 
         let updateButton: ButtonComponent | null = null;
         updateSetting.addButton((button: ButtonComponent) => {
@@ -129,13 +126,13 @@ export class DrawioClientManager {
 
             if (success) {
                 statusSpan.setText(t("DRAWIO_UPDATE__SUCCESS"));
-                statusSpan.style.color = "var(--text-success)";
+                statusSpan.addClass("drawio-update-status--success")
 
                 const newVersion = targetVersion || currentVersion;
                 refreshUiText(newVersion, targetVersion);
             } else {
                 statusSpan.setText(t("DRAWIO_UPDATE__ERROR"));
-                statusSpan.style.color = "var(--text-error)";
+                statusSpan.addClass("drawio-update-status--error")
                 updateButton!.setButtonText(t("DRAWIO_UPDATE__RETRY"));
             }
 

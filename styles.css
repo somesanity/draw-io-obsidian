@@ -161,3 +161,17 @@
 .drawio-embed-resized {
     width: var(--drawio-popup-width) !important;
 }
+
+.drawio-update-status {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--text-accent);
+}
+
+.drawio-update-status--success {
+    color: var(--text-success);
+}
+
+.drawio-update-status--error {
+    color: var(--text-error);
+}
