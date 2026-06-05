@@ -157,3 +157,18 @@
     width: 100% !important;
     height: 100% !important;
 }
+
+.hover-popover.drawio-popover-container {
+    max-width: var(--drawio-popup-width, 800px) !important;
+    width: max-content !important;
+}
+
+.hover-popover.drawio-popover-container .drawio-embed-resized {
+    width: var(--drawio-popup-width, 100%) !important;
+    max-width: none !important;
+}
+
+.hover-popover.drawio-popover-container svg.drawio-embed-resized {
+    width: var(--drawio-popup-width, 100%) !important;
+    height: auto !important;
+}

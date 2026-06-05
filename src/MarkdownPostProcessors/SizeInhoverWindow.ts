@@ -1,8 +1,17 @@
 import DrawioPlugin from "main";
 import { MarkdownPostProcessorContext } from "obsidian";
 
+interface ObsidianElement extends Element {
+    setCssProps(props: Record<string, string>): void;
+    setCssStyles(styles: Record<string, string>): void;
+}
+
 export function SizeInHoverWindow(plugin: DrawioPlugin) {
-    const desired = plugin.settings.diagramSizeInPopupHover;
+    let desired = String(plugin.settings.diagramSizeInPopupHover).trim();
+
+    if (!isNaN(Number(desired)) && desired !== "") {
+        desired += "px";
+    }
 
     const isTarget = (node: Element): boolean => {
         return typeof node.matches === "function" && (
@@ -11,19 +20,18 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         );
     };
 
-    const applyResize = (el: HTMLElement) => {
-        if (!el.closest('.hover-popover')) return;
-        if (el.getAttribute("width") !== desired) el.setAttribute("width", desired);
-        if (el.style.width !== desired) el.style.width = desired;
+    const applyResize = (el: Element) => {
+        const popover = el.closest('.hover-popover');
+        if (!popover) return;
+
+        popover.classList.add("drawio-popover-container");
+        (popover as unknown as ObsidianElement).setCssProps({ "--drawio-popup-width": desired });
+
+        el.classList.add("drawio-embed-resized");
 
         const svg = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
         if (svg) {
-            if (svg.getAttribute("width") !== desired) {
-                svg.setAttribute("width", desired);
-            }
-            if (svg.style.width !== desired) {
-                svg.style.width = desired;
-            }
+            svg.classList.add("drawio-embed-resized");
             if (!svg.getAttribute("preserveAspectRatio")) {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
             }
@@ -34,13 +42,14 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         if (isTarget(element)) {
             applyResize(element);
         }
+
         if (element.tagName?.toLowerCase() === 'svg' && element.closest('span[src*=".drawio.svg"]')) {
-            applyResize(element.closest('span[src*=".drawio.svg"]') as HTMLElement);
+            applyResize(element.closest('span[src*=".drawio.svg"]') as Element);
             return;
         }
 
         const children = element.querySelectorAll('img[src*=".drawio.svg"], span.internal-embed[src*=".drawio.svg"]');
-        children.forEach(ch => applyResize(ch as HTMLElement));
+        children.forEach(ch => applyResize(ch));
     };
 
     const setupPopoverObserver = (popover: HTMLElement) => {
@@ -51,18 +60,11 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
 
         const observer = new MutationObserver((mutations) => {
             for (const m of mutations) {
-                if (m.type === "childList") {
-                    m.addedNodes.forEach(node => {
-                        if (node instanceof HTMLElement) {
-                            processContainer(node);
-                        }
-                    });
-                } else if (m.type === "attributes") {
-                    const el = m.target as HTMLElement;
-                    if (isTarget(el) || el.tagName?.toLowerCase() === 'svg') {
-                        applyResize(el);
+                m.addedNodes.forEach(node => {
+                    if (node instanceof HTMLElement) {
+                        processContainer(node);
                     }
-                }
+                });
             }
         });
 
@@ -70,10 +72,22 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: ["src", "class", "width", "style"]
+            attributeFilter: ["src", "class"]
         });
 
-        plugin.register(() => observer.disconnect());
+        const disconnectObserver = new MutationObserver((mutations, obs) => {
+            for (const m of mutations) {
+                for (const node of m.removedNodes) {
+                    if (node === popover || node.contains(popover)) {
+                        observer.disconnect();
+                        obs.disconnect();
+                        delete popover.dataset.resizeObserverAttached;
+                    }
+                }
+            }
+        });
+
+        disconnectObserver.observe(popover.parentElement || document.body, { childList: true });
     };
 
     const bodyObserver = new MutationObserver((mutations) => {

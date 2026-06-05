@@ -153,7 +153,7 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                         (popover).setCssProps({
                                             "--drawio-hover-position-top": `${targetTop}px`,
                                             "--drawio-hover-position-left": `${targetLeft}px`,
-                                            "--drawio-hover-position-hight": "var(--popover-height)" // или твое фиксированное значение
+                                            "--drawio-hover-position-hight": "var(--popover-height)"
                                         });
                                     }
                                 });
