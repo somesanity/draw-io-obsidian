@@ -7,8 +7,10 @@ interface ObsidianElement extends Element {
 }
 
 export function SizeInHoverWindow(plugin: DrawioPlugin) {
+    // Получаем значение из настроек
     let desired = String(plugin.settings.diagramSizeInPopupHover).trim();
 
+    // Если это просто число (например, "800"), добавляем "px" для валидного CSS
     if (!isNaN(Number(desired)) && desired !== "") {
         desired += "px";
     }
@@ -20,34 +22,20 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         );
     };
 
-<<<<<<< HEAD
-    const applyResize = (el: HTMLElement) => {
-        if (!el.closest('.hover-popover')) return;
-
-        el.classList.add("drawio-embed-resized");
-        (el as any).setCssProps({ "--drawio-popup-width": desired });
-
-        el.setAttribute("width", desired);
-=======
     const applyResize = (el: Element) => {
         const popover = el.closest('.hover-popover');
         if (!popover) return;
 
+        // Применяем стили и переменную К САМОМУ ПОПОВЕРУ, чтобы он мог растянуться
         popover.classList.add("drawio-popover-container");
         (popover as unknown as ObsidianElement).setCssProps({ "--drawio-popup-width": desired });
 
+        // Добавляем классы к самому элементу (span/img)
         el.classList.add("drawio-embed-resized");
->>>>>>> 7f252b204348a2cad21c617d928dce6d893bfdd0
 
         const svg = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
         if (svg) {
             svg.classList.add("drawio-embed-resized");
-<<<<<<< HEAD
-            (svg as any).setCssProps({ "--drawio-popup-width": desired });
-
-            svg.setAttribute("width", desired);
-=======
->>>>>>> 7f252b204348a2cad21c617d928dce6d893bfdd0
             if (!svg.getAttribute("preserveAspectRatio")) {
                 svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
             }
@@ -76,20 +64,9 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
 
         const observer = new MutationObserver((mutations) => {
             for (const m of mutations) {
-<<<<<<< HEAD
-                if (m.type === "childList") {
-                    m.addedNodes.forEach(node => {
-                        if (node instanceof HTMLElement) processContainer(node);
-                    });
-                } else if (m.type === "attributes") {
-                    const el = m.target as HTMLElement;
-                    if (isTarget(el) || el.tagName?.toLowerCase() === 'svg') {
-                        applyResize(el);
-=======
                 m.addedNodes.forEach(node => {
                     if (node instanceof HTMLElement) {
                         processContainer(node);
->>>>>>> 7f252b204348a2cad21c617d928dce6d893bfdd0
                     }
                 });
             }
@@ -99,11 +76,7 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
             subtree: true,
             childList: true,
             attributes: true,
-<<<<<<< HEAD
-            attributeFilter: ["src", "class", "width"]
-=======
             attributeFilter: ["src", "class"]
->>>>>>> 7f252b204348a2cad21c617d928dce6d893bfdd0
         });
 
         const disconnectObserver = new MutationObserver((mutations, obs) => {
@@ -125,6 +98,7 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
         for (const m of mutations) {
             m.addedNodes.forEach(node => {
                 if (!(node instanceof HTMLElement)) return;
+
                 if (node.classList?.contains('hover-popover')) {
                     setupPopoverObserver(node);
                 } else {
