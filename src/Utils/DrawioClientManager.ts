@@ -1,7 +1,7 @@
 import { DRAWIO_CLIENT_DOWNLOADING_LINK, DRAWIO_CLIENT_LAST_RELEASE } from "consts";
 import DrawioPlugin from "main";
 import { Notice, requestUrl, Setting, ButtonComponent } from 'obsidian';
-import JSZip from "jszip";
+import * as fflate from "fflate";
 import * as http from 'https';
 import { t } from "locales/I18n";
 
@@ -72,10 +72,11 @@ export class DrawioClientManager {
             cls: "drawio-update-status"
         });
 
-        let updateButton: ButtonComponent | null = null;
+        let updateButton!: ButtonComponent;
+
         updateSetting.addButton((button: ButtonComponent) => {
             updateButton = button;
-            updateButton
+            button
                 .setButtonText(t("DRAWIO_UPDATE__CHECKING"))
                 .setCta()
                 .setDisabled(true);
@@ -93,47 +94,48 @@ export class DrawioClientManager {
         const refreshUiText = (versionInstalled: string, versionAvailable: string | null) => {
             if (!versionAvailable) {
                 updateSetting.setDesc(t("DRAWIO_VERSION__FAILED_CHECK").replace("{installed}", versionInstalled));
-                updateButton?.setButtonText(t("DRAWIO_UPDATE__FORCE"));
+                updateButton.setButtonText(t("DRAWIO_UPDATE__FORCE"));
             } else if (versionInstalled === versionAvailable) {
                 updateSetting.setDesc(t("DRAWIO_VERSION__ACTUAL").replace("{installed}", versionInstalled));
-                updateButton?.setButtonText(t("DRAWIO_UPDATE__REINSTALL"));
+                updateButton.setButtonText(t("DRAWIO_UPDATE__REINSTALL"));
             } else {
                 updateSetting.setDesc(
                     t("DRAWIO_VERSION__AVAILABLE")
                         .replace("{installed}", versionInstalled)
                         .replace("{available}", versionAvailable)
                 );
-                updateButton?.setButtonText(t("DRAWIO_UPDATE__UPGRADE"));
+                updateButton.setButtonText(t("DRAWIO_UPDATE__UPGRADE"));
             }
             updateSetting.descEl.appendChild(statusSpan);
         };
 
         refreshUiText(currentVersion, targetVersion);
-        updateButton!.setDisabled(false);
 
-        updateButton!.onClick(async () => {
-            updateButton!.setDisabled(true);
+        updateButton.setDisabled(false);
+
+        updateButton.onClick(async () => {
+            updateButton.setDisabled(true);
 
             const success = await this.forceUpdateManual((percentage, status) => {
                 const btnText = percentage > 0 && percentage < 100
                     ? t("DRAWIO_UPDATE__DOWNLOADING").replace("{progress}", percentage.toString())
                     : t("DRAWIO_UPDATE__PROCESSING");
-                updateButton!.setButtonText(btnText);
+                updateButton.setButtonText(btnText);
                 statusSpan.setText(` [${status}]`);
             });
 
-            updateButton!.setDisabled(false);
+            updateButton.setDisabled(false);
 
             if (success) {
                 statusSpan.setText(t("DRAWIO_UPDATE__SUCCESS"));
-                statusSpan.addClass("drawio-update-status--success")
+                statusSpan.addClass("drawio-update-status--success");
 
                 const newVersion = targetVersion || currentVersion;
                 refreshUiText(newVersion, targetVersion);
             } else {
                 statusSpan.setText(t("DRAWIO_UPDATE__ERROR"));
-                statusSpan.addClass("drawio-update-status--error")
-                updateButton!.setButtonText(t("DRAWIO_UPDATE__RETRY"));
+                statusSpan.addClass("drawio-update-status--error");
+                updateButton.setButtonText(t("DRAWIO_UPDATE__RETRY"));
             }
 
             setTimeout(() => { statusSpan.setText(""); }, 5000);
@@ -161,8 +163,8 @@ export class DrawioClientManager {
         return new Promise((resolve, reject) => {
             const pluginBaseDir = this.plugin.manifest.dir;
             const adapter = this.plugin.app.vault.adapter;
-            // @ts-ignore
-            const basePath = adapter.getBasePath ? adapter.getBasePath() : "";
+
+            const basePath = (adapter as any).getBasePath?.() ?? "";
             const absoluteZipPath = `${basePath}/${pluginBaseDir}/webapp.zip`;
 
             const fs = require('fs');
@@ -173,7 +175,7 @@ export class DrawioClientManager {
             const makeRequest = (url: string) => {
                 http.get(url, {
                     headers: {
-                        'User-Agent': 'Obsidian-Plugin-CheckUpdate',
+                        'User-Agent': 'obsidian-draw.io-plugin-CheckUpdate-and-update',
                         'Accept': 'application/vnd.github+json'
                     }
                 }, (response) => {
@@ -227,12 +229,12 @@ export class DrawioClientManager {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/vnd.github+json',
-                    'User-Agent': 'Obsidian-Plugin-CheckUpdate',
+                    'User-Agent': 'obsidian-draw.io-plugin-CheckUpdate',
                     'Cache-Control': 'no-store, no-cache, must-revalidate',
                     'Pragma': 'no-cache'
                 }
             });
-            return response.json.tag_name;
+            return response.json?.tag_name;
         } catch (error) {
             console.error(t("DRAWIO_ERROR__FETCH_VERSION_FAILED"), error);
         }
@@ -261,26 +263,49 @@ export class DrawioClientManager {
             }
 
             const zipBuffer = await adapter.readBinary(drawioClientZipPath);
-            const zip = await JSZip.loadAsync(zipBuffer);
-            const RootFolderInZip = Object.keys(zip.files)[0];
-            if (!RootFolderInZip) throw new Error("zip is empty.");
+            const zipData = new Uint8Array(zipBuffer);
 
-            const rootDirInZip = RootFolderInZip.split('/')[0];
+            const files = await new Promise<Record<string, Uint8Array>>((resolve, reject) => {
+                fflate.unzip(zipData, (err, unzipped) => {
+                    if (err) {
+                        reject(err);
+                    } else if (unzipped) {
+                        resolve(unzipped);
+                    } else {
+                        reject(new Error("Unzipped data is empty or undefined"));
+                    }
+                });
+            });
+
+            const filePaths = Object.keys(files);
+            const firstFilePath = filePaths[0];
+
+            if (!firstFilePath) throw new Error("zip is empty.");
+
+            const rootDirInZip = firstFilePath.split('/')[0];
             const webappFolder = `${rootDirInZip}/src/main/webapp/`;
 
-            for (const relativePath in zip.files) {
+            for (const relativePath of filePaths) {
                 if (relativePath.startsWith(webappFolder) && relativePath !== webappFolder) {
-                    const zipEntry = zip.files[relativePath];
+                    const fileData = files[relativePath];
+
+                    if (!fileData) continue;
+
                     const cleanSubPath = relativePath.substring(webappFolder.length);
                     const fullPathOnDisk = `${pluginBaseDir}/webapp/${cleanSubPath}`;
 
-                    if (zipEntry!.dir) {
+                    if (relativePath.endsWith('/')) {
                         if (!(await adapter.exists(fullPathOnDisk))) await adapter.mkdir(fullPathOnDisk);
                     } else {
-                        const fileData = await zipEntry!.async("uint8array");
                         const parentDir = fullPathOnDisk.substring(0, fullPathOnDisk.lastIndexOf('/'));
                         if (!(await adapter.exists(parentDir))) await adapter.mkdir(parentDir);
-                        await adapter.writeBinary(fullPathOnDisk, fileData.buffer as ArrayBuffer);
+
+                        const safeArrayBuffer = fileData.buffer.slice(
+                            fileData.byteOffset,
+                            fileData.byteOffset + fileData.byteLength
+                        ) as ArrayBuffer;
+
+                        await adapter.writeBinary(fullPathOnDisk, safeArrayBuffer);
                     }
                 }
             }
