@@ -44,9 +44,9 @@ You can literally put **anything** into a diagram that Obsidian is capable of re
 for example:
 
 - random note
-  [random-note-demo.gif](docs/random-note-demo.gif)
+  ![random-note-demo.gif](docs/random-note-demo.gif)
 - complex dataviewjs scripts
-  [complex-interactive-demo](docs/complex-interactive-demo.gif)
+  ![complex-interactive-demo](docs/complex-interactive-demo.gif)
 
 ### 📐 Mermaid & LaTeX
 
