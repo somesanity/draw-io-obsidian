@@ -39,6 +39,15 @@ Next, insert the markdown text into the property.
 
 ![docs/demo.gif](/docs/markdown-fragment-demo.gif)
 
+You can literally put **anything** into a diagram that Obsidian is capable of rendering, including rendering features added by plugins.
+
+for example:
+
+- random note
+  [random-note-demo.gif](docs/random-note-demo.gif)
+- complex dataviewjs scripts
+  [complex-interactive-demo](docs/complex-interactive-demo.gif)
+
 ### 📐 Mermaid & LaTeX
 
 You can use mermaid, plumt and LaTeX (native support draw.io)
