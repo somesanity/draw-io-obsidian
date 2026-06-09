@@ -13,6 +13,8 @@
 
 ## ✨ Interactive diagrams
 
+> ⚠️ at the moment, work **ONLY** the reading mode
+
 ![docs/demo.gif](docs/interactiveDiagram-demo.gif)
 
 ### 🖇️ Linking shapes with notes & external links
