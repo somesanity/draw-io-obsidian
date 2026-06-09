@@ -73,7 +73,7 @@ This plugin launches a **local web server** that serves the [Draw.io web app](ht
 
 there are 2 ways: 
 
-1. install from the [plugin page](https://community.obsidian.md/plugins/drawio)
+1. install from the [plugin page](https://community.obsidian.md/plugins/drawio) or open this link obsidian://show-plugin?id=drawio in new browser tab
   > after downloading enable plugin, then go to settings, scroll down and click on the downlaod button draw.io client
 2. manually install
 
