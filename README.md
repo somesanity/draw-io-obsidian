@@ -10,7 +10,6 @@
   * 📐 **Mermaid & LaTeX** - the draw.io native support Mermaid and LaTeX.
   * 🖼️ **Support Canvas** - Use diagram in Canvas, linking notes, add external links!
 
-
 ## ✨ Interactive diagrams
 
 > ⚠️ at the moment, work **ONLY** the reading mode
@@ -61,6 +60,41 @@ You can use mermaid, plumt and LaTeX (native support draw.io)
 Use the diagrams in canvas! Link your notes, add external/internal links and markdown-fragments!
 
 ![canvas-demo.gif](docs/canvas-demo.gif)
+
+## 🖱️ How to Use
+
+Diagrams created by the plugin use the `.drawio.svg` extension. The file is still a regular SVG file; the `.drawio` part is added so the plugin can recognize that the SVG was created by it.
+
+- `diagram.drawio.svg` — ✔️
+- `diagram.svg` — ❌
+
+If you remove the `.drawio` part, the plugin will no longer recognize the file as a draw.io diagram.
+
+### How to Open the Editor
+
+You can open the editor using a Command Palette command:
+
+![Open editor via Command Palette](./docs/open-editor-by-command.gif)
+
+Or you can assign and use a keyboard shortcut:
+
+![Open editor via keyboard shortcut](./docs/open-editor-by-hotkey.gif)
+
+### How to Edit Diagrams
+
+There are three ways to edit a diagram:
+
+1. **Using the context menu** — right-click the diagram link and select **"Edit draw.io Diagram"**.
+
+![Edit diagram via context menu](./docs/edit-diagram-by-context-menu.gif)
+
+2. **Using a keyboard shortcut** — place the cursor on the diagram link in editing mode and press the assigned shortcut.
+
+![Edit diagram via keyboard shortcut](./docs/edit-diagram-by-keybind.gif)
+
+3. **Using the modal editor shortcut** — place the cursor on the diagram link in editing mode and press the modal editor shortcut.
+
+![Edit diagram via modal editor shortcut](./docs/edit-diagram-by-keybind-modal.gif)
 
 ## ❓ How It Works
 
