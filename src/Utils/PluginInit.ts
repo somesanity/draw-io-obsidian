@@ -162,8 +162,7 @@ export class PluginInit {
         );
 
         this.plugin.registerEvent(
-            this.plugin.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
-                const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
+            this.plugin.app.workspace.on("file-menu", (menu: Menu, fileToEdit: File) => {
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
                     menu.addItem((item) => {
@@ -179,8 +178,7 @@ export class PluginInit {
         );
 
         this.plugin.registerEvent(
-            this.plugin.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView) => {
-                const file = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
+            this.plugin.app.workspace.on("file-menu", (menu: Menu, file: TFile) => {
 
                 if (file && file.name.endsWith('.drawio.svg')) {
                     menu.addItem((item) => {

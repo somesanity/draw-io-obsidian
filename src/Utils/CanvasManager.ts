@@ -20,8 +20,6 @@ export class CanvasManager {
     init() {
         this.plugin.app.workspace.onLayoutReady(() => {
             this.startObserving();
-            this.registerCanvasContextMenu();
-
         });
     }
 
@@ -363,39 +361,5 @@ export class CanvasManager {
         } catch (e) {
             return null;
         }
-    }
-
-    private registerCanvasContextMenu() {
-        this.plugin.registerEvent(
-            // @ts-ignore
-            this.plugin.app.workspace.on("canvas:node-menu", (menu: Menu, node: any) => {
-                if (node.file instanceof TFile && node.file.extension === "svg" && node.file.name.endsWith(".drawio.svg")) {
-
-                    menu.addItem((item) => {
-                        item.setTitle(t("DRAWIO_MENU__EDIT_DIAGRAM"))
-                            .setIcon("shapes")
-                            .onClick(async () => {
-                                this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: node.file as TFile })
-                            });
-                    });
-                }
-            })
-        );
-
-        this.plugin.registerEvent(
-            // @ts-ignore
-            this.plugin.app.workspace.on("canvas:node-menu", (menu: Menu, node: any) => {
-                if (node.file instanceof TFile && node.file.extension === "svg" && node.file.name.endsWith(".drawio.svg")) {
-
-                    menu.addItem((item) => {
-                        item.setTitle(t("DRAWIO_MENU__COPY_AS_IMAGE"))
-                            .setIcon("copy")
-                            .onClick(async () => {
-                                this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', node.file);
-                            });
-                    });
-                }
-            })
-        );
     }
 }
