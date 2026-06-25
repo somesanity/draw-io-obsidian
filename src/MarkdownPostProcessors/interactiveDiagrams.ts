@@ -43,7 +43,24 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
 
                                     svgElement.classList.add("drawio-interactive-diagram");
 
-                                    img.replaceWith(svgElement);
+                                    // Keep img in the DOM (hidden) so Obsidian's built-in
+                                    // resize handles and the </> edit button continue to work.
+                                    // The SVG is inserted as a sibling and syncs its width
+                                    // whenever Obsidian updates the img's width attribute.
+                                    img.style.display = 'none';
+                                    img.insertAdjacentElement('afterend', svgElement);
+
+                                    const widthObserver = new MutationObserver(() => {
+                                        const w = img.style.width || img.getAttribute('width');
+                                        if (w) {
+                                            svgElement.style.width = w;
+                                            svgElement.style.height = 'auto';
+                                        }
+                                    });
+                                    widthObserver.observe(img, {
+                                        attributes: true,
+                                        attributeFilter: ['style', 'width']
+                                    });
 
                                     svgelement = svgElement
                                 }

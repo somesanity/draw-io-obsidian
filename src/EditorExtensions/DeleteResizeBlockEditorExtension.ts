@@ -43,16 +43,6 @@ export const DeleteResizeBlockEditorExtension = () => {
                             element.classList.add("drawio-diagram--editmode");
                         }
 
-                        const editButton = element.querySelector(".edit-block-button");
-                        if (editButton) {
-                            editButton.remove();
-                        }
-
-                        const resizeCorner = element.querySelector(".image-resize-corner");
-                        if (resizeCorner) {
-                            resizeCorner.remove();
-                        }
-
                         const imageWrapper = element.querySelector(".image-wrapper");
                         if (imageWrapper) {
                             imageWrapper.classList.remove("image-wrapper");
