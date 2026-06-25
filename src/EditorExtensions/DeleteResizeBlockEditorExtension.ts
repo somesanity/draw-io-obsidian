@@ -44,8 +44,7 @@ export const DeleteResizeBlockEditorExtension = () => {
                         }
 
                         const imageWrapper = element.querySelector(".image-wrapper");
-                        if (imageWrapper) {
-                            imageWrapper.classList.remove("image-wrapper");
+                        if (imageWrapper && !imageWrapper.classList.contains("drawio-diagram-wrapper")) {
                             imageWrapper.classList.add("drawio-diagram-wrapper");
                         }
                     }
