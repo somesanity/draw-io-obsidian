@@ -42,11 +42,6 @@ export const DeleteResizeBlockEditorExtension = () => {
                         if (!element.classList.contains("drawio-diagram--editmode")) {
                             element.classList.add("drawio-diagram--editmode");
                         }
-
-                        const imageWrapper = element.querySelector(".image-wrapper");
-                        if (imageWrapper && !imageWrapper.classList.contains("drawio-diagram-wrapper")) {
-                            imageWrapper.classList.add("drawio-diagram-wrapper");
-                        }
                     }
                 });
             }
