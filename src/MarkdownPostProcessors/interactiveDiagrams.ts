@@ -170,11 +170,15 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
                                     observerPopover.observe(document.body, observerPopoverCfg);
                                 });
 
-                                linkItem.addEventListener("mouseleave", () => {
+                                const cleanupPopoverObserver = () => {
                                     observerPopover.disconnect();
                                     mouseX = null;
                                     mouseY = null;
-                                });
+                                };
+
+                                linkItem.addEventListener("pointerdown", cleanupPopoverObserver);
+                                linkItem.addEventListener("click", cleanupPopoverObserver);
+                                linkItem.addEventListener("mouseleave", cleanupPopoverObserver);
                             }
                         });
                     }
