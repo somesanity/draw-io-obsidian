@@ -159,6 +159,29 @@ export class DrawioClientManager {
         }
     }
 
+    // Node's https trusts only its bundled roots, so behind a TLS-inspecting
+    // corporate proxy the download fails even when the proxy CA is trusted by
+    // the OS. Returns the OS trust store merged with Node's built-in roots.
+    private getExtraCa(): string[] | undefined {
+        try {
+            const tls = require('tls');
+            // tls.getCACertificates exists only since Node 22.15 / 23.8, so it is
+            // feature-detected rather than gated on a version: on older runtimes
+            // (and if the call fails or the store is empty) we return undefined,
+            // which leaves https.get on its default behaviour.
+            if (typeof tls.getCACertificates !== 'function') {
+                return undefined;
+            }
+            const systemCerts = tls.getCACertificates('system');
+            if (!Array.isArray(systemCerts) || systemCerts.length === 0) {
+                return undefined;
+            }
+            return [...tls.rootCertificates, ...systemCerts];
+        } catch {
+            return undefined;
+        }
+    }
+
     private downloadWithSystemStream(onProgress?: (percentage: number, status: string) => void): Promise<void> {
         return new Promise((resolve, reject) => {
             const pluginBaseDir = this.plugin.manifest.dir;
@@ -172,12 +195,15 @@ export class DrawioClientManager {
 
             if (onProgress) onProgress(0, t("DRAWIO_UPDATE__CONNECTING"));
 
+            const extraCa = this.getExtraCa();
+
             const makeRequest = (url: string) => {
                 http.get(url, {
                     headers: {
                         'User-Agent': 'obsidian-draw.io-plugin-CheckUpdate-and-update',
                         'Accept': 'application/vnd.github+json'
-                    }
+                    },
+                    ca: extraCa
                 }, (response) => {
                     if (response.statusCode === 301 || response.statusCode === 302) {
                         if (response.headers.location) {
