@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Baked in by `npm run install-plugin-installer` (absolute path to this repo's dist/).
+PLUGIN_DIST_DIR="__PLUGIN_DIST_DIR__"
+
+usage() {
+	echo "Usage: $(basename "$0") [--purge] <folder>" >&2
+	echo "  Install the built plugin from PLUGIN_DIST_DIR into an Obsidian vault" >&2
+	echo "  (or into <folder> if no .obsidian/plugins is found)." >&2
+	echo "  By default, removes everything in the destination except webapp/ and data.json," >&2
+	echo "  then copies all files from dist." >&2
+	echo "  --purge  Also remove webapp/ and data.json before copying." >&2
+	exit 1
+}
+
+resolve_realpath() {
+	local target="$1"
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "$target"
+	elif command -v python3 >/dev/null 2>&1; then
+		python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$target"
+	else
+		echo "Error: neither realpath nor python3 is available to resolve paths." >&2
+		exit 1
+	fi
+}
+
+find_plugins_dir() {
+	local current="$1"
+	while true; do
+		if [[ -d "$current/.obsidian/plugins" ]]; then
+			printf '%s\n' "$current/.obsidian/plugins"
+			return 0
+		fi
+		# Already inside .../.obsidian/plugins[/...]
+		if [[ "$(basename "$current")" == "plugins" ]] && [[ "$(basename "$(dirname "$current")")" == ".obsidian" ]]; then
+			printf '%s\n' "$current"
+			return 0
+		fi
+		local parent
+		parent="$(dirname "$current")"
+		if [[ "$parent" == "$current" ]]; then
+			return 1
+		fi
+		current="$parent"
+	done
+}
+
+# Remove contents of DEST. Without --purge, keep webapp/ and data.json.
+clean_dest() {
+	local dest="$1"
+	local purge="$2"
+
+	if [[ ! -d "$dest" ]]; then
+		return 0
+	fi
+
+	local entry name
+	shopt -s nullglob dotglob
+	for entry in "$dest"/*; do
+		name="$(basename "$entry")"
+		if [[ "$purge" != "1" ]]; then
+			if [[ "$name" == "webapp" || "$name" == "data.json" ]]; then
+				continue
+			fi
+		fi
+		rm -rf "$entry"
+	done
+	shopt -u nullglob dotglob
+}
+
+# Copy every file/dir from dist into DEST (including hidden files).
+copy_all_from_dist() {
+	local dist="$1"
+	local dest="$2"
+
+	local entry
+	shopt -s nullglob dotglob
+	for entry in "$dist"/*; do
+		cp -R "$entry" "$dest/"
+	done
+	shopt -u nullglob dotglob
+}
+
+PURGE=0
+TARGET_ARG=""
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		-h|--help)
+			usage
+			;;
+		--purge)
+			PURGE=1
+			shift
+			;;
+		-*)
+			echo "Error: unknown option: $1" >&2
+			usage
+			;;
+		*)
+			if [[ -n "$TARGET_ARG" ]]; then
+				echo "Error: unexpected argument: $1" >&2
+				usage
+			fi
+			TARGET_ARG="$1"
+			shift
+			;;
+	esac
+done
+
+if [[ -z "$TARGET_ARG" ]]; then
+	usage
+fi
+
+if [[ ! -d "$PLUGIN_DIST_DIR" ]]; then
+	echo "Error: plugin dist directory does not exist: $PLUGIN_DIST_DIR" >&2
+	echo "Re-run \`npm run install-plugin-installer\` from the plugin repo, then build with \`npm run build\` or \`npm run build:dev\`." >&2
+	exit 1
+fi
+
+MANIFEST_SRC="$PLUGIN_DIST_DIR/manifest.json"
+MAIN_SRC="$PLUGIN_DIST_DIR/main.js"
+
+if [[ ! -f "$MANIFEST_SRC" || ! -f "$MAIN_SRC" ]]; then
+	echo "Error: plugin build not found in $PLUGIN_DIST_DIR (need manifest.json and main.js)." >&2
+	echo "Run \`npm run build\` or \`npm run build:dev\` first." >&2
+	exit 1
+fi
+
+if [[ ! -e "$TARGET_ARG" ]]; then
+	echo "Error: path does not exist: $TARGET_ARG" >&2
+	exit 1
+fi
+
+TARGET_REAL="$(resolve_realpath "$TARGET_ARG")"
+
+if [[ ! -d "$TARGET_REAL" ]]; then
+	echo "Error: path is not a directory: $TARGET_REAL" >&2
+	exit 1
+fi
+
+PLUGIN_ID="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); if(!m.id) process.exit(2); process.stdout.write(String(m.id));' "$MANIFEST_SRC")"
+PLUGIN_NAME="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.name ?? m.id ?? ""));' "$MANIFEST_SRC")"
+PLUGIN_VERSION="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.version ?? ""));' "$MANIFEST_SRC")"
+BUILD_TIME="$(node -e 'const fs=require("fs"); const s=fs.statSync(process.argv[1]); process.stdout.write(new Date(s.mtimeMs).toISOString());' "$MAIN_SRC")"
+
+DEST=""
+if PLUGINS_DIR="$(find_plugins_dir "$TARGET_REAL")"; then
+	DEST="$PLUGINS_DIR/$PLUGIN_ID"
+else
+	DEST="$TARGET_REAL"
+fi
+
+if [[ "$PURGE" -eq 1 ]]; then
+	echo "Do you ok to install plugin \`${PLUGIN_NAME}\` with version \`${PLUGIN_VERSION}\` built at \`${BUILD_TIME}\` to folder \`${DEST}\` (purge all existing files)? [y/N]"
+else
+	echo "Do you ok to install plugin \`${PLUGIN_NAME}\` with version \`${PLUGIN_VERSION}\` built at \`${BUILD_TIME}\` to folder \`${DEST}\`? [y/N]"
+fi
+read -r ANSWER
+case "${ANSWER}" in
+	y|Y|yes|YES)
+		;;
+	*)
+		echo "Aborted."
+		exit 0
+		;;
+esac
+
+mkdir -p "$DEST"
+clean_dest "$DEST" "$PURGE"
+copy_all_from_dist "$PLUGIN_DIST_DIR" "$DEST"
+
+echo "Installed to $DEST"

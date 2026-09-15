@@ -136,6 +136,31 @@ there are 2 ways:
 
 ![installation-drawio-client-demo.gif](docs/installation-drawio-client-demo.gif)
 
+### 🛠️ Local install from `dist` (developers)
+
+CLI helper that copies your local `dist/` build into an Obsidian vault plugin folder. Useful while developing: rebuild, then install into a vault without manually copying files.
+
+**Install the CLI once** (from this repo; re-run after moving the checkout):
+
+```bash
+npm run build          # or npm run build:dev
+npm run install-plugin-installer
+```
+
+This installs `obsidian-plugin-installer` into `~/.local/bin` and binds it to the current repo’s `dist/`. Ensure `~/.local/bin` is on your `PATH`.
+
+**Usage:**
+
+```bash
+obsidian-plugin-installer /path/to/vault
+obsidian-plugin-installer --purge /path/to/vault
+```
+
+- Resolves the path, finds `.obsidian/plugins`, and installs into `plugins/<plugin-id>/` (or into the given folder if no vault layout is found).
+- Asks for confirmation (`name`, `version`, build time, destination).
+- By default keeps existing `webapp/` and `data.json`, then copies everything from `dist/`.
+- `--purge` clears the destination completely before copying.
+
 ### License
 
 This software is licensed under the [GNU GPLv3](./LICENSE).

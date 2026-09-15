@@ -9,7 +9,8 @@
 		"build:dev": "node esbuild.config.mjs development",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"install-plugin-installer": "node scripts/install-plugin-installer.mjs"
 	},
 	"keywords": [],
 	"license": "0-BSD",
