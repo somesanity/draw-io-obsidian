@@ -5,6 +5,7 @@ import { Server } from 'http';
 import { ServerManager } from 'Utils/ServerManager';
 import { DrawioClientManager } from 'Utils/DrawioClientManager';
 import { ExternalLinkTooltip } from 'Utils/ExternalLinkTooltip';
+import { SidecarManager } from 'Utils/SidecarManager';
 
 export default class DrawioPlugin extends Plugin {
 	settings!: DrawioSettings;
@@ -12,6 +13,7 @@ export default class DrawioPlugin extends Plugin {
 	server!: Server
 	serverManager!: ServerManager;
 	drawioClientManager!: DrawioClientManager
+	sidecarManager!: SidecarManager;
 
 
 	async onload() {
@@ -24,6 +26,7 @@ export default class DrawioPlugin extends Plugin {
 
 		// init plugin
 		await initter.loadSettings();
+		this.sidecarManager = new SidecarManager(this);
 		initter.setPluginLanguage();
 		await initter.registerCommands();
 		await initter.registerViews();
@@ -52,6 +55,7 @@ export default class DrawioPlugin extends Plugin {
 		tooltip.destroy();
 
 		this.initter.canvasManager.destroy();
+		this.sidecarManager.destroy();
 	}
 
 	async activateView(ViewType: string, options?: { file?: { path: string };[key: string]: any }) {

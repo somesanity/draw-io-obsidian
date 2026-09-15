@@ -18,11 +18,16 @@ export type editorTheme =
 	"dark" |
 	"light"
 
+export type newDiagramFormat =
+	"drawio" |
+	"drawio-svg"
+
 export interface DrawioSettings {
 	port: string;
 	currentlyDrawioClientVersion: string;
 	folder: string;
 	savingNameFileFormat: savingNameFileFormatOption
+	newDiagramFormat: newDiagramFormat
 	centeringDiagrams: boolean
 	interactiveDiagrams: boolean
 	diagramSizeInPopupHover: string
@@ -44,6 +49,7 @@ export const DEFAULT_SETTINGS: DrawioSettings = {
 	currentlyDrawioClientVersion: "",
 	folder: "drawio",
 	savingNameFileFormat: "timestamp",
+	newDiagramFormat: "drawio",
 	centeringDiagrams: true,
 	interactiveDiagrams: true,
 	diagramSizeInPopupHover: "100%",
@@ -110,6 +116,19 @@ export class SettingTab extends PluginSettingTab {
 				dropdown.setValue(this.plugin.settings.savingNameFileFormat || "timestamp");
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.savingNameFileFormat = value as savingNameFileFormatOption;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(t("SETTINGS_NEW_DIAGRAM_FORMAT__NAME"))
+			.setDesc(t("SETTINGS_NEW_DIAGRAM_FORMAT__DESCRIPTION"))
+			.addDropdown(dropdown => {
+				dropdown.addOption("drawio", t("FORMAT_NEW_DIAGRAM_XML"));
+				dropdown.addOption("drawio-svg", t("FORMAT_NEW_DIAGRAM_SVG"));
+				dropdown.setValue(this.plugin.settings.newDiagramFormat || "drawio");
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.newDiagramFormat = value as newDiagramFormat;
 					await this.plugin.saveSettings();
 				});
 			});

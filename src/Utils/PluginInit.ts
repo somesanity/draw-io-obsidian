@@ -19,6 +19,14 @@ import { CanvasManager } from "./CanvasManager";
 import { DrawioEditorModal } from "Views/DrawioEditorModal";
 import { drawioEditorFileItemView } from "Views/drawioEditorFileItemView";
 import { setLocale, t } from "locales/I18n";
+import { DrawioXmlEmbeds } from "MarkdownPostProcessors/DrawioXmlEmbeds";
+import { DrawioXmlEmbedEditorExtension } from "EditorExtensions/DrawioXmlEmbedEditorExtension";
+import {
+    getSidecarPath,
+    isDrawioSvgPath,
+    isDrawioXmlPath
+} from "./SidecarPaths";
+import { refreshRenderedDrawioEmbeds } from "./DrawioXmlEmbeds";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -81,7 +89,7 @@ export class PluginInit {
             editorCallback: (editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
 
-                if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
+                if (fileToEdit && (isDrawioSvgPath(fileToEdit.name) || isDrawioXmlPath(fileToEdit.name))) {
                     this.plugin.activateView(DRAWIO_EDITOR_VIEW, { file: fileToEdit });
                 } else {
                     this.plugin.activateView(DRAWIO_EDITOR_VIEW);
@@ -105,7 +113,7 @@ export class PluginInit {
             editorCallback: (editor: Editor, view: MarkdownView) => {
                 const fileToEdit = this.utils.findDiagramFileUnderCursor(this.plugin.app, editor, view);
 
-                if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
+                if (fileToEdit && (isDrawioSvgPath(fileToEdit.name) || isDrawioXmlPath(fileToEdit.name))) {
                     const modal = new DrawioEditorModal(this.plugin.app, this.plugin, fileToEdit)
                     modal.open();
                 }
@@ -128,10 +136,12 @@ export class PluginInit {
             : ""
 
         SizeInHoverWindow(this.plugin);
+        DrawioXmlEmbeds(this.plugin);
         this.canvasManager.init();
     }
 
     registerEditorExtensions() {
+        this.plugin.registerEditorExtension(DrawioXmlEmbedEditorExtension(this.plugin));
         this.plugin.registerEditorExtension(SetClassToDiagramsEditorExtension());
         this.plugin.registerEditorExtension(setDiagramThemeEditorExtension(this.plugin));
 
@@ -155,16 +165,20 @@ export class PluginInit {
         );
 
         this.plugin.registerEvent(
-            this.plugin.app.workspace.on('drawio:copy-diagram-as-image', (file: TFile) => {
+            this.plugin.app.workspace.on('drawio:copy-diagram-as-image', async (file: TFile) => {
+                const svgSource = isDrawioXmlPath(file.path)
+                    ? await this.plugin.sidecarManager.getSvg(file)
+                    : null;
+                if (isDrawioXmlPath(file.path) && !svgSource) return;
 
-                this.utils.copySvgAsPng(file)
+                this.utils.copySvgAsPng(file, svgSource)
             })
         );
 
         this.plugin.registerEvent(
             this.plugin.app.workspace.on("file-menu", (menu: Menu, fileToEdit: TFile) => {
 
-                if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
+                if (fileToEdit && (isDrawioSvgPath(fileToEdit.name) || isDrawioXmlPath(fileToEdit.name))) {
                     menu.addItem((item) => {
                         item
                             .setTitle(t("DRAWIO_MENU__EDIT_DIAGRAM"))
@@ -180,7 +194,7 @@ export class PluginInit {
         this.plugin.registerEvent(
             this.plugin.app.workspace.on("file-menu", (menu: Menu, file: TFile) => {
 
-                if (file && file.name.endsWith('.drawio.svg')) {
+                if (file && (isDrawioSvgPath(file.name) || isDrawioXmlPath(file.name))) {
                     menu.addItem((item) => {
                         item
                             .setTitle(t("DRAWIO_MENU__COPY_AS_IMAGE"))
@@ -189,6 +203,39 @@ export class PluginInit {
                                 this.plugin.app.workspace.trigger('drawio:copy-diagram-as-image', file);
                             });
                     });
+                }
+            })
+        );
+
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on("modify", (file) => {
+                if (!isDrawioXmlPath(file.path) || this.plugin.sidecarManager.isInternalWrite(file.path)) return;
+
+                this.plugin.sidecarManager.invalidate(file.path);
+                refreshRenderedDrawioEmbeds(this.plugin, file.path);
+            })
+        );
+
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on("rename", async (file, oldPath) => {
+                if (!isDrawioXmlPath(file.path) || !isDrawioXmlPath(oldPath)) return;
+
+                this.plugin.sidecarManager.invalidate(oldPath);
+                const oldSidecar = this.plugin.app.vault.getAbstractFileByPath(getSidecarPath(oldPath));
+                if (oldSidecar instanceof TFile) {
+                    await this.plugin.app.fileManager.renameFile(oldSidecar, getSidecarPath(file.path));
+                }
+            })
+        );
+
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on("delete", async (file) => {
+                if (!isDrawioXmlPath(file.path)) return;
+
+                this.plugin.sidecarManager.invalidate(file.path);
+                const sidecar = this.plugin.app.vault.getAbstractFileByPath(getSidecarPath(file.path));
+                if (sidecar instanceof TFile) {
+                    await this.plugin.app.fileManager.trashFile(sidecar);
                 }
             })
         );

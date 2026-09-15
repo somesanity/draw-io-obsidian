@@ -8,6 +8,39 @@
     height: 100%;
 }
 
+.drawio-sidecar-renderer {
+    position: fixed;
+    top: 0;
+    left: -20000px;
+    width: 1600px;
+    height: 1200px;
+    border: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.drawio-xml-embed {
+    display: block;
+    border: none;
+    padding: 0;
+    background: none;
+}
+
+.drawio-xml-embed svg.drawio-diagram {
+    max-width: 100%;
+    height: auto;
+}
+
+.drawio-sidecar-status {
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    padding: 4px 0;
+}
+
+.drawio-sidecar-status--error {
+    color: var(--text-error);
+}
+
 .drawio-centering-diagrams {
     display: flex;
     justify-content: center;

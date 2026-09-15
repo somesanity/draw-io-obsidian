@@ -3,6 +3,7 @@ import DrawioPlugin from "main";
 import { App, Editor, MarkdownView, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { diagramTheme, savingNameFileFormatOption } from "Settings/settings";
 import { SetFileNameModal } from "Views/SetFileNameModal";
+import { DRAWIO_SVG_SUFFIX } from "consts";
 
 export class pluginUtils {
     private plugin: DrawioPlugin
@@ -39,15 +40,15 @@ export class pluginUtils {
         }
     }
 
-    async getFileNameForSave(): Promise<string | null> {
+    async getFileNameForSave(fileExtension?: string): Promise<string | null> {
         const option: savingNameFileFormatOption = this.plugin.settings.savingNameFileFormat
+        const extension = fileExtension || DRAWIO_SVG_SUFFIX;
         let defaultPath: string = "";
 
         switch (option) {
             case "timestamp": {
                 const folder = this.plugin.settings.folder;
                 const timestamp = Date.now().toString();
-                const extension = '.drawio.svg';
                 const fullpath = normalizePath(`${folder}/${timestamp}${extension}`);
 
                 if (!await this.plugin.app.vault.adapter.exists(folder)) {
@@ -59,7 +60,6 @@ export class pluginUtils {
             case "uuid": {
                 const folder = this.plugin.settings.folder;
                 const uuid = crypto.randomUUID();
-                const extension = '.drawio.svg';
                 const fullpath = normalizePath(`${folder}/${uuid}${extension}`);
 
                 if (!await this.plugin.app.vault.adapter.exists(folder)) {
@@ -80,7 +80,6 @@ export class pluginUtils {
                 const seconds = String(date.getSeconds()).padStart(2, '0');
 
                 const fulldate = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-                const extension = '.drawio.svg';
                 const fullpath = normalizePath(`${folder}/${fulldate}${extension}`);
 
                 if (!await this.plugin.app.vault.adapter.exists(folder)) {
@@ -92,7 +91,8 @@ export class pluginUtils {
             case "set name": {
                 const fullPath = await SetFileNameModal.openAndGetPath(
                     this.plugin.app,
-                    this.plugin.settings.folder
+                    this.plugin.settings.folder,
+                    extension
                 );
                 return fullPath;
             }
@@ -195,9 +195,9 @@ export class pluginUtils {
         return document.body.hasClass("theme-dark") ? classes.dark : classes.light;
     }
 
-    async copySvgAsPng(file: TFile): Promise<void> {
+    async copySvgAsPng(file: TFile, svgSource?: string | null): Promise<void> {
         try {
-            let svgContent = await this.plugin.app.vault.read(file);
+            let svgContent = svgSource || await this.plugin.app.vault.read(file);
 
             svgContent = svgContent.replace(/<rect[^>]*fill\s*=\s*["'](?:#ffffff|rgb\(255,\s*255,\s*255\)|white)["'][^>]*\/>/gi, '');
             svgContent = svgContent.replace(/(style=[^>]*background-color:\s*)(?:#ffffff|white|rgb\(255,\s*255,\s*255\))/gi, '$1transparent');

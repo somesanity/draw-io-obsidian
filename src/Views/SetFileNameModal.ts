@@ -1,27 +1,35 @@
 import { App, Modal, Setting, normalizePath, ButtonComponent } from 'obsidian';
 import { t } from "locales/I18n";
+import { DRAWIO_SVG_SUFFIX } from "consts";
 
 export class SetFileNameModal extends Modal {
     private fileName: string = '';
     private folderPath: string;
+    private extension: string;
     private onSubmit: (result: string | null) => void;
     private submitBtn!: ButtonComponent;
     private errorEl!: HTMLElement;
     private isSubmitted: boolean = false;
 
-    static openAndGetPath(app: App, folderPath: string): Promise<string | null> {
+    static openAndGetPath(app: App, folderPath: string, extension?: string): Promise<string | null> {
         return new Promise((resolve) => {
             const modal = new SetFileNameModal(app, folderPath, (result) => {
                 resolve(result);
-            });
+            }, extension);
             modal.open();
         });
     }
 
-    private constructor(app: App, folderPath: string, onSubmit: (result: string | null) => void) {
+    private constructor(
+        app: App,
+        folderPath: string,
+        onSubmit: (result: string | null) => void,
+        extension?: string
+    ) {
         super(app);
         this.folderPath = folderPath;
         this.onSubmit = onSubmit;
+        this.extension = extension || DRAWIO_SVG_SUFFIX;
     }
 
     onOpen() {
@@ -61,7 +69,7 @@ export class SetFileNameModal extends Modal {
                             this.isSubmitted = true;
                             this.close();
 
-                            const fullPath = normalizePath(`${this.folderPath}/${this.fileName}.drawio.svg`);
+                            const fullPath = normalizePath(`${this.folderPath}/${this.fileName}${this.extension}`);
                             this.onSubmit(fullPath);
                         }
                     });
@@ -78,7 +86,7 @@ export class SetFileNameModal extends Modal {
             return;
         }
 
-        const fullPath = normalizePath(`${this.folderPath}/${name}.drawio.svg`);
+        const fullPath = normalizePath(`${this.folderPath}/${name}${this.extension}`);
         const fileExists = this.app.vault.getAbstractFileByPath(fullPath);
 
         if (fileExists) {
