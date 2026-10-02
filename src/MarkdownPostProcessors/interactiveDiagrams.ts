@@ -43,7 +43,36 @@ export async function interactiveDiagramss(plugin: DrawioPlugin) {
 
                                     svgElement.classList.add("drawio-interactive-diagram");
 
-                                    img.replaceWith(svgElement);
+                                    // The svg renders in flow at its own size (themes can't
+                                    // inflate it the way some inflate img). The img stays in
+                                    // the DOM as an invisible overlay on the svg: Obsidian's
+                                    // native click-to-zoom lightbox is bound to the img
+                                    // element and animates from its rect, so the img must
+                                    // keep a layout box matching the diagram (display:none
+                                    // would make the zoom animate from the top-left corner).
+                                    element.style.position = "relative";
+                                    img.style.position = "absolute";
+                                    img.style.visibility = "hidden";
+                                    img.insertAdjacentElement("afterend", svgElement);
+
+                                    const syncOverlay = () => {
+                                        const rect = svgElement.getBoundingClientRect();
+                                        const parentRect = element.getBoundingClientRect();
+                                        img.style.left = `${rect.left - parentRect.left}px`;
+                                        img.style.top = `${rect.top - parentRect.top}px`;
+                                        img.style.width = `${rect.width}px`;
+                                        img.style.height = `${rect.height}px`;
+                                    };
+                                    new ResizeObserver(syncOverlay).observe(svgElement);
+                                    syncOverlay();
+
+                                    // Forward clicks on the interactive svg to the hidden
+                                    // img so the native lightbox still opens.
+                                    svgElement.addEventListener("click", (event) => {
+                                        const target = event.target as Element;
+                                        if (target.closest("a")) return;
+                                        img.click();
+                                    });
 
                                     svgelement = svgElement
                                 }
