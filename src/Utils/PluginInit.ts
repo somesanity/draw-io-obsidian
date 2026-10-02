@@ -13,7 +13,7 @@ import { pluginUtils } from "./PluginUtils";
 import { SizeInHoverWindow } from "MarkdownPostProcessors/SizeInhoverWindow";
 import { setClassToDiagrams } from "MarkdownPostProcessors/setClassToDiagrams";
 import { setDiagramsTheme } from "MarkdownPostProcessors/setDiagramTheme";
-import { SetClassToDiagramsEditorExtension } from "EditorExtensions/setClassToDiagramsEditorExtension";
+import { SetClassToDiagramsEditorExtension } from "EditorExtensions/SetClassToDiagramsEditorExtension";
 import { setDiagramThemeEditorExtension } from "EditorExtensions/setDiagramThemeEditorExtension";
 import { CanvasManager } from "./CanvasManager";
 import { DrawioEditorModal } from "Views/DrawioEditorModal";
@@ -162,7 +162,7 @@ export class PluginInit {
         );
 
         this.plugin.registerEvent(
-            this.plugin.app.workspace.on("file-menu", (menu: Menu, fileToEdit: File) => {
+            this.plugin.app.workspace.on("file-menu", (menu: Menu, fileToEdit: TFile) => {
 
                 if (fileToEdit && fileToEdit.name.endsWith('.drawio.svg')) {
                     menu.addItem((item) => {

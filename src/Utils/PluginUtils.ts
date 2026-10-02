@@ -198,6 +198,10 @@ export class pluginUtils {
                 case "dark": return "drawio-diagram--canvasMode--darkTheme";
             }
         }
+
+        return mode === "editMode" ? "drawio-diagram--editmode--lightTheme"
+            : mode === "canvasMode" ? "drawio-diagram--canvasMode--lightTheme"
+            : "drawio-diagrams--lightTheme";
     }
 
     async copySvgAsPng(file: TFile): Promise<void> {

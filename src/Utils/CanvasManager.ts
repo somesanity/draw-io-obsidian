@@ -3,7 +3,7 @@ import { EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, CLEAR_INTERNAL_LINK, DRAWIO_E
 import { ExternalLinkTooltip } from "./ExternalLinkTooltip";
 import { pluginUtils } from "./PluginUtils";
 import { Menu, TFile } from "obsidian";
-import { MarkdownTooltip } from "./markdownTooltip";
+import { MarkdownTooltip } from "./MarkdownTooltip";
 import { MxGraphParser } from "./MxGraphParser";
 import { t } from "locales/I18n";
 

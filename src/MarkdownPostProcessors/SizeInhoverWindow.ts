@@ -77,7 +77,7 @@ export function SizeInHoverWindow(plugin: DrawioPlugin) {
 
         const disconnectObserver = new MutationObserver((mutations, obs) => {
             for (const m of mutations) {
-                for (const node of m.removedNodes) {
+                for (const node of Array.from(m.removedNodes)) {
                     if (node === popover || node.contains(popover)) {
                         observer.disconnect();
                         obs.disconnect();

@@ -2,7 +2,7 @@ import { CLEAR_INTERNAL_LINK, EXTERNAL_LINK_CHECK, INTERNAL_LINK_CHECK, MARKDOWN
 import DrawioPlugin from "main";
 import { TFile } from "obsidian";
 import { ExternalLinkTooltip } from "Utils/ExternalLinkTooltip";
-import { MarkdownTooltip } from "Utils/markdownTooltip";
+import { MarkdownTooltip } from "Utils/MarkdownTooltip";
 import { MxGraphParser } from "Utils/MxGraphParser";
 
 export async function interactiveDiagramss(plugin: DrawioPlugin) {
