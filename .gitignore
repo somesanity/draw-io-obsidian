@@ -24,3 +24,6 @@ data.json
 # app
 webapp
 webapp.zip
+
+# Release artifacts
+dist/
