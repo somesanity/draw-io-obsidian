@@ -39,13 +39,12 @@ export class pluginUtils {
         }
     }
 
-    async getFileNameForSave(): Promise<string | null> {
+    async getFileNameForSave(folder = this.plugin.settings.folder): Promise<string | null> {
         const option: savingNameFileFormatOption = this.plugin.settings.savingNameFileFormat
         let defaultPath: string = "";
 
         switch (option) {
             case "timestamp": {
-                const folder = this.plugin.settings.folder;
                 const timestamp = Date.now().toString();
                 const extension = '.drawio.svg';
                 const fullpath = normalizePath(`${folder}/${timestamp}${extension}`);
@@ -57,7 +56,6 @@ export class pluginUtils {
             }
 
             case "uuid": {
-                const folder = this.plugin.settings.folder;
                 const uuid = crypto.randomUUID();
                 const extension = '.drawio.svg';
                 const fullpath = normalizePath(`${folder}/${uuid}${extension}`);
@@ -69,7 +67,6 @@ export class pluginUtils {
             }
 
             case "iso-date-8601": {
-                const folder = this.plugin.settings.folder;
                 const date = new Date();
 
                 const year = date.getFullYear();
@@ -92,7 +89,7 @@ export class pluginUtils {
             case "set name": {
                 const fullPath = await SetFileNameModal.openAndGetPath(
                     this.plugin.app,
-                    this.plugin.settings.folder
+                    folder
                 );
                 return fullPath;
             }

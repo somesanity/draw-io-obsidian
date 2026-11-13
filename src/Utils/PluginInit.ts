@@ -19,6 +19,7 @@ import { CanvasManager } from "./CanvasManager";
 import { DrawioEditorModal } from "Views/DrawioEditorModal";
 import { drawioEditorFileItemView } from "Views/drawioEditorFileItemView";
 import { setLocale, t } from "locales/I18n";
+import { registerCreateDiagramMenu } from "./CreateDiagram";
 
 export class PluginInit {
     private plugin: DrawioPlugin;
@@ -146,6 +147,7 @@ export class PluginInit {
     }
 
     registerEvents() {
+        registerCreateDiagramMenu(this.plugin);
 
         this.plugin.registerEvent(
             this.plugin.app.workspace.on('drawio:edit-diagram', (file: TFile) => {

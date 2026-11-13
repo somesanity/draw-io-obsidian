@@ -1,4 +1,6 @@
 {
+    "DRAWIO_MENU__NEW_DIAGRAM": "New draw.io diagram",
+    "DRAWIO_NOTICE__CREATE_FAILED": "Could not create the draw.io diagram. See the console for details.",
     "SETTINGS_GENERAL_SECTION_TITLE": "General",
     "SETTINGS_DISPLAY_SECTION_TITLE": "Display",
     "SETTINGS_THEME_SECTION_TITLE": "Theme",

@@ -1,4 +1,6 @@
 {
+    "DRAWIO_MENU__NEW_DIAGRAM": "Создать диаграмму draw.io",
+    "DRAWIO_NOTICE__CREATE_FAILED": "Не удалось создать диаграмму draw.io. Подробности в консоли.",
     "SETTINGS_GENERAL_SECTION_TITLE": "Основные",
     "SETTINGS_DISPLAY_SECTION_TITLE": "Отображение",
     "SETTINGS_THEME_SECTION_TITLE": "Темы",
